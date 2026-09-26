@@ -1,0 +1,699 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NAIRA FASHION – Executive Luxury Admin Portal</title>
+  <meta name="description" content="Exclusive Admin Portal for SA Glam & Grace / Naira Fashion. Manage collections, real-time inventory, luxury orders, clientele, and analytics.">
+
+  <!-- Luxury Typography & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+  <!-- Chart.js for High Fidelity Analytics -->
+    <!-- Chart.js for High Fidelity Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Supabase Cloud SDK & Configuration -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+
+  <!-- Admin Design System -->
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <div class="admin-layout">
+    
+    <!-- ═══════════ SIDEBAR NAVIGATION ═══════════ -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      
+      <!-- Brand Logo Header -->
+      <div class="sidebar-header">
+        <div class="brand-icon-wrap">
+          <i class="ri-vip-crown-2-fill"></i>
+        </div>
+        <div class="brand-text-wrap">
+          <h2>Naira Fashion</h2>
+          <span class="brand-badge">Luxury Couture</span>
+        </div>
+      </div>
+
+      <!-- Navigation Menu -->
+      <div class="sidebar-menu">
+        <span class="menu-section-title">Core Management</span>
+        
+        <a href="#dashboard" class="nav-link active" data-tab="dashboard">
+          <i class="ri-dashboard-3-line"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="#products" class="nav-link" data-tab="products">
+          <i class="ri-t-shirt-2-line"></i>
+          <span>Catalog & Stock</span>
+          <span class="nav-badge-pill">8 Live</span>
+        </a>
+
+        <a href="#orders" class="nav-link" data-tab="orders">
+          <i class="ri-shopping-bag-3-line"></i>
+          <span>Orders & Invoices</span>
+          <span class="nav-badge-pill" style="background:var(--primary-pink); color:#FFF;">5 New</span>
+        </a>
+
+        <a href="#customers" class="nav-link" data-tab="customers">
+          <i class="ri-user-star-line"></i>
+          <span>VIP Clientele</span>
+        </a>
+
+        <span class="menu-section-title">Growth & Sales</span>
+
+        <a href="#coupons" class="nav-link" data-tab="coupons">
+          <i class="ri-coupon-3-line"></i>
+          <span>Promotions & Codes</span>
+        </a>
+
+        <a href="#analytics" class="nav-link" data-tab="analytics">
+          <i class="ri-line-chart-line"></i>
+          <span>Revenue Analytics</span>
+        </a>
+
+        <a href="#settings" class="nav-link" data-tab="settings">
+          <i class="ri-settings-4-line"></i>
+          <span>Store Settings</span>
+        </a>
+      </div>
+
+      <!-- Live Store Footer Link -->
+      <div class="sidebar-footer">
+        <a href="index.html" target="_blank" class="live-store-card">
+          <div class="live-store-info">
+            <span>Online Boutique</span>
+            <strong>View Live Store</strong>
+          </div>
+          <div class="live-store-btn">
+            <i class="ri-external-link-line"></i>
+          </div>
+        </a>
+      </div>
+
+    </aside>
+
+    <!-- ═══════════ MAIN VIEWPORT ═══════════ -->
+    <main class="admin-main">
+      
+      <!-- Topbar -->
+      <header class="admin-header">
+        <div class="header-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Navigation">
+            <i class="ri-menu-2-line"></i>
+          </button>
+          <div class="header-title-box">
+            <h1 id="headerTitle">Executive Dashboard</h1>
+            <p id="headerSubtitle">Real-time revenue, orders & store performance</p>
+          </div>
+        </div>
+
+        <div class="header-search">
+          <i class="ri-search-2-line"></i>
+          <input type="text" id="globalSearchInput" placeholder="Search catalog, order #, client name..." />
+        </div>
+
+        <div class="header-right">
+          <!-- Dark/Light Theme Toggle -->
+          <button class="icon-action-btn" id="themeToggleBtn" title="Toggle Luxury Theme">
+            <i class="ri-moon-line"></i>
+          </button>
+
+          <!-- Notification Bell -->
+          <button class="icon-action-btn" onclick="window.app.showToast('All 5 pending luxury shipments are on schedule.')" title="Notifications">
+            <i class="ri-notification-3-line"></i>
+            <span class="notification-dot"></span>
+          </button>
+
+          <!-- Admin Profile Badge -->
+                    <!-- Supabase Cloud Sync Badge -->
+          <div id="cloudStatusBadge" style="display:flex; align-items:center; gap:6px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); color:#16a34a; padding:5px 12px; border-radius:20px; font-size:0.75rem; font-weight:600;">
+            <span style="width:8px; height:8px; background:#22c55e; border-radius:50%; display:inline-block; box-shadow:0 0 8px #22c55e;"></span>
+            <span id="cloudStatusText">Supabase Cloud</span>
+          </div>
+
+          <div class="admin-profile-menu" id="adminProfileMenu" style="cursor:pointer; position:relative;" title="Executive Admin Profile">
+            <div class="admin-avatar" id="adminAvatarInitials">NF</div>
+            <div class="admin-meta">
+              <strong id="adminProfileName">Executive Admin</strong>
+              <span id="adminProfileRole">Super Admin</span>
+            </div>
+            <button id="adminHeaderLogoutBtn" onclick="window.adminLogout && window.adminLogout(event)" title="Lock / Sign Out" style="margin-left:8px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; border-radius:6px; padding:4px 8px; font-size:0.75rem; cursor:pointer; display:flex; align-items:center; gap:4px;">
+              <i class="ri-logout-box-r-line"></i> Exit
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Views Container -->
+      <div class="admin-body">
+        
+        <!-- ═══════════ TAB 1: EXECUTIVE DASHBOARD ═══════════ -->
+        <section class="tab-pane active" id="tab-dashboard">
+          
+          <!-- KPI Statistics Cards -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-card-top">
+                <div class="stat-icon pink"><i class="ri-money-rupee-circle-line"></i></div>
+                <span class="stat-trend up"><i class="ri-arrow-up-line"></i> +28.4%</span>
+              </div>
+              <div class="stat-label">Total Gross Revenue</div>
+              <div class="stat-value" id="statTotalRevenue">₹2,42,800</div>
+              <div class="stat-subtext">vs. last 30 days period</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-top">
+                <div class="stat-icon gold"><i class="ri-shopping-basket-2-line"></i></div>
+                <span class="stat-trend up"><i class="ri-arrow-up-line"></i> +14.2%</span>
+              </div>
+              <div class="stat-label">Total Luxury Orders</div>
+              <div class="stat-value" id="statTotalOrders">89</div>
+              <div class="stat-subtext">Avg cart value: ₹14,200</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-top">
+                <div class="stat-icon blue"><i class="ri-t-shirt-air-line"></i></div>
+                <span class="stat-trend up"><i class="ri-check-line"></i> 98% Active</span>
+              </div>
+              <div class="stat-label">Catalog Products</div>
+              <div class="stat-value" id="statTotalProducts">8</div>
+              <div class="stat-subtext">5 Bridal & Saree Collections</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-top">
+                <div class="stat-icon green"><i class="ri-vip-diamond-line"></i></div>
+                <span class="stat-trend up"><i class="ri-arrow-up-line"></i> +42 VIPs</span>
+              </div>
+              <div class="stat-label">VIP Clientele Base</div>
+              <div class="stat-value" id="statTotalCustomers">425</div>
+              <div class="stat-subtext">High repeat purchase rate</div>
+            </div>
+          </div>
+
+          <!-- Dual Analytics Visualizations -->
+          <div class="charts-dual-grid">
+            <div class="chart-card">
+              <div class="card-header-flex">
+                <div>
+                  <h3>Revenue & Sales Trend</h3>
+                  <p>Daily turnover across all couture collections (₹ INR)</p>
+                </div>
+                <div class="chart-controls">
+                  <button class="btn-pill-filter active">7 Days</button>
+                  <button class="btn-pill-filter" onclick="window.app.showToast('Loaded 30-day telemetry.')">30 Days</button>
+                </div>
+              </div>
+              <div class="chart-canvas-box">
+                <canvas id="revenueChart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="card-header-flex">
+                <div>
+                  <h3>Sales by Category</h3>
+                  <p>Lehenga, Saree & Anarkali volume</p>
+                </div>
+              </div>
+              <div class="chart-canvas-box">
+                <canvas id="categoryChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Orders Table -->
+          <div class="table-panel-card">
+            <div class="panel-header-toolbar">
+              <div class="panel-title-area">
+                <h3>Recent High-Value Orders</h3>
+                <span>Latest bridal & luxury garment purchases</span>
+              </div>
+              <div class="toolbar-actions">
+                <button class="btn-luxury-outline" onclick="window.app.switchTab('orders')">View All Orders <i class="ri-arrow-right-line"></i></button>
+              </div>
+            </div>
+            <div class="luxury-table-wrapper">
+              <table class="luxury-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Garment Selection</th>
+                    <th>Total Value</th>
+                    <th>Fulfillment</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardOrdersBody">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ═══════════ TAB 2: PRODUCT INVENTORY ═══════════ -->
+        <section class="tab-pane" id="tab-products">
+          <div class="table-panel-card">
+            <div class="panel-header-toolbar">
+              <div class="panel-title-area">
+                <h3>Luxury Couture Inventory</h3>
+                <span>Real-time stock, pricing and SKU management</span>
+              </div>
+              <div class="toolbar-actions">
+                <div class="table-search-input">
+                  <i class="ri-search-line"></i>
+                  <input type="text" placeholder="Filter garments..." oninput="window.app.filterProducts(this.value.toLowerCase())" />
+                </div>
+                <button class="btn-luxury-outline" onclick="window.app.exportCSV('products')">
+                  <i class="ri-download-2-line"></i> Export CSV
+                </button>
+                <button class="btn-luxury-primary" onclick="window.openAddProductModal && window.openAddProductModal(event)">
+                  <i class="ri-add-line"></i> Add New Couture
+                </button>
+              </div>
+            </div>
+            <div class="luxury-table-wrapper">
+              <table class="luxury-table">
+                <thead>
+                  <tr>
+                    <th>Product & SKU</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock Units</th>
+                    <th>Availability</th>
+                    <th>Rating / Sales</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ TAB 3: ORDERS MANAGEMENT ═══════════ -->
+        <section class="tab-pane" id="tab-orders">
+          <div class="table-panel-card">
+            <div class="panel-header-toolbar">
+              <div class="panel-title-area">
+                <h3>All Customer Orders</h3>
+                <span>Dispatch status, invoice downloads and tracking</span>
+              </div>
+              <div class="toolbar-actions">
+                <div class="table-search-input">
+                  <i class="ri-search-line"></i>
+                  <input type="text" placeholder="Search orders..." oninput="window.app.filterOrders(this.value.toLowerCase())" />
+                </div>
+                <button class="btn-luxury-outline" onclick="window.app.exportCSV('orders')">
+                  <i class="ri-download-2-line"></i> Export Orders
+                </button>
+              </div>
+            </div>
+            <div class="luxury-table-wrapper">
+              <table class="luxury-table">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Client Details</th>
+                    <th>Items Ordered</th>
+                    <th>Gross Total</th>
+                    <th>Update Status</th>
+                    <th>Date</th>
+                    <th>Invoice</th>
+                  </tr>
+                </thead>
+                <tbody id="ordersTableBody">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ TAB 4: VIP CUSTOMERS CRM ═══════════ -->
+        <section class="tab-pane" id="tab-customers">
+          <div class="table-panel-card">
+            <div class="panel-header-toolbar">
+              <div class="panel-title-area">
+                <h3>VIP Clientele Directory</h3>
+                <span>Customer lifetime value, loyalty tiers & order histories</span>
+              </div>
+              <div class="toolbar-actions">
+                <button class="btn-luxury-primary" onclick="window.app.showToast('VIP Campaign invitation sent to 425 clients via WhatsApp & Email!')">
+                  <i class="ri-mail-send-line"></i> Broadcast VIP Offer
+                </button>
+              </div>
+            </div>
+            <div class="luxury-table-wrapper">
+              <table class="luxury-table">
+                <thead>
+                  <tr>
+                    <th>Client</th>
+                    <th>Tier</th>
+                    <th>Contact Phone</th>
+                    <th>City / State</th>
+                    <th>Total Orders</th>
+                    <th>Lifetime Spent</th>
+                    <th>Member Since</th>
+                  </tr>
+                </thead>
+                <tbody id="customersTableBody">
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ TAB 5: COUPONS & DISCOUNTS ═══════════ -->
+        <section class="tab-pane" id="tab-coupons">
+          <div class="table-panel-card" style="padding:1.8rem; background:transparent; border:none; box-shadow:none; margin-bottom:0.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+              <div>
+                <h3 style="font-family:var(--font-serif); font-size:1.6rem;">Active Festive Promotions & Voucher Codes</h3>
+                <p style="font-size:0.85rem; color:var(--text-muted);">Generate discounts for Diwali, Weddings, and New Customer onboarding.</p>
+              </div>
+              <button class="btn-luxury-primary" onclick="window.openCouponModal && window.openCouponModal(event)">
+                <i class="ri-add-line"></i> Create New Promo Code
+              </button>
+            </div>
+            <div class="stats-grid" id="couponsGrid" style="grid-template-columns: repeat(3, 1fr);">
+              <!-- Injected via JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ TAB 6: ANALYTICS ═══════════ -->
+        <section class="tab-pane" id="tab-analytics">
+          <div class="charts-dual-grid">
+            <div class="chart-card">
+              <div class="card-header-flex">
+                <div>
+                  <h3>Monthly Revenue Growth</h3>
+                  <p>Comprehensive financial projections</p>
+                </div>
+              </div>
+              <div class="chart-canvas-box" style="height:320px;">
+                <canvas id="analyticsMonthlyChart"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="card-header-flex">
+                <div>
+                  <h3>Top Performing Styles</h3>
+                  <p>Conversion metrics by garment type</p>
+                </div>
+              </div>
+              <div style="padding:1rem 0; display:flex; flex-direction:column; gap:1.2rem;">
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:0.86rem; margin-bottom:0.4rem;">
+                    <strong>Bridal Lehengas</strong>
+                    <span style="color:var(--primary-pink); font-weight:700;">₹1,42,000 (58%)</span>
+                  </div>
+                  <div style="background:var(--border-subtle); height:8px; border-radius:4px; overflow:hidden;">
+                    <div style="background:var(--pink-gradient); width:58%; height:100%;"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:0.86rem; margin-bottom:0.4rem;">
+                    <strong>Banarasi Silk Sarees</strong>
+                    <span style="color:var(--gold-accent); font-weight:700;">₹68,500 (28%)</span>
+                  </div>
+                  <div style="background:var(--border-subtle); height:8px; border-radius:4px; overflow:hidden;">
+                    <div style="background:var(--gold-gradient); width:28%; height:100%;"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:0.86rem; margin-bottom:0.4rem;">
+                    <strong>Chikankari Anarkalis</strong>
+                    <span style="color:#2563EB; font-weight:700;">₹32,300 (14%)</span>
+                  </div>
+                  <div style="background:var(--border-subtle); height:8px; border-radius:4px; overflow:hidden;">
+                    <div style="background:#2563EB; width:14%; height:100%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ TAB 7: STORE SETTINGS ═══════════ -->
+        <section class="tab-pane" id="tab-settings">
+          <div class="table-panel-card" style="max-width:800px; padding:2rem;">
+            <h3 style="font-family:var(--font-serif); font-size:1.6rem; margin-bottom:0.3rem;">Boutique & Brand Settings</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.8rem;">Configure luxury currency, store contact, and automated tracking emails.</p>
+
+            <form onsubmit="event.preventDefault(); window.app.showToast('Store settings updated successfully!');">
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label>Store Name</label>
+                  <input type="text" class="form-control" value="Naira Fashion - SA Glam & Grace" />
+                </div>
+                <div class="form-group">
+                  <label>Support Email</label>
+                  <input type="email" class="form-control" value="concierge@nairafashion.com" />
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label>Default Currency</label>
+                  <select class="form-control">
+                    <option selected>₹ INR - Indian Rupee</option>
+                    <option>$ USD - US Dollar</option>
+                    <option>£ GBP - British Pound</option>
+                    <option>AED - UAE Dirham</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Free Shipping Threshold (₹)</label>
+                  <input type="number" class="form-control" value="2999" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Boutique Flagship Address</label>
+                <textarea class="form-control" rows="3">Flagship Haute Couture Salon, Linking Road, Bandra West, Mumbai, Maharashtra 400050</textarea>
+              </div>
+
+              <button type="submit" class="btn-luxury-primary" style="margin-top:0.8rem;">
+                <i class="ri-save-3-line"></i> Save Configuration
+              </button>
+            </form>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ═══════════ ADD/EDIT PRODUCT MODAL ═══════════ -->
+  <div class="modal-backdrop" id="productModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalProductTitle">Add New Luxury Couture</h3>
+        <button class="modal-close-btn" id="closeProductModal" onclick="window.closeProductModal && window.closeProductModal(event)"><i class="ri-close-line"></i></button>
+      </div>
+      
+      <form id="productForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Garment Title / Couture Name</label>
+            <input type="text" class="form-control" id="prodName" required placeholder="e.g. Royal Embroidered Zari Lehenga" />
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Collection / Category</label>
+                            <select class="form-control" id="prodCategory" required>
+                <option value="Kurtis">Kurtis & Kurti Sets</option>
+                <option value="Churidar">Churidar & Salwar Sets</option>
+                <option value="Anarkali">Anarkali Suits</option>
+                <option value="Saree">Handloom & Silk Sarees</option>
+                <option value="Lehenga">Bridal & Heritage Lehengas</option>
+                <option value="Tops">Tops & Peplum</option>
+                <option value="Dupatta">Dupattas</option>
+                <option value="Jewellery">Jewellery & Chokers</option>
+                <option value="Handbags">Handbags & Potlis</option>
+                <option value="Footwear">Footwear & Juttis</option>
+                <option value="Watches">Luxury Watches</option>
+                <option value="Accessories">Accessories</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Initial Stock Units</label>
+              <input type="number" class="form-control" id="prodStock" required min="0" value="15" />
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Special Price (₹)</label>
+              <input type="number" class="form-control" id="prodPrice" required placeholder="8499" />
+            </div>
+            <div class="form-group">
+              <label>Original MRP (₹)</label>
+              <input type="number" class="form-control" id="prodOriginalPrice" placeholder="10999" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Garment Image (Upload to Supabase Storage or enter URL)</label>
+            <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem;">
+              <input type="file" id="prodImageFile" accept="image/*" class="form-control" style="padding:0.35rem 0.6rem; font-size:0.8rem;" />
+              <span id="uploadSpinner" style="display:none; color:#c69214; font-size:0.8rem; white-space:nowrap;"><i class="ri-loader-4-line ri-spin"></i> Uploading...</span>
+            </div>
+            <input type="text" class="form-control" id="prodImage" value="assets/images/about_anarkali.png" placeholder="Supabase CDN URL or assets/images/..." />
+          </div>
+
+          <div style="display:flex; align-items:center; gap:1rem; padding:0.8rem; background:var(--bg-card-alt); border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
+            <img id="productImagePreview" src="assets/images/about_anarkali.png" alt="Preview" style="width:60px; height:70px; object-fit:cover; border-radius:var(--radius-sm); border:1px solid var(--border-subtle);" />
+            <div>
+              <strong style="font-size:0.85rem; display:block;">Live Image Preview</strong>
+              <span style="font-size:0.75rem; color:var(--text-muted);">High-resolution garment rendering</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-luxury-outline" id="cancelProductModal" onclick="window.closeProductModal && window.closeProductModal(event)">Cancel</button>
+          <button type="submit" class="btn-luxury-primary"><i class="ri-check-line"></i> Save Couture Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════ ADD COUPON MODAL ═══════════ -->
+  <div class="modal-backdrop" id="couponModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.65); z-index:99999; justify-content:center; align-items:center; backdrop-filter:blur(4px);">
+    <div class="modal-card" style="background:#fff; width:92%; max-width:480px; border-radius:12px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); overflow:hidden; border:1px solid #e5e7eb;">
+      <div class="modal-header" style="padding:1.2rem 1.5rem; border-bottom:1px solid #f3f4f6; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <i class="ri-coupon-3-line" style="color:var(--primary-pink, #b45309); font-size:1.3rem;"></i>
+          <h3 id="modalCouponTitle" style="margin:0; font-size:1.2rem; font-weight:700;">Create Festive Promo Code</h3>
+        </div>
+        <button class="modal-close-btn" id="closeCouponModal" onclick="window.closeCouponModal && window.closeCouponModal(event)" style="background:none; border:none; font-size:1.3rem; cursor:pointer; color:#6b7280;"><i class="ri-close-line"></i></button>
+      </div>
+      
+      <form id="couponForm" onsubmit="window.app && window.app.saveCoupon && window.app.saveCoupon(event)">
+        <div class="modal-body" style="padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
+          <div class="form-group">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Promo Code (e.g. DIWALI25)</label>
+            <input type="text" class="form-control" id="couponCode" required placeholder="DIWALI25" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-family:monospace; font-weight:700; text-transform:uppercase; letter-spacing:1px;" />
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.8rem;">
+            <div class="form-group">
+              <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Discount Type</label>
+              <select class="form-control" id="couponType" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px;" onchange="window.updateCouponFormLabels && window.updateCouponFormLabels()">
+                <option value="percentage">Percentage (%) OFF</option>
+                <option value="fixed">Flat Cash (₹) OFF</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label id="couponValueLabel" style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Discount Value (%)</label>
+              <input type="number" class="form-control" id="couponValue" required min="1" placeholder="20" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px;" />
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.8rem;">
+            <div class="form-group">
+              <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Min Order (₹)</label>
+              <input type="number" class="form-control" id="couponMinOrder" required min="0" value="2999" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px;" />
+            </div>
+            <div class="form-group">
+              <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Expiry Date</label>
+              <input type="date" class="form-control" id="couponExpiry" required value="2026-12-31" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px;" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Usage Limit (Times)</label>
+            <input type="number" class="form-control" id="couponLimit" min="1" value="500" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px;" />
+          </div>
+        </div>
+
+        <div class="modal-footer" style="padding:1rem 1.5rem; background:#f9fafb; border-top:1px solid #f3f4f6; display:flex; justify-content:flex-end; gap:0.8rem;">
+          <button type="button" class="btn-luxury-outline" onclick="window.closeCouponModal && window.closeCouponModal(event)" style="padding:0.5rem 1rem; border:1px solid #d1d5db; background:#fff; border-radius:6px; cursor:pointer;">Cancel</button>
+          <button type="submit" class="btn-luxury-primary" style="padding:0.5rem 1.2rem; background:var(--primary-pink, #b45309); color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer;"><i class="ri-check-line"></i> Save & Publish Coupon</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Admin JS Engine -->
+  <script src="admin.js"></script>
+
+  <!-- ════════════════════════════════════════════════════════════
+       FULL-SCREEN EXECUTIVE ADMIN SIGN-IN GATE
+       ════════════════════════════════════════════════════════════ -->
+  <div id="adminLoginGate" style="display:flex; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:9999999; background:radial-gradient(circle at 50% 30%, #1e1b18 0%, #0c0b0a 100%); align-items:center; justify-content:center; padding:1.5rem;">
+    <div style="background:rgba(24, 22, 20, 0.96); border:1px solid rgba(212, 175, 55, 0.35); box-shadow:0 30px 70px rgba(0,0,0,0.7), 0 0 50px rgba(212,175,55,0.12); border-radius:18px; width:100%; max-width:440px; padding:2.5rem 2rem; color:#fff; backdrop-filter:blur(20px); text-align:center; position:relative;">
+      
+      <!-- Luxury Crown Emblem -->
+      <div style="width:68px; height:68px; margin:0 auto 1.2rem; background:linear-gradient(135deg, #d4af37, #996515); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 25px rgba(212,175,55,0.35); border:2px solid rgba(255,255,255,0.2);">
+        <i class="ri-shield-keyhole-line" style="font-size:2.2rem; color:#fff;"></i>
+      </div>
+      
+      <span style="font-size:0.75rem; letter-spacing:3px; text-transform:uppercase; color:#d4af37; font-weight:700;">SA Glam & Grace</span>
+      <h2 style="font-family:'Cinzel', serif; font-size:1.65rem; color:#fff; margin:0.3rem 0 0.5rem 0;">Executive Portal</h2>
+      <p style="font-size:0.85rem; color:#a39f99; margin-bottom:1.8rem;">Enter your administrator credentials to manage catalog, orders & revenue</p>
+      
+      <form id="adminGateForm" style="text-align:left;">
+        <div style="margin-bottom:1.2rem;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#d4af37; margin-bottom:6px;">Admin Email</label>
+          <div style="position:relative;">
+            <i class="ri-mail-line" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#888;"></i>
+            <input type="email" id="adminGateEmail" value="admin@saglam.com" placeholder="admin@saglam.com" required style="width:100%; box-sizing:border-box; padding:11px 12px 11px 38px; background:#141210; border:1px solid rgba(212,175,55,0.3); border-radius:8px; color:#fff; font-size:0.9rem; outline:none;" />
+          </div>
+        </div>
+        
+        <div style="margin-bottom:1.5rem;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#d4af37; margin-bottom:6px;">Password</label>
+          <div style="position:relative;">
+            <i class="ri-lock-password-line" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#888;"></i>
+            <input type="password" id="adminGatePassword" value="admin123" placeholder="••••••••" required style="width:100%; box-sizing:border-box; padding:11px 12px 11px 38px; background:#141210; border:1px solid rgba(212,175,55,0.3); border-radius:8px; color:#fff; font-size:0.9rem; outline:none;" />
+          </div>
+        </div>
+        
+        <div id="adminGateError" style="display:none; color:#f87171; font-size:0.8rem; padding:9px 12px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:6px; margin-bottom:1.2rem;"></div>
+
+        <button type="submit" id="adminGateSubmitBtn" style="width:100%; padding:13px; background:linear-gradient(135deg, #d4af37, #b8860b); color:#111; font-weight:700; border:none; border-radius:8px; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 8px 22px rgba(212,175,55,0.28);">
+          <i class="ri-login-circle-line" style="font-size:1.15rem;"></i> Sign In to Admin Portal
+        </button>
+
+        <button type="button" id="adminGateDemoBtn" style="width:100%; margin-top:0.75rem; padding:10px; background:transparent; border:1px dashed rgba(212,175,55,0.5); color:#d4af37; font-weight:600; border-radius:8px; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <span>⚡</span> Instant 1-Click Fast Unlock (Demo)
+        </button>
+
+        <div style="display:flex; justify-content:center; align-items:center; margin-top:1.6rem; padding-top:1.2rem; border-top:1px solid rgba(255,255,255,0.08); font-size:0.82rem;">
+          <a href="/" style="color:#a39f99; text-decoration:none; display:flex; align-items:center; gap:5px;">
+            <i class="ri-arrow-left-line"></i> Back to Live Storefront
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>

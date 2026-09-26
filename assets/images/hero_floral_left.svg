@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF69B4" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#E91E63" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="yellowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE082" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#FFB300" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A5D6A7" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#4CAF50" stop-opacity="0.8"/>
+    </linearGradient>
+    <radialGradient id="softGold" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFF8E1" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#FFE082" stop-opacity="0.2"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background Soft Warm Glow -->
+  <circle cx="100" cy="550" r="220" fill="url(#softGold)"/>
+  
+  <!-- Vines and Leaves -->
+  <path d="M -20,700 Q 80,500 40,300 Q 10,150 120,50" stroke="#7CB342" stroke-width="2.5" fill="none" opacity="0.6"/>
+  <path d="M 30,750 Q 130,550 80,380 Q 50,200 160,80" stroke="#9CCC65" stroke-width="2" fill="none" opacity="0.5"/>
+
+  <!-- Botanical Leaves -->
+  <path d="M 45,320 C 70,300 90,320 80,345 C 65,355 45,340 45,320 Z" fill="url(#leafGrad)"/>
+  <path d="M 75,480 C 105,460 120,485 105,510 C 85,520 70,500 75,480 Z" fill="url(#leafGrad)"/>
+  <path d="M 20,200 C 45,180 60,200 50,220 C 35,230 20,215 20,200 Z" fill="url(#leafGrad)"/>
+  <path d="M 90,160 C 115,145 130,165 115,185 C 95,195 85,175 90,160 Z" fill="url(#leafGrad)"/>
+
+  <!-- Large Pink Blossom Bottom Left -->
+  <g transform="translate(70, 620)">
+    <circle cx="0" cy="0" r="16" fill="#F48FB1"/>
+    <!-- Petals -->
+    <path d="M 0,-15 C 20,-60 60,-40 45,-10 C 35,10 15,10 0,0 Z" fill="url(#pinkGrad)"/>
+    <path d="M 15,0 C 60,20 40,60 10,45 C -10,35 -10,15 0,0 Z" fill="url(#pinkGrad)"/>
+    <path d="M 0,15 C -20,60 -60,40 -45,10 C -35,-10 -15,-10 0,0 Z" fill="url(#pinkGrad)"/>
+    <path d="M -15,0 C -60,-20 -40,-60 -10,-45 C 10,-35 10,-15 0,0 Z" fill="url(#pinkGrad)"/>
+    <!-- Diagonal Petals -->
+    <path d="M 10,-10 C 45,-45 55,-15 30,10 C 15,20 0,5 10,-10 Z" fill="url(#pinkGrad)" opacity="0.9"/>
+    <path d="M -10,10 C -45,45 -55,15 -30,-10 C -15,-20 0,-5 -10,10 Z" fill="url(#pinkGrad)" opacity="0.9"/>
+    <circle cx="0" cy="0" r="14" fill="#FFD54F"/>
+    <circle cx="0" cy="0" r="8" fill="#FF80AB"/>
+  </g>
+
+  <!-- Large Pink Blossom Middle Left -->
+  <g transform="translate(50, 430)">
+    <circle cx="0" cy="0" r="12" fill="#F48FB1"/>
+    <path d="M 0,-12 C 16,-48 48,-32 36,-8 C 28,8 12,8 0,0 Z" fill="url(#pinkGrad)"/>
+    <path d="M 12,0 C 48,16 32,48 8,36 C -8,28 -8,12 0,0 Z" fill="url(#pinkGrad)"/>
+    <path d="M 0,12 C -16,48 -48,32 -36,8 C -28,-8 -12,-8 0,0 Z" fill="url(#pinkGrad)"/>
+    <path d="M -12,0 C -48,-16 -32,-48 -8,-36 C 8,-28 8,-12 0,0 Z" fill="url(#pinkGrad)"/>
+    <circle cx="0" cy="0" r="10" fill="#FFE082"/>
+  </g>
+
+  <!-- Yellow Flowers Top & Mid -->
+  <g transform="translate(130, 240)">
+    <circle cx="0" cy="0" r="8" fill="#FFF59D"/>
+    <ellipse cx="0" cy="-18" rx="8" ry="14" fill="url(#yellowGrad)"/>
+    <ellipse cx="18" cy="0" rx="14" ry="8" fill="url(#yellowGrad)"/>
+    <ellipse cx="0" cy="18" rx="8" ry="14" fill="url(#yellowGrad)"/>
+    <ellipse cx="-18" cy="0" rx="14" ry="8" fill="url(#yellowGrad)"/>
+    <ellipse cx="12" cy="-12" rx="10" ry="10" fill="url(#yellowGrad)" opacity="0.85"/>
+    <ellipse cx="-12" cy="12" rx="10" ry="10" fill="url(#yellowGrad)" opacity="0.85"/>
+    <circle cx="0" cy="0" r="7" fill="#FF6F00"/>
+  </g>
+
+  <g transform="translate(90, 110)">
+    <ellipse cx="0" cy="-14" rx="7" ry="12" fill="url(#yellowGrad)"/>
+    <ellipse cx="14" cy="0" rx="12" ry="7" fill="url(#yellowGrad)"/>
+    <ellipse cx="0" cy="14" rx="7" ry="12" fill="url(#yellowGrad)"/>
+    <ellipse cx="-14" cy="0" rx="12" ry="7" fill="url(#yellowGrad)"/>
+    <circle cx="0" cy="0" r="5" fill="#E65100"/>
+  </g>
+
+  <!-- Small Buds and Dots -->
+  <circle cx="160" cy="70" r="6" fill="#F48FB1"/>
+  <circle cx="180" cy="120" r="4" fill="#FFB74D"/>
+  <circle cx="110" cy="350" r="5" fill="#FF80AB"/>
+  <circle cx="30" cy="520" r="4" fill="#FFE082"/>
+</svg>

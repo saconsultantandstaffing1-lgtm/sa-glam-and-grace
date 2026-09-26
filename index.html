@@ -1,0 +1,1580 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SA Glam and Grace | Luxury Indian Women's Ethnic Fashion</title>
+  <meta name="description" content="Discover SA Glam and Grace's award-winning luxury ethnic wear collection. Handcrafted Kurtis, Sarees, Lehengas, and Anarkalis designed for regal Indian celebrations.">
+  
+  <!-- Google Fonts & Remix Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  
+  <!-- Master Stylesheet -->
+    <!-- Supabase Cloud SDK & Configuration -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <link rel="stylesheet" href="./style.css?v=220">
+</head>
+<body>
+
+  <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+       SECTION 1 – Announcement Bar
+       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <aside class="announcement-bar" id="announcementBar">
+    <div class="container announcement-container">
+      <div class="announcement-ticker">
+        <svg class="star-icon-svg" viewBox="0 0 24 24" width="18" height="18">
+          <path fill="#FFD700" stroke="#FFFFFF" stroke-width="0.5" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        <span class="badge-tag">Festive Offer</span>
+        <span id="announcementPromoText">Use Code <strong style="color:#FFD700;">WELCOME10</strong> for 10% OFF Your First Order</span>
+        <svg class="star-icon-svg" viewBox="0 0 24 24" width="18" height="18">
+          <path fill="#FFD700" stroke="#FFFFFF" stroke-width="0.5" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+      </div>
+      <div class="announcement-links">
+        <a href="#track-order"><i class="ri-truck-line"></i> Track Order</a>
+        <a href="javascript:void(0)" onclick="window.openCustomerAuth && window.openCustomerAuth(event)" style="color:#FFD700; font-weight:700;"><i class="ri-user-star-line"></i> Sign In</a>
+        <a href="admin.html" style="color:#fff; font-weight:600;"><i class="ri-shield-user-line"></i> Admin</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+       SECTION 2 – Premium Sticky Header
+       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <header class="header-sticky" id="mainHeader">
+    <div class="container header-container">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="brand-logo" id="brandLogo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 50 50" class="brand-crest-svg" width="34" height="34">
+            <defs>
+              <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#D4AF37"/>
+                <stop offset="50%" stop-color="#F3E5AB"/>
+                <stop offset="100%" stop-color="#AA7C11"/>
+              </linearGradient>
+              <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#F43F7E"/>
+                <stop offset="100%" stop-color="#E11D48"/>
+              </linearGradient>
+            </defs>
+            <!-- Decorative Gold Ring -->
+            <circle cx="25" cy="25" r="23" fill="none" stroke="url(#goldGrad)" stroke-width="1.5"/>
+            <circle cx="25" cy="25" r="21" fill="none" stroke="#F43F7E" stroke-width="0.5" stroke-dasharray="2 1"/>
+            
+            <!-- Royal Lotus Petal Motif -->
+            <path d="M25 8 C27 13 31 14 33 17 C30 17 27 19 25 22 C23 19 20 17 17 17 C19 14 23 13 25 8 Z" fill="url(#pinkGrad)"/>
+            
+            <!-- Monogram SA -->
+            <text x="25" y="37" font-family="'Playfair Display', serif" font-size="15" font-weight="700" fill="url(#goldGrad)" text-anchor="middle" letter-spacing="-0.5">SA</text>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="brand-name" style="font-size: 1.55rem; letter-spacing: 2px;">SA GLAM &amp; GRACE</span>
+          <span class="brand-tagline">LUXURY ETHNIC WEAR</span>
+        </div>
+      </a>
+
+      <!-- Center Navigation with Dropdown Menu -->
+      <nav class="main-nav" id="mainNav">
+        <ul>
+          <!-- Collections with Dropdown -->
+          <li class="nav-item has-mega active">
+            <a href="#collections" class="nav-link">Collections <i class="ri-arrow-down-s-line"></i></a>
+            
+            <!-- Mega Dropdown Menu -->
+            <div class="mega-menu">
+              <div class="mega-column">
+                <h4>Kurtis &amp; Sets</h4>
+                <ul>
+                  <li><a href="category.html?cat=kurtis">Straight Cut Kurtis</a></li>
+                  <li><a href="category.html?cat=kurtis">A-Line Kurtis</a></li>
+                  <li><a href="category.html?cat=anarkali">Anarkali Suit Sets</a></li>
+                  <li><a href="category.html?cat=churidar">Chudidar Sets</a></li>
+                  <li><a href="#categories">Short Tunics &amp; Kaftans</a></li>
+                </ul>
+              </div>
+              <div class="mega-column">
+                <h4>Sarees &amp; Lehengas</h4>
+                <ul>
+                  <li><a href="category.html?cat=saree">Banarasi Silk Sarees</a></li>
+                  <li><a href="#categories">Chanderi &amp; Organza Sarees</a></li>
+                  <a href="category.html?cat=lehenga">Heritage Bridal Lehengas <span class="tag-soon">Launching Soon</span></a></li>
+                  <a href="category.html?cat=dupatta">Hand-Embroidered Dupattas <span class="tag-soon">Launching Soon</span></a></li>
+                </ul>
+              </div>
+              <div class="mega-column">
+                <h4>By Occasion</h4>
+                <ul>
+                  <li><a href="#occasions">Festive SoirÃ©e</a></li>
+                  <li><a href="#occasions">Wedding &amp; Sangeet</a></li>
+                  <li><a href="#occasions">Royal Office Wear</a></li>
+                  <li><a href="#occasions">Daily Luxury</a></li>
+                </ul>
+              </div>
+              <div class="mega-banner">
+                <img src="./assets/images/hero_1.png" alt="Curated Collections">
+                <h5 style="font-family: var(--font-serif); font-size: 1.1rem; color: var(--primary-pink);">Royal Silk Collection</h5>
+                <p style="font-size: 0.78rem; color: #666; margin-top: 2px;">Hand-embroidered zardozi touch</p>
+              </div>
+            </div>
+          </li>
+
+          <!-- Fancy Dresses Dedicated Link -->
+          <li class="nav-item nav-item-fancy">
+            <a href="#fancy-dresses" class="nav-link nav-link-fancy" id="fancyNavBtn">
+              <i class="ri-sparkles-fill" style="color: #FFD700;"></i> Fancy Dresses <span class="badge-tag-sparkle">COUTURE</span>
+            </a>
+          </li>
+
+          <!-- Accessories with Dropdown (3 Columns) -->
+          <li class="nav-item has-dropdown">
+            <a href="#categories" class="nav-link">Accessories <i class="ri-arrow-down-s-line"></i></a>
+            
+            <!-- Accessories Dropdown Menu -->
+            <div class="dropdown-menu">
+              <div class="dropdown-column">
+                <h4><i class="ri-sparkles-line"></i> Earrings</h4>
+                <ul>
+                  <li><a href="#categories">Jhumkas &amp; Chandbalis</a></li>
+                  <li><a href="#categories">Kundan &amp; Polki Earrings</a></li>
+                  <li><a href="#categories">Statement Earrings</a></li>
+                </ul>
+              </div>
+              <div class="dropdown-column">
+                <h4><i class="ri-heart-pulse-line"></i> Necklaces</h4>
+                <ul>
+                  <li><a href="#categories">Choker Sets &amp; Harams</a></li>
+                  <li><a href="#categories">Royal Kundan Necklaces</a></li>
+                  <li><a href="#categories">Temple Jewelry &amp; Chains</a></li>
+                </ul>
+              </div>
+              <div class="dropdown-column">
+                <h4><i class="ri-vip-diamond-line"></i> Rings &amp; Bangles</h4>
+                <ul>
+                  <li><a href="#categories">Statement Finger Rings</a></li>
+                  <li><a href="#categories">Kundan Bracelets &amp; Kadas</a></li>
+                  <li><a href="#categories">Bangle Sets</a></li>
+                </ul>
+              </div>
+            </div>
+          </li>
+
+          <!-- About Us -->
+          <li class="nav-item"><a href="#about" class="nav-link">About Us</a></li>
+
+          <!-- Contact Us -->
+          <li class="nav-item"><a href="#contact" class="nav-link">Contact Us</a></li>
+        </ul>
+      </nav>
+
+      <!-- Header Actions Right -->
+      <div class="header-actions">
+        <button class="action-btn" id="searchBtn" title="Search Collections">
+          <i class="ri-search-line" style="font-size: 1.25rem;"></i>
+        </button>
+        
+        <button class="action-btn" id="wishlistHeaderBtn" onclick="window.openWishlistDrawer && window.openWishlistDrawer(event)" title="Wishlist">
+          <i class="ri-heart-line" style="font-size: 1.25rem;"></i>
+          <span class="badge-count" id="wishlistBadge">2</span>
+        </button>
+        
+        <a href="javascript:void(0)" onclick="window.openCustomerAuth && window.openCustomerAuth(event)" class="action-btn" title="My Account (Sign In / Register)" id="accountBtn">
+          <i class="ri-user-line" style="font-size: 1.25rem;"></i>
+        </a>
+        
+        <button class="action-btn cart-trigger" id="cartHeaderBtn" onclick="window.openCartDrawer ? window.openCartDrawer() : (window.openCart && window.openCart())" title="Shopping Bag">
+          <i class="ri-shopping-bag-line" style="font-size: 1.25rem;"></i>
+          <span class="badge-count" id="cartBadge">1</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+       SECTION 3 – Hero Banner (Restored Slider)
+       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="hero-section" id="hero">
+    <!-- Navigation Arrows -->
+    <button class="hero-nav-arrow arrow-left" id="heroPrevBtn" aria-label="Previous Slide">
+      <i class="ri-arrow-left-s-line"></i>
+    </button>
+    <button class="hero-nav-arrow arrow-right" id="heroNextBtn" aria-label="Next Slide">
+      <i class="ri-arrow-right-s-line"></i>
+    </button>
+
+    <div class="container hero-container">
+      
+      <!-- Hero Left Content -->
+      <div class="hero-left-content">
+        <div class="hero-tag" id="heroTag">
+          <i class="ri-sparkling-fill"></i> NEW FESTIVE COLLECTION 2026
+        </div>
+
+        <h1 class="hero-heading" id="heroHeading">
+          Your Style.<br>
+          <span class="italic-gold">Your Celebration.</span>
+        </h1>
+
+        <p class="hero-description" id="heroDesc">
+          Immerse yourself in handcrafted luxury ethnic wear. Designed with regal silk weaves, authentic zardozi embroidery, and timeless Indian grace.
+        </p>
+
+        <div class="hero-buttons">
+          <a href="#new-arrivals" class="btn-primary">
+            EXPLORE COLLECTION <i class="ri-arrow-right-line"></i>
+          </a>
+          <a href="#categories" class="btn-secondary">
+            VIEW LOOKBOOK
+          </a>
+        </div>
+
+        <div class="hero-controls">
+          <span class="dot active"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+
+      <!-- Hero Right Image Card & Glass Badge -->
+      <div class="hero-image-wrapper">
+        <div class="hero-img-container">
+          <img src="./assets/images/hero_1.png" alt="SA Glam & Grace Luxury Ethnic Wear" id="heroImg">
+        </div>
+
+        <!-- Floating Glassmorphism Badge -->
+        <div class="hero-badge-glass">
+          <div class="badge-icon">
+            <i class="ri-award-line"></i>
+          </div>
+          <div class="badge-text-group">
+            <h4 id="badgeTitle">Royal Chanderi Silk</h4>
+            <p id="badgeDesc">Hand-woven Kurti Set</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+       SECTION 4 – About Us & What Makes Us Special
+       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="about-special-section" id="about">
+    
+    <!-- Right Floral Top Corner Artwork -->
+    <div class="floral-corner-right">
+      <img src="./assets/images/floral_right.png" alt="Corner Floral Ornament" class="floral-img-right">
+    </div>
+
+    <div class="container">
+      
+      <!-- Two Column Grid (Left Story & Header, Right Image) -->
+      <div class="about-hero-grid">
+        
+        <!-- Bottom-Left Floral Corner Artwork -->
+        <div class="floral-corner-left">
+          <img src="./assets/images/floral_right.png" alt="Bottom Left Floral Ornament" class="floral-img-left">
+        </div>
+        
+        <!-- Left Column: Centered Header + Story Text + CTA Button -->
+        <div class="about-text-content">
+          
+          <div class="about-badge-header">
+            <span class="gold-line"></span>
+            <span class="gold-badge-text">ABOUT US</span>
+            <span class="gold-line"></span>
+          </div>
+
+          <h2 class="about-headline">
+            Our Story. Our Promise.<br>
+            <span class="pink-italic-heading">Your Style. Your Celebration.</span>
+          </h2>
+
+          <div class="gold-divider-ornament">
+            <span class="diamond-dot">â—†</span>
+          </div>
+
+          <p class="about-description-paragraph">
+            At SA Glam &amp; Grace, we believe ethnic wear is more than just clothing – it's a celebration of culture, craftsmanship and confidence. Every piece we create is a blend of timeless tradition and modern elegance, designed to make you feel beautiful, inside and out.
+          </p>
+
+          <p class="about-description-paragraph">
+            From festive occasions to everyday elegance, we are here to be a part of every special moment in your life.
+          </p>
+
+          <a href="#collections" class="btn-pink-pill">
+            EXPLORE OUR COLLECTIONS <i class="ri-arrow-right-line"></i>
+          </a>
+
+        </div>
+
+        <!-- Right Column: Custom Cutout Image Container -->
+        <div class="about-image-column">
+          <div class="arch-image-frame">
+
+            <!-- About Us Image Carousel -->
+            <div class="about-carousel" id="aboutCarousel">
+              <img src="./assets/images/about_us_model.png" alt="SA Glam & Grace Heritage Ethnic Wear" class="about-carousel-img active">
+              <img src="./assets/images/about_saree.png" alt="SA Glam & Grace Saree Collection" class="about-carousel-img">
+              <img src="./assets/images/about_lehenga.png" alt="SA Glam & Grace Lehenga Collection" class="about-carousel-img">
+              <img src="./assets/images/about_anarkali.png" alt="SA Glam & Grace Anarkali Kurti" class="about-carousel-img">
+              <img src="./assets/images/about_tops.png" alt="SA Glam & Grace Ethnic Tops" class="about-carousel-img">
+            </div>
+
+            <!-- Carousel Dots -->
+            <div class="about-carousel-dots">
+              <span class="about-dot active" onclick="goToAboutSlide(0)"></span>
+              <span class="about-dot" onclick="goToAboutSlide(1)"></span>
+              <span class="about-dot" onclick="goToAboutSlide(2)"></span>
+              <span class="about-dot" onclick="goToAboutSlide(3)"></span>
+              <span class="about-dot" onclick="goToAboutSlide(4)"></span>
+            </div>
+
+            <!-- Floating Circular Crafted With Love Badge -->
+            <div class="crafted-badge-floating">
+              <div class="crafted-badge-inner">
+                <i class="ri-flower-line badge-pink-icon"></i>
+                <div class="crafted-title">CRAFTED<br>WITH LOVE</div>
+                <div class="crafted-sub">Since Day One</div>
+                <i class="ri-heart-fill badge-gold-heart"></i>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Center Divider: WHAT MAKES US SPECIAL -->
+      <div class="special-section-divider">
+        <span class="ornament-arrow">←</span>
+        <h3 class="special-title">WHAT MAKES US SPECIAL</h3>
+        <span class="ornament-arrow">→</span>
+      </div>
+
+      <!-- 6 Feature Cards Grid -->
+      <div class="special-cards-grid">
+        
+        <!-- Card 1 -->
+        <div class="special-card">
+          <div class="special-card-icon">
+            <i class="ri-hand-heart-line"></i>
+          </div>
+          <h4>Quality Craftsmanship</h4>
+          <p>Finest fabrics and intricate workmanship in every piece.</p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="special-card">
+          <div class="special-card-icon">
+            <i class="ri-leaf-line"></i>
+          </div>
+          <h4>Ethical &amp; Sustainable</h4>
+          <p>We care for people and the planet we create in.</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="special-card">
+          <div class="special-card-icon">
+            <i class="ri-t-shirt-line"></i>
+          </div>
+          <h4>Timeless Designs</h4>
+          <p>Blending traditional artistry with modern elegance.</p>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="special-card">
+          <div class="special-card-icon">
+            <i class="ri-award-line"></i>
+          </div>
+          <h4>Trusted By Thousands</h4>
+          <p>Loved by 10,000+ customers across India.</p>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="special-card">
+          <div class="special-card-icon">
+            <i class="ri-truck-line"></i>
+          </div>
+          <h4>Fast &amp; Reliable Delivery</h4>
+          <p>Quick delivery, carefully packed with love.</p>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="special-card">
+          <div class="special-card-icon">
+            <i class="ri-customer-service-2-line"></i>
+          </div>
+          <h4>Customer First</h4>
+          <p>We're always here to make you smile.</p>
+        </div>
+
+      </div>
+
+      <!-- Bottom Stats Bar -->
+      <div class="stats-bar-card">
+        <div class="stat-item">
+          <div class="stat-icon-wrapper"><i class="ri-group-line"></i></div>
+          <div class="stat-info">
+            <div class="stat-number">10,000+</div>
+            <div class="stat-label">Happy Customers</div>
+          </div>
+        </div>
+
+        <div class="stat-divider"></div>
+
+        <div class="stat-item">
+          <div class="stat-icon-wrapper"><i class="ri-star-line"></i></div>
+          <div class="stat-info">
+            <div class="stat-number">4.9/5</div>
+            <div class="stat-label">Average Rating</div>
+          </div>
+        </div>
+
+        <div class="stat-divider"></div>
+
+        <div class="stat-item">
+          <div class="stat-icon-wrapper"><i class="ri-shopping-bag-3-line"></i></div>
+          <div class="stat-info">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Unique Styles</div>
+          </div>
+        </div>
+
+        <div class="stat-divider"></div>
+
+        <div class="stat-item">
+          <div class="stat-icon-wrapper"><i class="ri-heart-line"></i></div>
+          <div class="stat-info">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Customer Satisfaction</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+       SECTION 5 – Shop by Category
+       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="section-padding" id="categories">
+    <div class="container">
+      
+      <div class="section-header">
+        <span class="sub-heading">Curated Selection</span>
+        <h2 class="section-title">Shop by <span>Category</span></h2>
+        <p class="section-desc">Explore handcrafted silhouettes meticulously tailored for royal celebrations and everyday splendor.</p>
+      </div>
+
+      <div class="categories-grid">
+        
+        <!-- Category 0: Featured Fancy Dresses Portal Trigger -->
+        <a href="#fancy-dresses" class="category-card category-card-fancy" id="fancyCategoryCard">
+          <div class="category-circle-wrapper">
+            <div class="category-badge-gold" style="background: linear-gradient(135deg, #111, #D4AF37); color: #FFF; border: 1px solid #FFD700;">COUTURE<br>PORTAL</div>
+            <div class="category-circle-inner" style="border-color: #D4AF37;">
+              <img src="https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=800&q=80" alt="Fancy Dresses & Gowns">
+            </div>
+          </div>
+          <h3 class="category-name" style="color: var(--primary-pink); font-weight: 700;">Fancy Dresses ✨</h3>
+          <p class="category-count" style="color: #AA7C11; font-weight: 600;">Partywear &amp; Gowns</p>
+        </a>
+
+        <!-- Category 1 -->
+        <a href="category.html?cat=kurtis" class="category-card">
+          <div class="category-circle-wrapper">
+            <div class="category-circle-inner">
+              <img src="./assets/images/hero_1.png" alt="Kurtis">
+            </div>
+          </div>
+          <h3 class="category-name">Kurtis</h3>
+          <p class="category-count">120+ Styles</p>
+        </a>
+
+        <!-- Category 2 -->
+        <a href="category.html?cat=churidar" class="category-card">
+          <div class="category-circle-wrapper">
+            <div class="category-circle-inner">
+              <img src="./assets/images/festive.png" alt="Chudidar Sets">
+            </div>
+          </div>
+          <h3 class="category-name">Chudidar Sets</h3>
+          <p class="category-count">85+ Styles</p>
+        </a>
+
+        <!-- Category 3 -->
+        <a href="category.html?cat=anarkali" class="category-card">
+          <div class="category-circle-wrapper">
+            <div class="category-circle-inner">
+              <img src="./assets/images/wedding.png" alt="Anarkalis">
+            </div>
+          </div>
+          <h3 class="category-name">Anarkalis</h3>
+          <p class="category-count">64+ Styles</p>
+        </a>
+
+        <!-- Category 4 -->
+        <a href="category.html?cat=saree" class="category-card">
+          <div class="category-circle-wrapper">
+            <div class="category-circle-inner">
+              <img src="./assets/images/saree_tn.png" alt="Sarees">
+            </div>
+          </div>
+          <h3 class="category-name">Sarees</h3>
+          <p class="category-count">150+ Weaves</p>
+        </a>
+
+        <!-- Category 5: Lehengas -->
+        <a href="category.html?cat=lehenga" class="category-card">
+          <div class="category-circle-wrapper">
+            <div class="category-badge-gold">LAUNCHING<br>SOON</div>
+            <div class="category-circle-inner">
+              <img src="./assets/images/hero_2.png" alt="Lehengas">
+            </div>
+          </div>
+          <h3 class="category-name">Lehengas</h3>
+        </a>
+
+        <!-- Category 6: Dupattas -->
+        <a href="category.html?cat=dupatta" class="category-card">
+          <div class="category-circle-wrapper">
+            <div class="category-badge-gold">LAUNCHING<br>SOON</div>
+            <div class="category-circle-inner">
+              <img src="./assets/images/dupatta.png" alt="Dupattas">
+            </div>
+          </div>
+          <h3 class="category-name">Dupattas</h3>
+        </a>
+
+        <!-- Category 7: Handbags -->
+        <a href="category.html?cat=handbags" class="category-card">
+          <div class="category-circle-wrapper">
+            <div class="category-badge-gold">LAUNCHING<br>SOON</div>
+            <div class="category-circle-inner">
+              <img src="./assets/images/handbag_modern.png" alt="Handbags">
+            </div>
+          </div>
+          <h3 class="category-name">Handbags</h3>
+        </a>
+
+        <!-- Category 8: Footwear -->
+        <a href="category.html?cat=footwear" class="category-card">
+          <div class="category-circle-wrapper">
+            <div class="category-badge-gold">LAUNCHING<br>SOON</div>
+            <div class="category-circle-inner">
+              <img src="./assets/images/footwear_modern.png" alt="Footwear">
+            </div>
+          </div>
+          <h3 class="category-name">Footwear</h3>
+        </a>
+
+        <!-- Category 9 -->
+        <a href="category.html?cat=jewellery" class="category-card">
+          <div class="category-circle-wrapper">
+            <div class="category-circle-inner">
+              <img src="./assets/images/jewellery.png" alt="Jewellery">
+            </div>
+          </div>
+          <h3 class="category-name">Jewellery</h3>
+          <p class="category-count">75+ Kundans</p>
+        </a>
+
+        <!-- Category 10: Watches -->
+        <a href="category.html?cat=watches" class="category-card">
+          <div class="category-circle-wrapper">
+            <div class="category-badge-gold">LAUNCHING<br>SOON</div>
+            <div class="category-circle-inner">
+              <img src="https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80" alt="Watches">
+            </div>
+          </div>
+          <h3 class="category-name">Watches</h3>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+       SECTION 6 – Featured Collections (4 Editorial Banners)
+       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="section-padding" id="collections" style="background: var(--light-gray);">
+    <div class="container">
+      
+      <div class="section-header">
+        <span class="sub-heading">Seasonal Highlights</span>
+        <h2 class="section-title">Featured <span>Collections</span></h2>
+      </div>
+
+      <div class="collections-grid">
+        
+        <!-- Banner 1: Pink Festive -->
+        <div class="collection-banner banner-pink">
+          <img src="./assets/images/festive.png" alt="Vibrant Festive Collection" class="banner-bg-img">
+          <div class="banner-overlay">
+            <span class="banner-sub">ROYAL EDITIONS</span>
+            <h3 class="banner-title">Vibrant Festive Collection</h3>
+            <p class="banner-desc">Luminous magenta pink silks embedded with fine gold zari and sequins.</p>
+            <a href="#new-arrivals" class="btn-banner">Shop Collection <i class="ri-arrow-right-s-line"></i></a>
+          </div>
+        </div>
+
+        <!-- Banner 2: Yellow Summer Cotton -->
+        <div class="collection-banner banner-yellow">
+          <img src="./assets/images/hero_1.png" alt="Summer Cotton Collection" class="banner-bg-img">
+          <div class="banner-overlay">
+            <span class="banner-sub">BREATHABLE ELEGANCE</span>
+            <h3 class="banner-title">Summer Cotton Collection</h3>
+            <p class="banner-desc">Lightweight Chanderi and Mulmul fabrics keeping you graceful and cool.</p>
+            <a href="#new-arrivals" class="btn-banner">Shop Collection <i class="ri-arrow-right-s-line"></i></a>
+          </div>
+        </div>
+
+        <!-- Banner 3: Mint Wedding Special -->
+        <div class="collection-banner banner-mint">
+          <img src="./assets/images/wedding.png" alt="Wedding Special Collection" class="banner-bg-img">
+          <div class="banner-overlay">
+            <span class="banner-sub">BRIDAL SOIRÉE</span>
+            <h3 class="banner-title">Wedding Special Collection</h3>
+            <p class="banner-desc">Hand-loomed mint green Anarkalis with royal mirror work details.</p>
+            <a href="#new-arrivals" class="btn-banner">Shop Collection <i class="ri-arrow-right-s-line"></i></a>
+          </div>
+        </div>
+
+        <!-- Banner 4: Peach New Arrivals -->
+        <div class="collection-banner banner-peach">
+          <img src="./assets/images/hero_2.png" alt="New Arrivals Collection" class="banner-bg-img">
+          <div class="banner-overlay">
+            <span class="banner-sub">FRESH OFF THE LOOM</span>
+            <h3 class="banner-title">New Arrivals 2026</h3>
+            <p class="banner-desc">Modern silhouettes infused with century-old Indian weaving heritage.</p>
+            <a href="#new-arrivals" class="btn-banner">Shop Collection <i class="ri-arrow-right-s-line"></i></a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+       SECTION 7 – New Arrivals Product Grid
+       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="section-padding" id="new-arrivals">
+    <div class="container">
+      
+      <div class="section-header">
+        <span class="sub-heading">Fresh Drops</span>
+        <h2 class="section-title">New <span>Arrivals</span></h2>
+        <p class="section-desc">Handcrafted luxury styles designed to make every occasion memorable.</p>
+      </div>
+
+      
+      <div class="products-grid">
+        
+        <!-- Product 1 -->
+        <div class="product-card">
+          <div class="product-img-wrapper">
+            <span class="product-badge">NEW</span>
+            <button class="wishlist-btn active" onclick="toggleWishlist(1, this)"><i class="ri-heart-fill"></i></button>
+            <img src="./assets/images/hero_1.png" alt="Amber Chanderi Kurti" class="product-img-primary">
+            <img src="./assets/images/festive.png" alt="Amber Chanderi Kurti Back" class="product-img-secondary">
+            
+            <div class="product-hover-actions">
+              <button class="btn-quick-add" onclick="addToCart({id:1, title:'Amber Chanderi Silk Kurti Set', price:3499, image:'./assets/images/hero_1.png'})">
+                Add to Cart
+              </button>
+              <button class="btn-quick-view" onclick="openQuickView({id:1, title:'Amber Chanderi Silk Kurti Set', price:3499, image:'./assets/images/hero_1.png'})" title="Quick View">
+                <i class="ri-eye-line"></i>
+              </button>
+            </div>
+          </div>
+          <div class="product-info">
+            <span class="product-category-label">Kurti Set</span>
+            <h3 class="product-title">Amber Chanderi Silk Kurti Set</h3>
+            <div class="product-price-row">
+              <div class="price-box">
+                <span class="current-price">₹3,499</span>
+                <span class="original-price">₹4,999</span>
+              </div>
+              <div class="color-swatches">
+                <span class="swatch active" style="background: #F8C146;"></span>
+                <span class="swatch" style="background: #F43F7E;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product 2 -->
+        <div class="product-card">
+          <div class="product-img-wrapper">
+            <span class="product-badge">BESTSELLER</span>
+            <button class="wishlist-btn" onclick="toggleWishlist(2, this)"><i class="ri-heart-line"></i></button>
+            <img src="./assets/images/festive.png" alt="Gulabi Magenta Anarkali" class="product-img-primary">
+            <img src="./assets/images/hero_1.png" alt="Gulabi Magenta Anarkali Hover" class="product-img-secondary">
+            
+            <div class="product-hover-actions">
+              <button class="btn-quick-add" onclick="addToCart({id:2, title:'Gulabi Magenta Handloom Suit', price:4899, image:'./assets/images/festive.png'})">
+                Add to Cart
+              </button>
+              <button class="btn-quick-view" onclick="openQuickView({id:2, title:'Gulabi Magenta Handloom Suit', price:4899, image:'./assets/images/festive.png'})" title="Quick View">
+                <i class="ri-eye-line"></i>
+              </button>
+            </div>
+          </div>
+          <div class="product-info">
+            <span class="product-category-label">Anarkali Suit</span>
+            <h3 class="product-title">Gulabi Magenta Handloom Suit</h3>
+            <div class="product-price-row">
+              <div class="price-box">
+                <span class="current-price">₹4,899</span>
+                <span class="original-price">₹6,200</span>
+              </div>
+              <div class="color-swatches">
+                <span class="swatch active" style="background: #F43F7E;"></span>
+                <span class="swatch" style="background: #BFE8D8;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product 3 -->
+        <div class="product-card">
+          <div class="product-img-wrapper">
+            <span class="product-badge">ROYAL</span>
+            <button class="wishlist-btn active" onclick="toggleWishlist(3, this)"><i class="ri-heart-fill"></i></button>
+            <img src="./assets/images/wedding.png" alt="Mint Blossom Organza Anarkali" class="product-img-primary">
+            <img src="./assets/images/hero_2.png" alt="Mint Blossom Organza Hover" class="product-img-secondary">
+            
+            <div class="product-hover-actions">
+              <button class="btn-quick-add" onclick="addToCart({id:3, title:'Mint Blossom Organza Anarkali', price:5999, image:'./assets/images/wedding.png'})">
+                Add to Cart
+              </button>
+              <button class="btn-quick-view" onclick="openQuickView({id:3, title:'Mint Blossom Organza Anarkali', price:5999, image:'./assets/images/wedding.png'})" title="Quick View">
+                <i class="ri-eye-line"></i>
+              </button>
+            </div>
+          </div>
+          <div class="product-info">
+            <span class="product-category-label">Wedding Wear</span>
+            <h3 class="product-title">Mint Blossom Organza Anarkali</h3>
+            <div class="product-price-row">
+              <div class="price-box">
+                <span class="current-price">₹5,999</span>
+                <span class="original-price">₹7,500</span>
+              </div>
+              <div class="color-swatches">
+                <span class="swatch active" style="background: #BFE8D8;"></span>
+                <span class="swatch" style="background: #FFF8F2;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product 4 -->
+        <div class="product-card">
+          <div class="product-img-wrapper">
+            <span class="product-badge">EXCLUSIVITY</span>
+            <button class="wishlist-btn" onclick="toggleWishlist(4, this)"><i class="ri-heart-line"></i></button>
+            <img src="./assets/images/hero_2.png" alt="Rose Zardozi Heritage Lehenga" class="product-img-primary">
+            <img src="./assets/images/wedding.png" alt="Rose Zardozi Heritage Lehenga Hover" class="product-img-secondary">
+            
+            <div class="product-hover-actions">
+              <button class="btn-quick-add" onclick="addToCart({id:4, title:'Rose Zardozi Heritage Lehenga', price:12999, image:'./assets/images/hero_2.png'})">
+                Add to Cart
+              </button>
+              <button class="btn-quick-view" onclick="openQuickView({id:4, title:'Rose Zardozi Heritage Lehenga', price:12999, image:'./assets/images/hero_2.png'})" title="Quick View">
+                <i class="ri-eye-line"></i>
+              </button>
+            </div>
+          </div>
+          <div class="product-info">
+            <span class="product-category-label">Bridal Lehenga</span>
+            <h3 class="product-title">Rose Zardozi Heritage Lehenga</h3>
+            <div class="product-price-row">
+              <div class="price-box">
+                <span class="current-price">₹12,999</span>
+                <span class="original-price">₹16,000</span>
+              </div>
+              <div class="color-swatches">
+                <span class="swatch active" style="background: #FF6B9A;"></span>
+                <span class="swatch" style="background: #D4AF37;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product 5 -->
+        <div class="product-card">
+          <div class="product-img-wrapper">
+            <span class="product-badge">NEW</span>
+            <button class="wishlist-btn" onclick="toggleWishlist(5, this)"><i class="ri-heart-line"></i></button>
+            <img src="./assets/images/hero_1.png" alt="Kashmiri Floral Embroidered Set" class="product-img-primary">
+            <img src="./assets/images/festive.png" alt="Kashmiri Floral Embroidered Set Hover" class="product-img-secondary">
+            
+            <div class="product-hover-actions">
+              <button class="btn-quick-add" onclick="addToCart({id:5, title:'Kashmiri Floral Embroidered Set', price:4299, image:'./assets/images/hero_1.png'})">
+                Add to Cart
+              </button>
+              <button class="btn-quick-view" onclick="openQuickView({id:5, title:'Kashmiri Floral Embroidered Set', price:4299, image:'./assets/images/hero_1.png'})" title="Quick View">
+                <i class="ri-eye-line"></i>
+              </button>
+            </div>
+          </div>
+          <div class="product-info">
+            <span class="product-category-label">Chudidar Set</span>
+            <h3 class="product-title">Kashmiri Floral Embroidered Set</h3>
+            <div class="product-price-row">
+              <div class="price-box">
+                <span class="current-price">₹4,299</span>
+                <span class="original-price">₹5,499</span>
+              </div>
+              <div class="color-swatches">
+                <span class="swatch active" style="background: #F8C146;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product 6 -->
+        <div class="product-card">
+          <div class="product-img-wrapper">
+            <span class="product-badge">TRENDING</span>
+            <button class="wishlist-btn" onclick="toggleWishlist(6, this)"><i class="ri-heart-line"></i></button>
+            <img src="./assets/images/festive.png" alt="Banarasi Silk Brocade Dupatta Set" class="product-img-primary">
+            <img src="./assets/images/hero_2.png" alt="Banarasi Silk Brocade Hover" class="product-img-secondary">
+            
+            <div class="product-hover-actions">
+              <button class="btn-quick-add" onclick="addToCart({id:6, title:'Banarasi Silk Brocade Dupatta Set', price:6499, image:'./assets/images/festive.png'})">
+                Add to Cart
+              </button>
+              <button class="btn-quick-view" onclick="openQuickView({id:6, title:'Banarasi Silk Brocade Dupatta Set', price:6499, image:'./assets/images/festive.png'})" title="Quick View">
+                <i class="ri-eye-line"></i>
+              </button>
+            </div>
+          </div>
+          <div class="product-info">
+            <span class="product-category-label">Saree & Dupatta</span>
+            <h3 class="product-title">Banarasi Silk Brocade Dupatta Set</h3>
+            <div class="product-price-row">
+              <div class="price-box">
+                <span class="current-price">₹6,499</span>
+                <span class="original-price">₹8,000</span>
+              </div>
+              <div class="color-swatches">
+                <span class="swatch active" style="background: #F43F7E;"></span>
+                <span class="swatch" style="background: #F8C146;"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+       SECTION 8 – Premium Benefits
+       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="section-padding" id="benefits" style="padding-top: 0;">
+    <div class="container">
+      <div class="benefits-wrapper">
+        <div class="benefits-grid">
+          
+          <div class="benefit-card">
+            <div class="benefit-icon-box"><i class="ri-plane-line"></i></div>
+            <h4>Express Dispatch</h4>
+            <p>Insured worldwide shipping within 24-48 hours.</p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon-box"><i class="ri-gift-2-line"></i></div>
+            <h4>Luxury Gift Wrapping</h4>
+            <p>Hand-wrapped in golden silk ribbon with custom note.</p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon-box"><i class="ri-vip-crown-line"></i></div>
+            <h4>Loyalty Rewards</h4>
+            <p>Earn SA Glam Club coins on every purchase for discounts.</p>
+          </div>
+
+          <div class="benefit-card">
+            <div class="benefit-icon-box"><i class="ri-smartphone-line"></i></div>
+            <h4>Download Mobile App</h4>
+            <p>Exclusive early access to festive drop releases.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+       SECTION 9 – Shop by Occasion
+       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="section-padding" id="occasions">
+    <div class="container">
+      
+      <div class="section-header">
+        <span class="sub-heading">Styling Guides</span>
+        <h2 class="section-title">Shop by <span>Occasion</span></h2>
+        <p class="section-desc">Handpicked outfits tailored specifically for every Indian celebration.</p>
+      </div>
+
+      <div class="occasion-flex-container">
+        
+        <!-- Occasion 1 -->
+        <div class="occasion-card">
+          <img src="./assets/images/wedding.png" alt="Wedding Collection">
+          <div class="occasion-overlay">
+            <h3 class="occasion-title">Wedding Soirée</h3>
+            <a href="#new-arrivals" class="occasion-link">Explore Collection <i class="ri-arrow-right-line"></i></a>
+          </div>
+        </div>
+
+        <!-- Occasion 2 -->
+        <div class="occasion-card">
+          <img src="./assets/images/festive.png" alt="Festive Celebrations">
+          <div class="occasion-overlay">
+            <h3 class="occasion-title">Festive Glow</h3>
+            <a href="#new-arrivals" class="occasion-link">Explore Collection <i class="ri-arrow-right-line"></i></a>
+          </div>
+        </div>
+
+        <!-- Occasion 3 -->
+        <div class="occasion-card">
+          <img src="./assets/images/hero_1.png" alt="Royal Office Wear">
+          <div class="occasion-overlay">
+            <h3 class="occasion-title">Royal Office Wear</h3>
+            <a href="#new-arrivals" class="occasion-link">Explore Collection <i class="ri-arrow-right-line"></i></a>
+          </div>
+        </div>
+
+        <!-- Occasion 4 -->
+        <div class="occasion-card">
+          <img src="./assets/images/hero_2.png" alt="Daily Luxury Wear">
+          <div class="occasion-overlay">
+            <h3 class="occasion-title">Daily Wear</h3>
+            <a href="#new-arrivals" class="occasion-link">Explore Collection <i class="ri-arrow-right-line"></i></a>
+          </div>
+        </div>
+
+        <!-- Occasion 5 -->
+        <div class="occasion-card">
+          <img src="./assets/images/festive.png" alt="Party Looks">
+          <div class="occasion-overlay">
+            <h3 class="occasion-title">Cocktail & Party</h3>
+            <a href="#new-arrivals" class="occasion-link">Explore Collection <i class="ri-arrow-right-line"></i></a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+       SECTION 10 – Social & Newsletter
+       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section class="section-padding" id="social-newsletter" style="background: var(--light-gray);">
+    <div class="container">
+      <div class="social-newsletter-grid">
+        
+        <!-- Left: Customer Testimonial Card -->
+        <div class="testimonial-card">
+          <div class="quote-icon"><i class="ri-double-quotes-l"></i></div>
+          <div class="stars">
+            <i class="ri-star-fill"></i>
+            <i class="ri-star-fill"></i>
+            <i class="ri-star-fill"></i>
+            <i class="ri-star-fill"></i>
+            <i class="ri-star-fill"></i>
+          </div>
+          <p class="testimonial-quote">
+            "SA Glam and Grace's Chanderi kurti was the highlight of my sister's Sangeet! The embroidery quality, soft fabric feel, and fitting were completely regal."
+          </p>
+          <div class="customer-info">
+            <img src="./assets/images/hero_1.png" alt="Ananya Sharma" class="customer-avatar">
+            <div>
+              <div class="customer-name">Ananya Sharma</div>
+              <div class="customer-location">Verified Buyer, Mumbai</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center: Instagram Editorial Gallery -->
+        <div style="text-align: center;">
+          <span class="sub-heading">#SAGlamAndGrace</span>
+          <h3 style="font-family: var(--font-serif); font-size: 2rem; margin-bottom: 1.2rem;">Follow Our World</h3>
+          
+          <div class="insta-grid">
+            <div class="insta-item">
+              <img src="./assets/images/hero_1.png" alt="Insta Post 1">
+              <div class="insta-hover-overlay"><i class="ri-instagram-line"></i></div>
+            </div>
+            <div class="insta-item">
+              <img src="./assets/images/festive.png" alt="Insta Post 2">
+              <div class="insta-hover-overlay"><i class="ri-instagram-line"></i></div>
+            </div>
+            <div class="insta-item">
+              <img src="./assets/images/wedding.png" alt="Insta Post 3">
+              <div class="insta-hover-overlay"><i class="ri-instagram-line"></i></div>
+            </div>
+            <div class="insta-item">
+              <img src="./assets/images/hero_2.png" alt="Insta Post 4">
+              <div class="insta-hover-overlay"><i class="ri-instagram-line"></i></div>
+            </div>
+            <div class="insta-item">
+              <img src="./assets/images/hero_1.png" alt="Insta Post 5">
+              <div class="insta-hover-overlay"><i class="ri-instagram-line"></i></div>
+            </div>
+            <div class="insta-item">
+              <img src="./assets/images/festive.png" alt="Insta Post 6">
+              <div class="insta-hover-overlay"><i class="ri-instagram-line"></i></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Newsletter Card -->
+        <div class="newsletter-card">
+          <h3>Join Our World of Elegance</h3>
+          <p>Subscribe to receive preview invitations to private sales and 10% off your first order.</p>
+          
+          <form class="newsletter-form" id="newsletterForm">
+            <input type="email" placeholder="Enter your email address..." class="newsletter-input" required>
+            <button type="submit" class="btn-subscribe">Subscribe Now</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+       SECTION 11 – Luxury Footer
+       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <footer class="site-footer" id="contact">
+    <div class="container">
+      
+      <div class="footer-columns">
+        
+        <!-- Col 1: Brand Story -->
+        <div class="footer-col">
+          <a href="#" class="brand-logo" style="margin-bottom: 1rem;">
+            <div class="logo-icon"><i class="ri-flower-line"></i></div>
+            <div class="logo-text">
+              <span class="brand-name" style="font-size: 1.5rem; letter-spacing: 2px;">SA GLAM &amp; GRACE</span>
+              <span class="brand-tagline">LUXURY ETHNIC WEAR</span>
+            </div>
+          </a>
+          <p class="footer-story-text">
+            SA Glam and Grace celebrates the timeless grandeur of Indian women's heritage fashion. Blending traditional zardozi, handlooms, and contemporary grace.
+          </p>
+          <div class="footer-socials">
+            <a href="#" class="social-icon"><i class="ri-instagram-line"></i></a>
+            <a href="#" class="social-icon"><i class="ri-facebook-fill"></i></a>
+            <a href="#" class="social-icon"><i class="ri-pinterest-line"></i></a>
+            <a href="#" class="social-icon"><i class="ri-youtube-line"></i></a>
+          </div>
+        </div>
+
+        <!-- Col 2: Shop Links -->
+        <div class="footer-col">
+          <h4>Shop Collections</h4>
+          <ul>
+            <li><a href="#new-arrivals">New Arrivals</a></li>
+            <li><a href="#categories">Chanderi Kurtis</a></li>
+            <li><a href="category.html?cat=anarkali">Anarkali Suit Sets</a></li>
+            <li><a href="#categories">Heritage Lehengas</a></li>
+            <li><a href="#categories">Handloom Sarees</a></li>
+            <li><a href="#categories">Silk Dupattas</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Customer Care -->
+        <div class="footer-col">
+          <h4>Customer Care</h4>
+          <ul>
+            <li><a href="#">Track Your Order</a></li>
+            <li><a href="#">Shipping & Delivery</a></li>
+            <li><a href="#">Returns & Exchanges</a></li>
+            <li><a href="#">Size & Fitting Guide</a></li>
+            <li><a href="#">Care Instructions</a></li>
+            <li><a href="#">FAQs</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: About Us -->
+        <div class="footer-col">
+          <h4>About Us</h4>
+          <ul>
+            <li><a href="#about">Our Heritage Story</a></li>
+            <li><a href="#about">Artisans & Weavers</a></li>
+            <li><a href="#about">Sustainability</a></li>
+            <li><a href="#about">Press & Editorial</a></li>
+            <li><a href="#contact">Store Locator</a></li>
+            <li><a href="admin.html" style="color:#d4af37; font-weight:700;"><i class="ri-shield-keyhole-line"></i> Executive Admin</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 5: Contact Info -->
+        <div class="footer-col">
+          <h4>Contact Us</h4>
+          <div class="contact-item">
+            <i class="ri-map-pin-line"></i>
+            <span>SA Heritage House, 45 Royal Heritage Boulevard, Jubilee Hills, Hyderabad - 500033</span>
+          </div>
+          <div class="contact-item">
+            <i class="ri-phone-line"></i>
+            <span>+91 1800-890-SAGLAM (Toll Free)</span>
+          </div>
+          <div class="contact-item">
+            <i class="ri-mail-line"></i>
+            <span>contact@saglamandgrace.com</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Bottom -->
+      <div class="footer-bottom">
+        <div>&copy; 2026 SA Glam and Grace Pvt Ltd. All Rights Reserved. Designed with elegance.</div>
+        <div class="payment-methods">
+          <i class="ri-visa-line" title="Visa"></i>
+          <i class="ri-mastercard-line" title="Mastercard"></i>
+          <i class="ri-bank-card-2-line" title="UPI"></i>
+          <i class="ri-secure-payment-line" title="NetBanking"></i>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+       OVERLAYS & MODALS (Cart Drawer, Quick View)
+       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <div class="overlay-backdrop" id="overlayBackdrop"></div>
+
+  <!-- Shopping Bag Drawer -->
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h3>Your Shopping Bag</h3>
+      <button class="cart-close-btn" id="cartCloseBtn"><i class="ri-close-line"></i></button>
+    </div>
+
+    <div class="cart-items-list" id="cartItemsList">
+      <!-- Items dynamically populated via JS -->
+    </div>
+
+    <div class="cart-footer">
+      <!-- Luxury Promo Voucher Application -->
+      <div class="cart-promo-section" id="cartPromoSection" style="margin-bottom:0.85rem; padding:0.75rem 0.85rem; background:#faf7f2; border:1px dashed #d4af37; border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+          <span style="font-size:0.72rem; font-weight:700; color:#854d0e; text-transform:uppercase; letter-spacing:0.5px;"><i class="ri-coupon-3-line"></i> Promo Voucher</span>
+          <span id="cartPromoSuggestion" style="font-size:0.72rem; color:#b45309; cursor:pointer; font-weight:600;"></span>
+        </div>
+        <div id="cartPromoInputGroup" style="display:flex; gap:0.4rem;">
+          <input type="text" id="cartPromoInput" placeholder="ENTER CODE" style="flex:1; padding:0.4rem 0.6rem; border:1px solid #d1d5db; border-radius:5px; font-size:0.8rem; font-family:monospace; font-weight:700; text-transform:uppercase; letter-spacing:1px;" />
+          <button id="cartPromoBtn" onclick="window.applyCartPromo && window.applyCartPromo()" style="padding:0.4rem 0.85rem; background:#181412; color:#D4AF37; border:1px solid #D4AF37; border-radius:5px; font-size:0.75rem; font-weight:700; cursor:pointer;">APPLY</button>
+        </div>
+        <div id="cartPromoFeedback" style="font-size:0.72rem; margin-top:0.35rem; display:none;"></div>
+      </div>
+
+      <div class="cart-total-row" id="cartSubtotalRow">
+        <span>Subtotal</span>
+        <span id="cartSubtotal">₹0</span>
+      </div>
+      <div class="cart-total-row" id="cartDiscountRow" style="display:none; color:#10b981; font-weight:600; font-size:0.9rem;">
+        <span id="cartDiscountLabel">Coupon Discount</span>
+        <span id="cartDiscountAmount">-₹0</span>
+      </div>
+      <div class="cart-total-row" id="cartFinalTotalRow" style="display:none; font-weight:700; font-size:1.15rem; border-top:1px solid #eee; padding-top:0.5rem; margin-top:0.5rem;">
+        <span>Final Total</span>
+        <span id="cartFinalTotal" style="color:var(--primary-pink, #b45309);">₹0</span>
+      </div>
+      <p style="font-size: 0.78rem; color: #666; margin-bottom: 1rem;">Taxes and shipping calculated at checkout.</p>
+      <button class="btn-checkout" onclick="alert('Order successfully submitted! Thank you for choosing SA Glam and Grace.')">Proceed to Checkout <i class="ri-arrow-right-line"></i></button>
+    </div>
+  </div>
+
+  <!-- Wishlist Drawer -->
+  <div class="cart-drawer" id="wishlistDrawer">
+    <div class="cart-header">
+      <div style="display:flex; align-items:center; gap:0.6rem;">
+        <i class="ri-heart-3-fill" style="color:var(--primary-pink); font-size:1.4rem;"></i>
+        <h3 style="margin:0; font-family:var(--font-serif); font-size:1.4rem;">Saved Wishlist</h3>
+      </div>
+      <button class="cart-close-btn" id="wishlistCloseBtn" onclick="window.closeWishlistDrawer && window.closeWishlistDrawer()"><i class="ri-close-line"></i></button>
+    </div>
+
+    <div class="cart-items-list" id="wishlistItemsList" style="padding:1.2rem; overflow-y:auto; flex:1;">
+      <!-- Wishlist items dynamically populated via JS -->
+    </div>
+
+    <div class="cart-footer" style="padding:1.2rem; border-top:1px solid var(--border-color);">
+      <button class="btn-checkout" id="addAllWishlistToCartBtn" onclick="window.moveAllWishlistToCart && window.moveAllWishlistToCart()" style="background:var(--dark-text); justify-content:center;">
+        Move All to Shopping Bag <i class="ri-shopping-bag-line"></i>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+       FANCY DRESSES EXTRAORDINARY MICRO-BOUTIQUE PORTAL
+       â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <section id="fancyDressesPortal" class="fancy-portal-section hidden">
+    
+    <!-- Fancy Portal Sticky Top Bar -->
+    <div class="fancy-top-bar">
+      <div class="container fancy-top-container">
+        <button id="closeFancyPortalBtn" class="fancy-back-btn">
+          <i class="ri-arrow-left-line"></i> Back to Main Boutique
+        </button>
+        <div class="fancy-brand-monogram">
+          <span class="gold-sparkle-icon">✨</span>
+          <span class="fancy-brand-text">SA COUTURE ATELIER</span>
+          <span class="fancy-brand-tag">FANCY DRESSES</span>
+        </div>
+        <div class="fancy-top-actions">
+          <button class="fancy-icon-btn cart-trigger">
+            <i class="ri-shopping-bag-line"></i>
+            <span class="badge-count cart-badge-sync">1</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fancy Hero Banner -->
+    <div class="fancy-hero-banner">
+      <div class="fancy-hero-bg-overlay"></div>
+      <div class="container fancy-hero-container">
+        <div class="fancy-hero-content">
+          <span class="fancy-badge-glow"><i class="ri-sparkles-fill"></i> LUXURY COUTURE EDITION 2026</span>
+          <h1 class="fancy-hero-title">
+            Red Carpet Glamour.<br>
+            <span class="fancy-gold-gradient">Extraordinary Fancy Dresses.</span>
+          </h1>
+          <p class="fancy-hero-subtitle">
+            Immerse yourself in our premier collection of hand-sequined cocktail gowns, backless satin slip dresses, royal velvet evening wear &amp; Indo-Western fusion silhouettes.
+          </p>
+          <div class="fancy-perks-row">
+            <div class="fancy-perk"><i class="ri-shield-star-line"></i> Hand-Embellished Zardozi &amp; Crystals</div>
+            <div class="fancy-perk"><i class="ri-scissors-line"></i> Custom Tailored Fitting Available</div>
+            <div class="fancy-perk"><i class="ri-truck-line"></i> Express Worldwide Delivery</div>
+          </div>
+        </div>
+        <div class="fancy-hero-image-wrapper">
+          <div class="fancy-img-card">
+            <img src="https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=900&q=80" alt="Fancy Evening Dress Couture" id="fancyHeroImg">
+            <div class="fancy-img-glass-tag">
+              <span class="fancy-tag-title">Midnight Star Sequined Gown</span>
+              <span class="fancy-tag-sub">Hand-Sewn Crystals • Deep Sapphire</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fancy Category Filter Bar & Sorting -->
+    <div class="fancy-controls-bar">
+      <div class="container fancy-controls-container">
+        <!-- Filter Tabs -->
+        <div class="fancy-filter-tabs" id="fancyFilterTabs">
+          <button class="fancy-tab active" data-filter="all">All Fancy Dresses</button>
+          <button class="fancy-tab" data-filter="cocktail">Cocktail Gowns</button>
+          <button class="fancy-tab" data-filter="indo-western">Indo-Western Fusion</button>
+          <button class="fancy-tab" data-filter="sequin">Sequined &amp; Glitter</button>
+          <button class="fancy-tab" data-filter="satin-velvet">Satin &amp; Velvet</button>
+          <button class="fancy-tab" data-filter="prom">Prom &amp; Red Carpet</button>
+        </div>
+
+        <!-- Search & Sort -->
+        <div class="fancy-search-sort">
+          <div class="fancy-search-input-wrapper">
+            <i class="ri-search-line"></i>
+            <input type="text" id="fancySearchInput" placeholder="Search gowns, sequin, velvet...">
+          </div>
+          <select id="fancySortSelect" class="fancy-sort-select">
+            <option value="featured">Sort by: Featured Couture</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="popular">Most Popular</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fancy Dresses Product Grid Showcase -->
+    <div class="fancy-grid-section">
+      <div class="container">
+        <div class="fancy-section-title-wrapper">
+          <span class="gold-line"></span>
+          <h2>The Couture Collection</h2>
+          <span class="gold-line"></span>
+        </div>
+        <div class="fancy-products-grid" id="fancyProductGrid">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive "Find Your Glam" Style Quiz Widget -->
+    <div class="fancy-quiz-section">
+      <div class="container">
+        <div class="fancy-quiz-card">
+          <div class="quiz-badge"><i class="ri-magic-line"></i> PERSONAL STYLIST AI</div>
+          <h3>Find Your Perfect Fancy Dress in 10 Seconds</h3>
+          <p>Tell us your occasion and preferred silhouette for instant curated dress recommendations.</p>
+          
+          <div class="quiz-steps-container">
+            <!-- Step 1: Occasion -->
+            <div class="quiz-step">
+              <label>1. Select Your Occasion:</label>
+              <div class="quiz-options-group" id="quizOccasionOptions">
+                <button class="quiz-opt-btn active" data-val="cocktail">Cocktail Party ðŸ¸</button>
+                <button class="quiz-opt-btn" data-val="reception">Grand Reception ðŸ’</button>
+                <button class="quiz-opt-btn" data-val="sangeet">Sangeet Night ðŸ’ƒ</button>
+                <button class="quiz-opt-btn" data-val="prom">Prom / Gala ðŸ‘‘</button>
+              </div>
+            </div>
+
+            <!-- Step 2: Vibe / Material -->
+            <div class="quiz-step">
+              <label>2. Choose Your Vibe &amp; Fabric:</label>
+              <div class="quiz-options-group" id="quizFabricOptions">
+                <button class="quiz-opt-btn active" data-val="sequin">Full Sequin Sparkle ✨</button>
+                <button class="quiz-opt-btn" data-val="satin">Sleek Satin Slip ðŸŒ¹</button>
+                <button class="quiz-opt-btn" data-val="velvet">Royal Velvet ðŸ‘‘</button>
+                <button class="quiz-opt-btn" data-val="fusion">Indo-Western Cape ðŸ’«</button>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-fancy-quiz-submit" id="quizSubmitBtn">
+            Get My Style Recommendation <i class="ri-sparkles-line"></i>
+          </button>
+
+          <!-- Quiz Result Display -->
+          <div class="quiz-result-box hidden" id="quizResultBox">
+            <div class="quiz-result-content" id="quizResultContent"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editorial Lookbook Banner -->
+    <div class="fancy-editorial-section">
+      <div class="container">
+        <div class="editorial-banner-grid">
+          <div class="editorial-card">
+            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80" alt="High Slit Satin Gown">
+            <div class="editorial-content">
+              <span>RED CARPET READY</span>
+              <h3>The Satin High-Slit Edit</h3>
+              <p>Sleek body-con silhouettes with hand-draped fluid silk.</p>
+              <button class="btn-editorial-shop" onclick="filterFancyCategory('satin-velvet')">Explore Satin <i class="ri-arrow-right-line"></i></button>
+            </div>
+          </div>
+
+          <div class="editorial-card">
+            <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=800&q=80" alt="Indo-Western Cape Dress">
+            <div class="editorial-content">
+              <span>FUSION COUTURE</span>
+              <h3>Indo-Western Capes &amp; Gowns</h3>
+              <p>Combining traditional zardozi work with contemporary western cuts.</p>
+              <button class="btn-editorial-shop" onclick="filterFancyCategory('indo-western')">Explore Fusion <i class="ri-arrow-right-line"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Return Bar Footer -->
+    <div class="fancy-bottom-return">
+      <div class="container text-center">
+        <h3>Looking for Traditional Sarees, Kurtis &amp; Lehengas?</h3>
+        <p>Return to the SA Glam &amp; Grace main boutique store anytime with one click.</p>
+        <button class="btn-fancy-return" id="fancyBottomReturnBtn">
+          <i class="ri-arrow-left-line"></i> Return to Main SA Glam &amp; Grace Boutique
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Quick View Modal -->
+  <div class="quickview-modal" id="quickviewModal">
+    <button class="modal-close-btn" id="qvCloseBtn"><i class="ri-close-line"></i></button>
+    
+    <div class="qv-image-box">
+      <img src="./assets/images/hero_1.png" alt="Quick View Product Image" id="qvImg">
+    </div>
+
+    <div class="qv-details-box">
+      <span class="product-category-label">LUXURY COLLECTION</span>
+      <h2 class="qv-title" id="qvTitle">Amber Chanderi Silk Kurti Set</h2>
+      <div class="qv-price" id="qvPrice">₹3,499</div>
+      
+      <p style="font-size: 0.9rem; color: var(--secondary-text); margin-bottom: 1rem;">
+        Crafted with pure hand-loomed Chanderi silk featuring gold zari accents. Includes silk trousers and organza floral dupatta.
+      </p>
+
+      <div style="font-weight: 600; font-size: 0.85rem; text-transform: uppercase;">Select Size</div>
+      <div class="size-selector">
+        <button class="size-btn">XS</button>
+        <button class="size-btn">S</button>
+        <button class="size-btn active">M</button>
+        <button class="size-btn">L</button>
+        <button class="size-btn">XL</button>
+      </div>
+
+      <button class="btn-primary" id="qvAddToCartBtn" style="width: 100%; justify-content: center;">
+        Add to Shopping Bag <i class="ri-shopping-bag-line"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Customer Authentication Modal -->
+  <div class="custom-modal-backdrop" id="customerAuthModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100vw; height:100vh; z-index:999999; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; opacity:1 !important; visibility:visible !important; pointer-events:auto !important;">
+    <div style="background:#fff; border-radius:12px; width:92%; max-width:420px; padding:2rem; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
+      <button id="closeCustomerAuthBtn" onclick="window.closeCustomerAuth && window.closeCustomerAuth()" style="position:absolute; right:1.2rem; top:1.2rem; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#666;">&times;</button>
+      
+      <!-- Unauthenticated View -->
+      <div id="authLoggedOutView">
+        <div style="text-align:center; margin-bottom:1.5rem;">
+          <h3 style="font-family:'Cormorant Garamond', serif; font-size:1.8rem; margin:0; color:#1a1a1a;">SA Glam & Grace</h3>
+          <p style="font-size:0.85rem; color:#666; margin:4px 0 0;">Sign in to your luxury account</p>
+        </div>
+
+        <div style="display:flex; border-bottom:1px solid #e5e7eb; margin-bottom:1.25rem;">
+          <button id="tabSignIn" style="flex:1; padding:0.6rem; border:none; background:none; border-bottom:2px solid #b45309; font-weight:700; color:#b45309; cursor:pointer;">Sign In</button>
+          <button id="tabSignUp" style="flex:1; padding:0.6rem; border:none; background:none; border-bottom:2px solid transparent; font-weight:600; color:#6b7280; cursor:pointer;">Create Account</button>
+        </div>
+
+        <form id="customerAuthForm">
+          <div id="signUpFields" style="display:none;">
+            <div style="margin-bottom:0.9rem;">
+              <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Full Name</label>
+              <input type="text" id="custFullName" placeholder="e.g. Priya Sharma" style="width:100%; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+            </div>
+            <div style="margin-bottom:0.9rem;">
+              <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Phone Number</label>
+              <input type="tel" id="custPhone" placeholder="+91 98765 43210" style="width:100%; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+            </div>
+          </div>
+
+          <div style="margin-bottom:0.9rem;">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Email Address</label>
+            <input type="email" id="custEmail" required placeholder="client@luxury.com" style="width:100%; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+          </div>
+
+          <div style="margin-bottom:1.2rem;">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Password</label>
+            <input type="password" id="custPassword" required placeholder="••••••••" style="width:100%; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+          </div>
+
+          <div id="custAuthMsg" style="display:none; font-size:0.8rem; padding:0.5rem; border-radius:6px; margin-bottom:1rem;"></div>
+
+          <button type="submit" id="custSubmitBtn" style="width:100%; padding:0.75rem; background:#b45309; color:#fff; border:none; border-radius:6px; font-weight:700; font-size:0.95rem; cursor:pointer; letter-spacing:0.5px;">
+            Sign In to Account
+          </button>
+
+          <button type="button" id="quickVipSignInBtn" style="width:100%; margin-top:0.75rem; padding:0.75rem; background:linear-gradient(135deg, #fef3c7, #fde68a); color:#92400e; border:1px solid #f59e0b; border-radius:6px; font-weight:700; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <span>✨</span> 1-Click VIP Member Sign In
+          </button>
+    
+        </form>
+      </div>
+
+      <!-- Authenticated View -->
+      <div id="authLoggedInView" style="display:none; text-align:center;">
+        <div style="width:60px; height:60px; background:#fef3c7; color:#b45309; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.8rem; margin:0 auto 1rem;">
+          <i class="ri-user-star-line"></i>
+        </div>
+        <h3 id="loggedInUserName" style="font-family:'Cormorant Garamond', serif; font-size:1.6rem; margin:0 0 0.4rem;">Priya Sharma</h3>
+        <p id="loggedInUserEmail" style="font-size:0.85rem; color:#666; margin:0 0 1.5rem;">client@luxury.com</p>
+
+        <div style="background:#f9fafb; border-radius:8px; padding:1rem; text-align:left; margin-bottom:1.5rem; font-size:0.85rem;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+            <span style="color:#666;">Account Type:</span>
+            <strong id="loggedInUserRole" style="color:#b45309;">Luxury Member</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:#666;">Cloud Sync:</span>
+            <strong style="color:#16a34a;"><i class="ri-checkbox-circle-fill"></i> Supabase Live</strong>
+          </div>
+        </div>
+
+        <button id="custSignOutBtn" style="width:100%; padding:0.65rem; background:#fee2e2; color:#b91c1c; border:none; border-radius:6px; font-weight:700; cursor:pointer;">
+          <i class="ri-logout-box-line"></i> Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real Checkout / Delivery Modal -->
+  <div class="custom-modal-backdrop" id="checkoutOrderModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100vw; height:100vh; z-index:999999; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; opacity:1 !important; visibility:visible !important; pointer-events:auto !important;">
+    <div style="background:#fff; border-radius:12px; width:92%; max-width:480px; padding:2rem; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
+      <button id="closeCheckoutModalBtn" style="position:absolute; right:1.2rem; top:1.2rem; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#666;">&times;</button>
+      
+      <div style="margin-bottom:1.25rem;">
+        <h3 style="font-family:'Cormorant Garamond', serif; font-size:1.8rem; margin:0; color:#1a1a1a;">Luxury Checkout</h3>
+        <p style="font-size:0.85rem; color:#666; margin:4px 0 0;">Enter your shipping details to place order</p>
+      </div>
+
+      <form id="checkoutOrderForm">
+        <div style="margin-bottom:0.85rem;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.25rem;">Recipient Name</label>
+          <input type="text" id="orderCustName" required placeholder="Full Name" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.85rem;">
+          <div>
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.25rem;">Email</label>
+            <input type="email" id="orderCustEmail" required placeholder="name@email.com" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+          </div>
+          <div>
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.25rem;">Phone Number</label>
+            <input type="tel" id="orderCustPhone" required placeholder="+91 98765 43210" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+          </div>
+        </div>
+
+        <div style="margin-bottom:0.85rem;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.25rem;">Delivery Address & City</label>
+          <textarea id="orderCustAddress" required rows="2" placeholder="Suite, Flat, Street, City, Pincode" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box; resize:none;"></textarea>
+        </div>
+
+        <div style="background:#fef3c7; border:1px solid #fde68a; border-radius:8px; padding:0.85rem; margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span style="font-size:0.8rem; color:#92400e; display:block;">Grand Total:</span>
+            <strong id="checkoutTotalDisplay" style="font-size:1.2rem; color:#b45309;">₹3,499</strong>
+          </div>
+          <span style="font-size:0.75rem; background:#b45309; color:#fff; padding:3px 8px; border-radius:4px; font-weight:600;">Supabase Live Order</span>
+        </div>
+
+        <button type="submit" id="confirmOrderBtn" style="width:100%; padding:0.75rem; background:#16a34a; color:#fff; border:none; border-radius:6px; font-weight:700; font-size:0.95rem; cursor:pointer; letter-spacing:0.5px;">
+          <i class="ri-check-double-line"></i> Confirm & Place Order
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-notification" id="toastNotification">
+    <i class="ri-checkbox-circle-fill"></i>
+    <span id="toastMessage">Item added to bag!</span>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="./app.js"></script>
+</body>
+</html>
+

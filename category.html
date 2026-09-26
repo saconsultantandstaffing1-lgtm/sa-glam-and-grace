@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luxury Ethnic Collection | SA Glam &amp; Grace</title>
+  <meta name="description" content="Explore handcrafted luxury ethnic wear collections at SA Glam & Grace. Kurtis, Sarees, Lehengas, and Anarkalis designed for regal celebrations." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,640;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Great+Vibes&display=swap" rel="stylesheet" />
+
+  <!-- Remix Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+
+  <!-- Supabase Cloud SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+
+  <!-- Main Style -->
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* Category Page Specific Enhancements */
+    .cat-hero-wrap {
+      background: linear-gradient(135deg, #181412 0%, #2a1f1b 50%, #120e0c 100%);
+      color: #fff;
+      padding: 3.5rem 0 3rem 0;
+      position: relative;
+      border-bottom: 2px solid #D4AF37;
+      overflow: hidden;
+    }
+    .cat-hero-wrap::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background: radial-gradient(circle at 80% 30%, rgba(212,175,55,0.18) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .cat-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 1rem;
+      color: #bfa888;
+    }
+    .cat-breadcrumb a {
+      color: #dcd3c8;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .cat-breadcrumb a:hover {
+      color: #FFD700;
+    }
+    .cat-hero-title {
+      font-family: var(--font-serif);
+      font-size: 3rem;
+      font-weight: 600;
+      color: #fff;
+      margin: 0 0 0.6rem 0;
+      line-height: 1.15;
+    }
+    .cat-hero-title span {
+      color: #FFD700;
+      font-style: italic;
+    }
+    .cat-hero-desc {
+      font-size: 1.05rem;
+      color: #e2d9cf;
+      max-width: 650px;
+      line-height: 1.6;
+      margin: 0;
+    }
+    .cat-nav-pills-bar {
+      background: #faf8f5;
+      border-bottom: 1px solid #ebd9c0;
+      padding: 1rem 0;
+      position: sticky;
+      top: 70px;
+      z-index: 80;
+      backdrop-filter: blur(8px);
+    }
+    .cat-pills-scroll {
+      display: flex;
+      gap: 0.6rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 2px 0;
+    }
+    .cat-pills-scroll::-webkit-scrollbar { display: none; }
+    .cat-pill-btn {
+      padding: 8px 18px;
+      border-radius: 25px;
+      background: #fff;
+      border: 1px solid #d9c8b0;
+      color: #333;
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.25s ease;
+    }
+    .cat-pill-btn:hover {
+      border-color: #AA7C11;
+      color: #111;
+      transform: translateY(-1px);
+    }
+    .cat-pill-btn.active {
+      background: linear-gradient(135deg, #1a1614, #2d2420);
+      color: #FFD700;
+      border-color: #D4AF37;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .cat-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.8rem 0 1rem 0;
+      border-bottom: 1px solid #ebd9c0;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .cat-count-info {
+      font-size: 0.95rem;
+      color: #666;
+    }
+    .cat-count-info strong {
+      color: #111;
+    }
+    .cat-sort-select {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid #d9c8b0;
+      background: #fff;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
+      outline: none;
+    }
+    .cat-empty-box {
+      text-align: center;
+      padding: 5rem 1.5rem;
+      background: #faf8f5;
+      border-radius: 18px;
+      border: 1px dashed #D4AF37;
+      grid-column: 1 / -1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Announcement Bar -->
+  <aside class="announcement-bar" id="announcementBar">
+    <div class="container announcement-container">
+      <div class="announcement-ticker">
+        <span class="badge-tag">Festive Couture</span>
+        <span id="categoryAnnouncementPromoText">Use Code <strong style="color:#FFD700;">WELCOME10</strong> for 10% OFF on all luxury collections</span>
+      </div>
+      <div class="announcement-links">
+        <a href="index.html"><i class="ri-home-4-line"></i> Main Store</a>
+        <a href="admin.html" style="color:#FFD700; font-weight:700;"><i class="ri-shield-user-line"></i> Admin Portal</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Navigation Header -->
+  <header class="header-sticky" id="mainHeader">
+    <div class="container header-container">
+      <a href="index.html" class="brand-logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 50 50" class="brand-crest-svg" width="34" height="34">
+            <defs>
+              <linearGradient id="goldGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#D4AF37"/>
+                <stop offset="100%" stop-color="#AA7C11"/>
+              </linearGradient>
+            </defs>
+            <circle cx="25" cy="25" r="23" fill="none" stroke="url(#goldGrad2)" stroke-width="1.5"/>
+            <text x="25" y="37" font-family="'Playfair Display', serif" font-size="15" font-weight="700" fill="url(#goldGrad2)" text-anchor="middle">SA</text>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="brand-name" style="font-size: 1.5rem; letter-spacing: 2px;">SA GLAM &amp; GRACE</span>
+          <span class="brand-tagline">LUXURY ETHNIC WEAR</span>
+        </div>
+      </a>
+
+      <nav class="main-nav">
+        <ul>
+          <li class="nav-item"><a href="index.html" class="nav-link"><i class="ri-arrow-left-s-line"></i> Back to Home</a></li>
+          <li class="nav-item active"><a href="javascript:void(0)" class="nav-link" id="currentCatNavLabel">Categories</a></li>
+          <li class="nav-item"><a href="index.html#about" class="nav-link">Our Heritage</a></li>
+          <li class="nav-item"><a href="admin.html" class="nav-link" style="color:var(--primary-pink); font-weight:700;"><i class="ri-add-circle-line"></i> Upload in Admin</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <button class="action-btn" id="wishlistHeaderBtn" onclick="window.openWishlistDrawer && window.openWishlistDrawer(event)" title="Wishlist">
+          <i class="ri-heart-line" style="font-size: 1.25rem;"></i>
+          <span class="badge-count" id="wishlistBadge">0</span>
+        </button>
+        <button class="action-btn cart-trigger" id="cartHeaderBtn" onclick="window.openCartDrawer ? window.openCartDrawer() : (window.openCart && window.openCart())" title="Shopping Bag">
+          <i class="ri-shopping-bag-line" style="font-size: 1.25rem;"></i>
+          <span class="badge-count" id="cartBadge">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Category Hero Banner -->
+  <section class="cat-hero-wrap">
+    <div class="container">
+      <div class="cat-breadcrumb">
+        <a href="index.html">Home</a>
+        <span>&gt;</span>
+        <a href="index.html#categories">Collections</a>
+        <span>&gt;</span>
+        <strong id="crumbCategoryName" style="color:#FFD700;">Kurtis</strong>
+      </div>
+      <h1 class="cat-hero-title" id="pageCategoryTitle">
+        Royal <span>Kurtis</span> Collection
+      </h1>
+      <p class="cat-hero-desc" id="pageCategoryDesc">
+        Handcrafted pure silk weaves, authentic zardozi embroidery, and timeless Indian silhouettes.
+      </p>
+    </div>
+  </section>
+
+  <!-- Quick Category Filter Pills Bar (Sticky) -->
+  <div class="cat-nav-pills-bar">
+    <div class="container">
+      <div class="cat-pills-scroll" id="catPillsList">
+        <a href="category.html?cat=kurtis" class="cat-pill-btn" data-cat="kurtis"><i class="ri-sparkle-fill" style="color:#D4AF37;"></i> Kurtis</a>
+        <a href="category.html?cat=churidar" class="cat-pill-btn" data-cat="churidar">Chudidar Sets</a>
+        <a href="category.html?cat=anarkali" class="cat-pill-btn" data-cat="anarkali">Anarkalis</a>
+        <a href="category.html?cat=saree" class="cat-pill-btn" data-cat="saree">Sarees</a>
+        <a href="category.html?cat=lehenga" class="cat-pill-btn" data-cat="lehenga">Lehengas</a>
+        <a href="category.html?cat=tops" class="cat-pill-btn" data-cat="tops">Tops &amp; Peplum</a>
+        <a href="category.html?cat=dupatta" class="cat-pill-btn" data-cat="dupatta">Dupattas</a>
+        <a href="category.html?cat=jewellery" class="cat-pill-btn" data-cat="jewellery">Jewellery</a>
+        <a href="category.html?cat=handbags" class="cat-pill-btn" data-cat="handbags">Handbags</a>
+        <a href="category.html?cat=footwear" class="cat-pill-btn" data-cat="footwear">Footwear</a>
+        <a href="category.html?cat=watches" class="cat-pill-btn" data-cat="watches">Watches</a>
+        <a href="index.html#new-arrivals" class="cat-pill-btn" style="border-color:#111; color:#111;"><i class="ri-eye-line"></i> View All Pieces</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Products Showcase Section -->
+  <section class="section-padding" style="padding-top: 1rem;">
+    <div class="container">
+
+      <!-- Toolbar: Items Count & Sort -->
+      <div class="cat-toolbar">
+        <div class="cat-count-info" id="catCountDisplay">
+          Showing <strong>0</strong> luxury styles in this collection
+        </div>
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <label style="font-size:0.85rem; color:#666; font-weight:600;">Sort By:</label>
+          <select class="cat-sort-select" id="catSortSelect" onchange="window.handleSortChange(this.value)">
+            <option value="featured">Featured / Curated</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="rating">Highest Rated</option>
+            <option value="newest">Newest Drops</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="products-grid" id="categoryProductsGrid">
+        <!-- Rendered dynamically via category.js -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Overlay Backdrop for Modals & Drawers -->
+  <div class="overlay-backdrop" id="overlayBackdrop" onclick="window.closeAllDrawers && window.closeAllDrawers()"></div>
+
+  <!-- Shopping Bag Drawer -->
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h3>Your Shopping Bag</h3>
+      <button class="cart-close-btn" onclick="window.closeAllDrawers()"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="cart-items-list" id="cartItemsList"></div>
+    <div class="cart-footer">
+      <!-- Luxury Promo Voucher Application -->
+      <div class="cart-promo-section" id="cartPromoSection" style="margin-bottom:0.85rem; padding:0.75rem 0.85rem; background:#faf7f2; border:1px dashed #d4af37; border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+          <span style="font-size:0.72rem; font-weight:700; color:#854d0e; text-transform:uppercase; letter-spacing:0.5px;"><i class="ri-coupon-3-line"></i> Promo Voucher</span>
+          <span id="cartPromoSuggestion" style="font-size:0.72rem; color:#b45309; cursor:pointer; font-weight:600;"></span>
+        </div>
+        <div id="cartPromoInputGroup" style="display:flex; gap:0.4rem;">
+          <input type="text" id="cartPromoInput" placeholder="ENTER CODE" style="flex:1; padding:0.4rem 0.6rem; border:1px solid #d1d5db; border-radius:5px; font-size:0.8rem; font-family:monospace; font-weight:700; text-transform:uppercase; letter-spacing:1px;" />
+          <button id="cartPromoBtn" onclick="window.applyCategoryCartPromo && window.applyCategoryCartPromo()" style="padding:0.4rem 0.85rem; background:#181412; color:#D4AF37; border:1px solid #D4AF37; border-radius:5px; font-size:0.75rem; font-weight:700; cursor:pointer;">APPLY</button>
+        </div>
+        <div id="cartPromoFeedback" style="font-size:0.72rem; margin-top:0.35rem; display:none;"></div>
+      </div>
+
+      <div class="cart-total-row" id="cartSubtotalRow">
+        <span>Subtotal</span>
+        <strong id="cartSubtotal">₹0</strong>
+      </div>
+      <div class="cart-total-row" id="cartDiscountRow" style="display:none; color:#10b981; font-weight:600; font-size:0.9rem;">
+        <span id="cartDiscountLabel">Coupon Discount</span>
+        <span id="cartDiscountAmount">-₹0</span>
+      </div>
+      <div class="cart-total-row" id="cartFinalTotalRow" style="display:none; font-weight:700; font-size:1.15rem; border-top:1px solid #eee; padding-top:0.5rem; margin-top:0.5rem;">
+        <span>Final Total</span>
+        <strong id="cartFinalTotal" style="color:var(--primary-pink, #b45309);">₹0</strong>
+      </div>
+      <button class="btn-primary btn-checkout" onclick="alert('Checkout initiated! Proceeding with order.')" style="width:100%; justify-content:center; margin-top:0.8rem;">
+        Proceed to Luxury Checkout
+      </button>
+    </div>
+  </div>
+
+  <!-- Wishlist Drawer -->
+  <div class="cart-drawer" id="wishlistDrawer">
+    <div class="cart-header">
+      <div style="display:flex; align-items:center; gap:0.6rem;">
+        <i class="ri-heart-3-fill" style="color:var(--primary-pink); font-size:1.4rem;"></i>
+        <h3 style="margin:0; font-family:var(--font-serif); font-size:1.4rem;">Saved Wishlist</h3>
+      </div>
+      <button class="cart-close-btn" onclick="window.closeAllDrawers()"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="cart-items-list" id="wishlistItemsList" style="padding:1.2rem; overflow-y:auto; flex:1;"></div>
+  </div>
+
+  <!-- Quick View Modal -->
+  <div class="quickview-modal" id="quickviewModal">
+    <button class="modal-close-btn" onclick="window.closeAllDrawers()"><i class="ri-close-line"></i></button>
+    <div class="qv-image-box">
+      <img src="" alt="Quick View Product" id="qvImg">
+    </div>
+    <div class="qv-details-box">
+      <span class="product-category-label" id="qvCat">LUXURY COLLECTION</span>
+      <h2 class="qv-title" id="qvTitle"></h2>
+      <div class="qv-price" id="qvPrice"></div>
+      <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.2rem;" id="qvDesc">
+        Exquisitely designed with authentic craftsmanship, pure handwoven materials, and intricate regal detailing.
+      </p>
+      <button class="btn-primary" id="qvAddToCartBtn" style="width: 100%; justify-content: center;">
+        Add to Shopping Bag <i class="ri-shopping-bag-line"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer" style="margin-top: 4rem;">
+    <div class="container footer-container">
+      <div class="footer-col brand-col">
+        <h3 style="font-family:var(--font-serif); color:#fff; font-size:1.6rem; margin-bottom:0.8rem;">SA GLAM &amp; GRACE</h3>
+        <p style="font-size:0.88rem; color:#aaa; line-height:1.6;">Celebrating Indian heritage with royal handlooms, zardozi needlework, and contemporary luxury silhouettes.</p>
+        <p style="color:#d4af37; font-size:0.85rem; margin-top:1rem;"><i class="ri-shield-check-line"></i> Authentic 100% Handcrafted Weaves</p>
+      </div>
+      <div class="footer-col">
+        <h4>Browse Categories</h4>
+        <ul>
+          <li><a href="category.html?cat=kurtis">Royal Kurtis</a></li>
+          <li><a href="category.html?cat=saree">Handloom Sarees</a></li>
+          <li><a href="category.html?cat=lehenga">Bridal Lehengas</a></li>
+          <li><a href="category.html?cat=anarkali">Anarkali Suits</a></li>
+          <li><a href="category.html?cat=churidar">Chudidar Ensembles</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Store Concierge</h4>
+        <ul>
+          <li><a href="index.html">Flagship Home</a></li>
+          <li><a href="admin.html">Admin Catalog Portal</a></li>
+          <li><a href="javascript:void(0)" onclick="alert('Shipping within 2-4 business days across India.')">Delivery &amp; Logistics</a></li>
+          <li><a href="javascript:void(0)" onclick="alert('Concierge Phone: +91 98765 43210')">VIP Assistance</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom text-center" style="border-top:1px solid rgba(255,255,255,0.08); padding:1.5rem 0; font-size:0.82rem; color:#777;">
+      &copy; 2026 SA Glam &amp; Grace Haute Couture. All rights reserved.
+    </div>
+  </footer>
+
+  <!-- Customer Authentication Modal -->
+  <div class="custom-modal-backdrop" id="customerAuthModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100vw; height:100vh; z-index:999999; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; opacity:1 !important; visibility:visible !important; pointer-events:auto !important;">
+    <div style="background:#fff; border-radius:12px; width:92%; max-width:420px; padding:2rem; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
+      <button id="closeCustomerAuthBtn" onclick="window.closeCustomerAuth && window.closeCustomerAuth()" style="position:absolute; right:1.2rem; top:1.2rem; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#666;">&times;</button>
+      
+      <!-- Unauthenticated View -->
+      <div id="authLoggedOutView">
+        <div style="text-align:center; margin-bottom:1.5rem;">
+          <h3 style="font-family:'Cormorant Garamond', serif; font-size:1.8rem; margin:0; color:#1a1a1a;">SA Glam &amp; Grace</h3>
+          <p style="font-size:0.85rem; color:#666; margin:4px 0 0;" id="authModalSubtext">Sign in to add luxury pieces to your bag</p>
+        </div>
+
+        <div style="display:flex; border-bottom:1px solid #e5e7eb; margin-bottom:1.25rem;">
+          <button id="tabSignIn" style="flex:1; padding:0.6rem; border:none; background:none; border-bottom:2px solid #b45309; font-weight:700; color:#b45309; cursor:pointer;">Sign In</button>
+          <button id="tabSignUp" style="flex:1; padding:0.6rem; border:none; background:none; border-bottom:2px solid transparent; font-weight:600; color:#6b7280; cursor:pointer;">Create Account</button>
+        </div>
+
+        <form id="customerAuthForm">
+          <div id="signUpFields" style="display:none;">
+            <div style="margin-bottom:0.9rem;">
+              <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Full Name</label>
+              <input type="text" id="custFullName" placeholder="e.g. Priya Sharma" style="width:100%; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+            </div>
+            <div style="margin-bottom:0.9rem;">
+              <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Phone Number</label>
+              <input type="tel" id="custPhone" placeholder="+91 98765 43210" style="width:100%; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+            </div>
+          </div>
+
+          <div style="margin-bottom:0.9rem;">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Email Address</label>
+            <input type="email" id="custEmail" required placeholder="client@luxury.com" style="width:100%; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+          </div>
+
+          <div style="margin-bottom:1.2rem;">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Password</label>
+            <input type="password" id="custPassword" required placeholder="••••••••" style="width:100%; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+          </div>
+
+          <div id="custAuthMsg" style="display:none; font-size:0.8rem; padding:0.5rem; border-radius:6px; margin-bottom:1rem;"></div>
+
+          <button type="submit" id="custSubmitBtn" style="width:100%; padding:0.75rem; background:#b45309; color:#fff; border:none; border-radius:6px; font-weight:700; font-size:0.95rem; cursor:pointer; letter-spacing:0.5px;">
+            Sign In &amp; Add to Bag
+          </button>
+
+          <button type="button" id="quickVipSignInBtn" style="width:100%; margin-top:0.75rem; padding:0.75rem; background:linear-gradient(135deg, #fef3c7, #fde68a); color:#92400e; border:1px solid #f59e0b; border-radius:6px; font-weight:700; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <span>✨</span> 1-Click VIP Member Sign In
+          </button>
+    
+        </form>
+      </div>
+
+      <!-- Authenticated View -->
+      <div id="authLoggedInView" style="display:none; text-align:center;">
+        <div style="width:60px; height:60px; background:#fef3c7; color:#b45309; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.8rem; margin:0 auto 1rem;">
+          <i class="ri-user-star-line"></i>
+        </div>
+        <h3 id="loggedInUserName" style="font-family:'Cormorant Garamond', serif; font-size:1.6rem; margin:0 0 0.4rem;">Priya Sharma</h3>
+        <p id="loggedInUserEmail" style="font-size:0.85rem; color:#666; margin:0 0 1.5rem;">client@luxury.com</p>
+
+        <div style="background:#f9fafb; border-radius:8px; padding:1rem; text-align:left; margin-bottom:1.5rem; font-size:0.85rem;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+            <span style="color:#666;">Account Type:</span>
+            <strong id="loggedInUserRole" style="color:#b45309;">Luxury Member</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:#666;">Cloud Sync:</span>
+            <strong style="color:#16a34a;"><i class="ri-checkbox-circle-fill"></i> Supabase Live</strong>
+          </div>
+        </div>
+
+        <button id="custSignOutBtn" onclick="window.customerSignOut && window.customerSignOut()" style="width:100%; padding:0.65rem; background:#fee2e2; color:#b91c1c; border:none; border-radius:6px; font-weight:700; cursor:pointer;">
+          <i class="ri-logout-box-line"></i> Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Category JavaScript Engine -->
+  <script src="category.js"></script>
+</body>
+</html>
