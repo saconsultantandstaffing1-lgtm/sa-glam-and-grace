@@ -1201,7 +1201,7 @@
         <span id="cartFinalTotal" style="color:var(--primary-pink, #b45309);">₹0</span>
       </div>
       <p style="font-size: 0.78rem; color: #666; margin-bottom: 1rem;">Taxes and shipping calculated at checkout.</p>
-      <button class="btn-checkout" onclick="alert('Order successfully submitted! Thank you for choosing SA Glam and Grace.')">Proceed to Checkout <i class="ri-arrow-right-line"></i></button>
+      <button type="button" class="btn-checkout" id="proceedToCheckoutBtn" onclick="window.openCheckoutModal && window.openCheckoutModal(event)">Proceed to Checkout <i class="ri-arrow-right-line"></i></button>
     </div>
   </div>
 
@@ -1520,50 +1520,112 @@
     </div>
   </div>
 
-  <!-- Real Checkout / Delivery Modal -->
-  <div class="custom-modal-backdrop" id="checkoutOrderModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100vw; height:100vh; z-index:999999; background:rgba(0,0,0,0.75); backdrop-filter:blur(6px); align-items:center; justify-content:center; opacity:1 !important; visibility:visible !important; pointer-events:auto !important;">
-    <div style="background:#fff; border-radius:12px; width:92%; max-width:480px; padding:2rem; position:relative; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);">
-      <button id="closeCheckoutModalBtn" style="position:absolute; right:1.2rem; top:1.2rem; background:none; border:none; font-size:1.5rem; cursor:pointer; color:#666;">&times;</button>
+  <!-- Real Checkout / Delivery Modal with Order Received Flow -->
+  <div class="custom-modal-backdrop" id="checkoutOrderModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100vw; height:100vh; z-index:999999; background:rgba(0,0,0,0.78); backdrop-filter:blur(8px); align-items:center; justify-content:center; opacity:1 !important; visibility:visible !important; pointer-events:auto !important;">
+    <div style="background:#fff; border-radius:14px; width:92%; max-width:490px; padding:2rem; position:relative; box-shadow:0 30px 60px -12px rgba(0,0,0,0.35); border:1px solid rgba(212,175,55,0.25); max-height:92vh; overflow-y:auto;">
+      <button type="button" id="closeCheckoutModalBtn" onclick="window.closeCheckoutModal && window.closeCheckoutModal(event)" style="position:absolute; right:1.2rem; top:1.2rem; background:none; border:none; font-size:1.6rem; cursor:pointer; color:#6b7280; line-height:1;">&times;</button>
       
-      <div style="margin-bottom:1.25rem;">
-        <h3 style="font-family:'Cormorant Garamond', serif; font-size:1.8rem; margin:0; color:#1a1a1a;">Luxury Checkout</h3>
-        <p style="font-size:0.85rem; color:#666; margin:4px 0 0;">Enter your shipping details to place order</p>
+      <!-- VIEW 1: Customer Information & Delivery Details Form -->
+      <div id="checkoutFormView">
+        <div style="margin-bottom:1.25rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
+            <i class="ri-shield-check-line" style="color:#d4af37; font-size:1.2rem;"></i>
+            <span style="font-size:0.75rem; letter-spacing:2px; text-transform:uppercase; color:#b45309; font-weight:700;">SA Glam & Grace</span>
+          </div>
+          <h3 style="font-family:'Cinzel', 'Cormorant Garamond', serif; font-size:1.75rem; margin:0; color:#181412;">Luxury Checkout</h3>
+          <p style="font-size:0.84rem; color:#6b7280; margin:4px 0 0;">Enter your delivery details to complete your order</p>
+        </div>
+
+        <form id="checkoutOrderForm">
+          <div style="margin-bottom:0.85rem;">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.25rem;">Recipient Full Name</label>
+            <input type="text" id="orderCustName" required placeholder="e.g. Priya Sharma" style="width:100%; padding:0.65rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.85rem;">
+            <div>
+              <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.25rem;">Email Address</label>
+              <input type="email" id="orderCustEmail" required placeholder="name@email.com" style="width:100%; padding:0.65rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+            </div>
+            <div>
+              <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.25rem;">Phone Number</label>
+              <input type="tel" id="orderCustPhone" required placeholder="+91 98765 43210" style="width:100%; padding:0.65rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+            </div>
+          </div>
+
+          <div style="margin-bottom:0.85rem;">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.25rem;">Delivery Address, City & Pincode</label>
+            <textarea id="orderCustAddress" required rows="2" placeholder="Suite, Flat, Street, City, State, PIN" style="width:100%; padding:0.65rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box; resize:none;"></textarea>
+          </div>
+
+          <div style="margin-bottom:1rem;">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.35rem;">Payment Preference</label>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem;">
+              <label style="display:flex; align-items:center; gap:0.5rem; padding:0.6rem; border:1px solid #d4af37; background:#faf7f2; border-radius:6px; font-size:0.82rem; cursor:pointer;">
+                <input type="radio" name="orderPayment" value="UPI / Online" checked style="accent-color:#b45309;" />
+                <span><i class="ri-bank-card-line"></i> UPI / Card</span>
+              </label>
+              <label style="display:flex; align-items:center; gap:0.5rem; padding:0.6rem; border:1px solid #e5e7eb; background:#fff; border-radius:6px; font-size:0.82rem; cursor:pointer;">
+                <input type="radio" name="orderPayment" value="Cash on Delivery" style="accent-color:#b45309;" />
+                <span><i class="ri-hand-coin-line"></i> Cash on Delivery</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Order Summary Card -->
+          <div style="background:#faf7f2; border:1px dashed #d4af37; border-radius:8px; padding:0.9rem 1rem; margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px; color:#854d0e; font-weight:700; display:block;">Total Payable:</span>
+              <strong id="checkoutTotalDisplay" style="font-size:1.35rem; color:#b45309;">₹0</strong>
+            </div>
+            <div style="text-align:right;">
+              <span style="font-size:0.72rem; background:#10b981; color:#fff; padding:3px 8px; border-radius:4px; font-weight:600;">Complimentary Express Shipping</span>
+            </div>
+          </div>
+
+          <button type="submit" id="confirmOrderBtn" style="width:100%; padding:0.85rem; background:linear-gradient(135deg, #181412, #2a201c); color:#d4af37; border:1px solid #d4af37; border-radius:6px; font-weight:700; font-size:0.95rem; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <i class="ri-check-double-line"></i> Place Luxury Order
+          </button>
+        </form>
       </div>
 
-      <form id="checkoutOrderForm">
-        <div style="margin-bottom:0.85rem;">
-          <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.25rem;">Recipient Name</label>
-          <input type="text" id="orderCustName" required placeholder="Full Name" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+      <!-- VIEW 2: Order Received Confirmation Screen -->
+      <div id="checkoutSuccessView" style="display:none; text-align:center; padding:1rem 0.2rem;">
+        <div style="width:72px; height:72px; margin:0 auto 1.2rem; background:linear-gradient(135deg, #10b981, #059669); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 25px rgba(16,185,129,0.35); border:2px solid #fff;">
+          <i class="ri-checkbox-circle-fill" style="font-size:2.8rem; color:#fff;"></i>
         </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.85rem;">
-          <div>
-            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.25rem;">Email</label>
-            <input type="email" id="orderCustEmail" required placeholder="name@email.com" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+        <span style="font-size:0.75rem; letter-spacing:2px; text-transform:uppercase; color:#b45309; font-weight:700;">SA Glam & Grace</span>
+        <h3 style="font-family:'Cinzel', 'Cormorant Garamond', serif; font-size:1.85rem; color:#181412; margin:0.3rem 0 0.5rem;">Order Received!</h3>
+        <p style="font-size:0.88rem; color:#6b7280; margin-bottom:1.5rem;">Thank you! Your luxury order has been received and scheduled for express dispatch.</p>
+        
+        <div style="background:#faf7f2; border:1px dashed #d4af37; border-radius:10px; padding:1.2rem; text-align:left; margin-bottom:1.5rem; font-size:0.85rem;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem; border-bottom:1px solid #eee; padding-bottom:0.5rem;">
+            <span style="color:#6b7280;">Order ID:</span>
+            <strong id="successOrderId" style="font-family:monospace; color:#b45309; font-size:0.95rem;">ORD-1001</strong>
           </div>
-          <div>
-            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.25rem;">Phone Number</label>
-            <input type="tel" id="orderCustPhone" required placeholder="+91 98765 43210" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem; border-bottom:1px solid #eee; padding-bottom:0.5rem;">
+            <span style="color:#6b7280;">Recipient:</span>
+            <strong id="successOrderCust">Customer</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem; border-bottom:1px solid #eee; padding-bottom:0.5rem;">
+            <span style="color:#6b7280;">Delivery To:</span>
+            <span id="successOrderAddress" style="max-width:60%; text-align:right; font-weight:600; color:#374151;">Address</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem; border-bottom:1px solid #eee; padding-bottom:0.5rem;">
+            <span style="color:#6b7280;">Payment Method:</span>
+            <span id="successOrderPayment" style="font-weight:600; color:#374151;">UPI / Card</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding-top:0.2rem;">
+            <span style="color:#6b7280;">Total Paid / Payable:</span>
+            <strong id="successOrderTotal" style="font-size:1.15rem; color:#10b981;">₹0</strong>
           </div>
         </div>
 
-        <div style="margin-bottom:0.85rem;">
-          <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.25rem;">Delivery Address & City</label>
-          <textarea id="orderCustAddress" required rows="2" placeholder="Suite, Flat, Street, City, Pincode" style="width:100%; padding:0.6rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box; resize:none;"></textarea>
-        </div>
-
-        <div style="background:#fef3c7; border:1px solid #fde68a; border-radius:8px; padding:0.85rem; margin-bottom:1.2rem; display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <span style="font-size:0.8rem; color:#92400e; display:block;">Grand Total:</span>
-            <strong id="checkoutTotalDisplay" style="font-size:1.2rem; color:#b45309;">₹3,499</strong>
-          </div>
-          <span style="font-size:0.75rem; background:#b45309; color:#fff; padding:3px 8px; border-radius:4px; font-weight:600;">Supabase Live Order</span>
-        </div>
-
-        <button type="submit" id="confirmOrderBtn" style="width:100%; padding:0.75rem; background:#16a34a; color:#fff; border:none; border-radius:6px; font-weight:700; font-size:0.95rem; cursor:pointer; letter-spacing:0.5px;">
-          <i class="ri-check-double-line"></i> Confirm & Place Order
+        <button type="button" onclick="window.closeCheckoutModal && window.closeCheckoutModal(event)" style="width:100%; padding:0.85rem; background:#181412; color:#D4AF37; border:1px solid #D4AF37; border-radius:6px; font-weight:700; font-size:0.9rem; cursor:pointer; letter-spacing:0.5px;">
+          <i class="ri-shopping-bag-line"></i> Continue Luxury Shopping
         </button>
-      </form>
+      </div>
+
     </div>
   </div>
 

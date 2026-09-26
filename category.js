@@ -1,4 +1,46 @@
 
+window.openCheckoutModal = function(e) {
+  if (e && e.preventDefault) e.preventDefault();
+
+  const cart = JSON.parse(localStorage.getItem('glam_cart') || '[]');
+  if (!cart || cart.length === 0) {
+    alert('Your shopping bag is empty. Please select a luxury garment first.');
+    return;
+  }
+
+  if (typeof window.closeAllDrawers === 'function') window.closeAllDrawers();
+
+  const finalTotalEl = document.getElementById('cartFinalTotal');
+  const subtotalEl = document.getElementById('cartSubtotal');
+  const totalDisplay = document.getElementById('checkoutTotalDisplay');
+
+  let payableText = '₹0';
+  if (finalTotalEl && finalTotalEl.offsetParent !== null && finalTotalEl.textContent) {
+    payableText = finalTotalEl.textContent;
+  } else if (subtotalEl && subtotalEl.textContent) {
+    payableText = subtotalEl.textContent;
+  }
+  if (totalDisplay) totalDisplay.textContent = payableText;
+
+  const formView = document.getElementById('checkoutFormView');
+  const successView = document.getElementById('checkoutSuccessView');
+  if (formView) formView.style.display = 'block';
+  if (successView) successView.style.display = 'none';
+
+  const modal = document.getElementById('checkoutOrderModal');
+  if (modal) {
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('opacity', '1', 'important');
+    modal.style.setProperty('visibility', 'visible', 'important');
+  }
+};
+
+window.closeCheckoutModal = function(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const modal = document.getElementById('checkoutOrderModal');
+  if (modal) modal.style.setProperty('display', 'none', 'important');
+};
+
   // Global Customer Auth for Category Page
   window.openCustomerAuth = function(e) {
     if (e && e.preventDefault) e.preventDefault();
@@ -547,7 +589,73 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch(e) {}
   window.addEventListener('storage', () => {
     try { window.syncCategoryAnnouncementPromo(); } catch(e) {}
-    try { renderCartDrawer(); } catch(e) {}
+    try { renderCartDrawer();
+
+  const catCheckoutForm = document.getElementById('checkoutOrderForm');
+  if (catCheckoutForm) {
+    catCheckoutForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('orderCustName').value.trim();
+      const email = document.getElementById('orderCustEmail').value.trim();
+      const phone = document.getElementById('orderCustPhone').value.trim();
+      const address = document.getElementById('orderCustAddress').value.trim();
+      const paymentInput = document.querySelector('input[name="orderPayment"]:checked');
+      const paymentMethod = paymentInput ? paymentInput.value : 'UPI / Card';
+
+      const totalDisplay = document.getElementById('checkoutTotalDisplay');
+      const totalText = totalDisplay ? totalDisplay.textContent : '₹3,499';
+      const cleanTotal = Number(totalText.replace(/[^0-9]/g, '')) || 3499;
+
+      const orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000);
+
+      // Save to localStorage
+      try {
+        let adminOrders = JSON.parse(localStorage.getItem('nf_orders') || '[]');
+        adminOrders.unshift({
+          id: orderId,
+          customer: name,
+          email: email,
+          phone: phone,
+          city: address.split(',').pop().trim() || 'India',
+          address: address,
+          items: 'Category Order Items',
+          total: cleanTotal,
+          paymentMethod: paymentMethod,
+          paymentStatus: 'Paid',
+          status: 'Processing',
+          date: new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })
+        });
+        localStorage.setItem('nf_orders', JSON.stringify(adminOrders));
+      } catch(e) {}
+
+      // Clear cart
+      localStorage.setItem('glam_cart', JSON.stringify([]));
+      localStorage.removeItem('glam_applied_promo');
+      if (typeof renderCartDrawer === 'function') {
+        localCart = [];
+        renderCartDrawer();
+      }
+
+      // Show success
+      const formView = document.getElementById('checkoutFormView');
+      const successView = document.getElementById('checkoutSuccessView');
+      const sOrderId = document.getElementById('successOrderId');
+      const sOrderCust = document.getElementById('successOrderCust');
+      const sOrderAddress = document.getElementById('successOrderAddress');
+      const sOrderPayment = document.getElementById('successOrderPayment');
+      const sOrderTotal = document.getElementById('successOrderTotal');
+
+      if (sOrderId) sOrderId.textContent = orderId;
+      if (sOrderCust) sOrderCust.textContent = name;
+      if (sOrderAddress) sOrderAddress.textContent = address;
+      if (sOrderPayment) sOrderPayment.textContent = paymentMethod;
+      if (sOrderTotal) sOrderTotal.textContent = totalText;
+
+      if (formView) formView.style.display = 'none';
+      if (successView) successView.style.display = 'block';
+    });
+  }
+ } catch(e) {}
   });
   window.addEventListener('coupons_updated', () => {
     try { window.syncCategoryAnnouncementPromo(); } catch(e) {}

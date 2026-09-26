@@ -1534,36 +1534,83 @@ function initCustomerAuth() {
   refreshAuthUI();
 }
 
-function initSupabaseCheckout() {
-  const checkoutBtn = document.querySelector('.btn-checkout');
-  const checkoutModal = document.getElementById('checkoutOrderModal');
-  const closeCheckoutBtn = document.getElementById('closeCheckoutModalBtn');
-  const checkoutForm = document.getElementById('checkoutOrderForm');
+
+window.openCheckoutModal = function(e) {
+  if (e && e.preventDefault) e.preventDefault();
+
+  // 1. Check if shopping bag has items
+  const cart = window.state ? window.state.cart : (JSON.parse(localStorage.getItem('glam_cart') || '[]'));
+  if (!cart || cart.length === 0) {
+    if (typeof showToast === 'function') showToast('Your shopping bag is empty. Please select a luxury garment first.');
+    else alert('Your shopping bag is empty. Please select a luxury garment first.');
+    return;
+  }
+
+  // 2. Close shopping bag drawer
+  const cartDrawer = document.getElementById('cartDrawer');
+  const backdrop = document.getElementById('overlayBackdrop');
+  if (cartDrawer) {
+    cartDrawer.classList.remove('open', 'active');
+    cartDrawer.style.setProperty('transform', 'translateX(100%)', 'important');
+  }
+  if (backdrop) {
+    backdrop.classList.remove('show', 'active');
+    backdrop.style.display = 'none';
+  }
+
+  // 3. Calculate final payable total
+  const finalTotalEl = document.getElementById('cartFinalTotal');
+  const subtotalEl = document.getElementById('cartSubtotal');
   const totalDisplay = document.getElementById('checkoutTotalDisplay');
 
-  if (checkoutBtn && checkoutModal) {
-    checkoutBtn.addEventListener('click', () => {
-      const subtotalEl = document.getElementById('cartSubtotal');
-      if (totalDisplay && subtotalEl) {
-        totalDisplay.textContent = subtotalEl.textContent;
-      }
-      checkoutModal.style.display = 'flex';
-      const cartDrawer = document.getElementById('cartDrawer');
-      const backdrop = document.getElementById('overlayBackdrop');
-      if (cartDrawer) cartDrawer.classList.remove('open');
-      if (backdrop) backdrop.classList.remove('active');
-    });
+  let payableText = '₹0';
+  if (finalTotalEl && finalTotalEl.offsetParent !== null && finalTotalEl.textContent) {
+    payableText = finalTotalEl.textContent;
+  } else if (subtotalEl && subtotalEl.textContent) {
+    payableText = subtotalEl.textContent;
   }
+  if (totalDisplay) totalDisplay.textContent = payableText;
 
-  if (closeCheckoutBtn && checkoutModal) {
-    closeCheckoutBtn.addEventListener('click', () => {
-      checkoutModal.style.display = 'none';
-    });
+  // 4. Pre-fill customer details if logged in
+  try {
+    const cust = JSON.parse(localStorage.getItem('glam_customer_user') || 'null');
+    if (cust) {
+      if (document.getElementById('orderCustName') && cust.name) document.getElementById('orderCustName').value = cust.name;
+      if (document.getElementById('orderCustEmail') && cust.email) document.getElementById('orderCustEmail').value = cust.email;
+      if (document.getElementById('orderCustPhone') && cust.phone) document.getElementById('orderCustPhone').value = cust.phone;
+    }
+  } catch(e) {}
+
+  // 5. Reset to Form View (hide success view)
+  const formView = document.getElementById('checkoutFormView');
+  const successView = document.getElementById('checkoutSuccessView');
+  if (formView) formView.style.display = 'block';
+  if (successView) successView.style.display = 'none';
+
+  // 6. Reveal the Big Modal directly
+  const modal = document.getElementById('checkoutOrderModal');
+  if (modal) {
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('opacity', '1', 'important');
+    modal.style.setProperty('visibility', 'visible', 'important');
   }
+};
+
+window.closeCheckoutModal = function(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const modal = document.getElementById('checkoutOrderModal');
+  if (modal) {
+    modal.style.setProperty('display', 'none', 'important');
+  }
+};
+
+function initSupabaseCheckout() {
+  const checkoutModal = document.getElementById('checkoutOrderModal');
+  const checkoutForm = document.getElementById('checkoutOrderForm');
 
   if (checkoutModal) {
     checkoutModal.addEventListener('click', (e) => {
-      if (e.target === checkoutModal) checkoutModal.style.display = 'none';
+      if (e.target === checkoutModal) window.closeCheckoutModal();
     });
   }
 
@@ -1574,20 +1621,50 @@ function initSupabaseCheckout() {
       const email = document.getElementById('orderCustEmail').value.trim();
       const phone = document.getElementById('orderCustPhone').value.trim();
       const address = document.getElementById('orderCustAddress').value.trim();
+      const paymentInput = document.querySelector('input[name="orderPayment"]:checked');
+      const paymentMethod = paymentInput ? paymentInput.value : 'UPI / Card';
 
-      const subtotalEl = document.getElementById('cartSubtotal');
-      const cleanTotal = Number((subtotalEl?.textContent || '0').replace(/[^0-9]/g, '')) || 3499;
+      const totalDisplay = document.getElementById('checkoutTotalDisplay');
+      const totalText = totalDisplay ? totalDisplay.textContent : '₹3,499';
+      const cleanTotal = Number(totalText.replace(/[^0-9]/g, '')) || 3499;
 
       const orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000);
 
       const submitBtn = document.getElementById('confirmOrderBtn');
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Saving to Cloud Database...';
+        submitBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Processing Order...';
       }
 
+      // 1. Build order item summary
+      const cartItems = (window.state && window.state.cart) ? window.state.cart : (JSON.parse(localStorage.getItem('glam_cart') || '[]'));
+      const itemsDesc = cartItems.map(i => `${i.title || i.name} (x${i.qty || 1})`).join(', ') || 'Luxury Ethnic Couture';
+
+      // 2. Save order to Admin Portal orders in localStorage
       try {
-        if (window.GlamOrders) {
+        let adminOrders = JSON.parse(localStorage.getItem('nf_orders') || '[]');
+        adminOrders.unshift({
+          id: orderId,
+          customer: name,
+          email: email,
+          phone: phone,
+          city: address.split(',').pop().trim() || 'India',
+          address: address,
+          items: itemsDesc,
+          total: cleanTotal,
+          paymentMethod: paymentMethod,
+          paymentStatus: 'Paid',
+          status: 'Processing',
+          date: new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })
+        });
+        localStorage.setItem('nf_orders', JSON.stringify(adminOrders));
+      } catch(err) {
+        console.warn('Admin local orders save:', err);
+      }
+
+      // 3. Save to Supabase Cloud
+      if (window.GlamOrders) {
+        try {
           await window.GlamOrders.create({
             id: orderId,
             customer_name: name,
@@ -1595,27 +1672,20 @@ function initSupabaseCheckout() {
             customer_phone: phone,
             shipping_address: address,
             total: cleanTotal,
-            payment_method: 'UPI / Card',
+            payment_method: paymentMethod,
             payment_status: 'Paid',
             status: 'Processing',
-            items_summary: "Order placed via SA Glam & Grace Web (" + (new Date()).toLocaleDateString() + ")"
+            items_summary: itemsDesc
           });
+        } catch(err) {
+          console.warn('Supabase cloud order create notice:', err);
         }
+      }
 
-        checkoutModal.style.display = 'none';
-        
-        // Trigger Toast
-        const toast = document.getElementById('toastNotification');
-        const toastMsg = document.getElementById('toastMessage');
-        if (toast && toastMsg) {
-          toastMsg.textContent = "Order " + orderId + " placed & synced to Supabase!";
-          toast.classList.add('show');
-          setTimeout(() => toast.classList.remove('show'), 4000);
-        }
-
-        // Also add customer to customer directory
-        if (window.GlamCustomers) {
-          window.GlamCustomers.upsert({
+      // 4. Save Customer profile
+      if (window.GlamCustomers) {
+        try {
+          await window.GlamCustomers.upsert({
             id: "CUST-" + Math.floor(100 + Math.random() * 900),
             name: name,
             email: email,
@@ -1623,19 +1693,37 @@ function initSupabaseCheckout() {
             orders_count: 1,
             total_spend: cleanTotal,
             status: 'Active'
-          }).catch(console.warn);
-        }
+          });
+        } catch(e) {}
+      }
 
-        checkoutForm.reset();
-      } catch (err) {
-        console.error('Order placement error:', err);
-        alert('Order placed locally! Note: Run the Supabase SQL script in your dashboard to enable live cloud recording.');
-        checkoutModal.style.display = 'none';
-      } finally {
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="ri-check-double-line"></i> Confirm & Place Order';
-        }
+      // 5. Empty Shopping Bag & Clear Applied Promo
+      if (window.state) window.state.cart = [];
+      localStorage.setItem('glam_cart', JSON.stringify([]));
+      localStorage.removeItem('glam_applied_promo');
+      if (typeof updateCartUI === 'function') updateCartUI();
+
+      // 6. Transition to "Order Received!" Confirmation Screen
+      const formView = document.getElementById('checkoutFormView');
+      const successView = document.getElementById('checkoutSuccessView');
+      const sOrderId = document.getElementById('successOrderId');
+      const sOrderCust = document.getElementById('successOrderCust');
+      const sOrderAddress = document.getElementById('successOrderAddress');
+      const sOrderPayment = document.getElementById('successOrderPayment');
+      const sOrderTotal = document.getElementById('successOrderTotal');
+
+      if (sOrderId) sOrderId.textContent = orderId;
+      if (sOrderCust) sOrderCust.textContent = name;
+      if (sOrderAddress) sOrderAddress.textContent = address;
+      if (sOrderPayment) sOrderPayment.textContent = paymentMethod;
+      if (sOrderTotal) sOrderTotal.textContent = totalText;
+
+      if (formView) formView.style.display = 'none';
+      if (successView) successView.style.display = 'block';
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="ri-check-double-line"></i> Place Luxury Order';
       }
     });
   }
