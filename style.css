@@ -1,4 +1,4 @@
-﻿/* 
+/* 
    SA Glam and Grace - Luxury Indian Women's Ethnic Fashion
    Master Stylesheet (Awwwards / Behance Quality UI)
 */
@@ -1717,7 +1717,9 @@ img {
 .cart-drawer.open,
 .cart-drawer.active,
 #cartDrawer.open,
-#cartDrawer.active {
+#cartDrawer.active,
+#wishlistDrawer.open,
+#wishlistDrawer.active {
   transform: translateX(0) !important;
 }
 

@@ -43,11 +43,14 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
       } catch(e) { return []; }
     })(),
-    wishlist: (() => {
+    wishlist: (function() {
       try {
         const saved = localStorage.getItem('glam_wishlist');
-        return saved ? JSON.parse(saved) : [1, 3];
-      } catch(e) { return [1, 3]; }
+        window.stateWishlist = saved ? JSON.parse(saved) : [1, 3];
+      } catch(e) {
+        window.stateWishlist = [1, 3];
+      }
+      return window.stateWishlist;
     })(),
     currentHeroSlide: 0,
     heroSlides: [
@@ -809,22 +812,10 @@ document.addEventListener('DOMContentLoaded', () => {
   cartCloseBtn.addEventListener('click', closeAllOverlays);
   overlayBackdrop.addEventListener('click', closeAllOverlays);
 
-  // --- Wishlist Toggle Logic ---
-  window.toggleWishlist = (id, btn) => {
-    const index = state.wishlist.indexOf(id);
-    if (index > -1) {
-      state.wishlist.splice(index, 1);
-      btn.classList.remove('active');
-      btn.querySelector('i').className = 'ri-heart-line';
-      showToast('Removed from Wishlist');
-    } else {
-      state.wishlist.push(id);
-      btn.classList.add('active');
-      btn.querySelector('i').className = 'ri-heart-fill';
-      showToast('Added to Wishlist!');
-    }
-    wishlistBadge.textContent = state.wishlist.length;
-  };
+  // --- Wishlist Synchronization ---
+  if (typeof window.updateWishlistUI === 'function') {
+    window.updateWishlistUI();
+  }
 
   // --- Quick View Modal Logic ---
   window.openQuickView = (product) => {
@@ -1245,19 +1236,9 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   window.toggleFancyWishlist = function(id, btn) {
-    const idx = state.wishlist.indexOf(id);
-    if (idx > -1) {
-      state.wishlist.splice(idx, 1);
-      btn.classList.remove('active');
-      btn.innerHTML = '<i class="ri-heart-line"></i>';
-      showToast('Removed from Wishlist.');
-    } else {
-      state.wishlist.push(id);
-      btn.classList.add('active');
-      btn.innerHTML = '<i class="ri-heart-fill"></i>';
-      showToast('Added to Wishlist!');
+    if (typeof window.toggleWishlist === 'function') {
+      window.toggleWishlist(id, btn);
     }
-    if (wishlistBadge) wishlistBadge.textContent = state.wishlist.length;
   };
 
   window.openFancyQuickview = function(id) {
@@ -1922,14 +1903,14 @@ function initSupabaseCheckout() {
 }
 
 // -------------------------------------------------------------
-// COMPREHENSIVE WISHLIST ENGINE & DRAWER LOGIC
+// COMPREHENSIVE LUXURY WISHLIST ENGINE & DRAWER LOGIC
 // -------------------------------------------------------------
 const WISHLIST_CATALOG = [
   { id: 1, title: 'Amber Chanderi Silk Kurti Set', price: 3499, originalPrice: 4999, category: 'Kurti Set', image: './assets/images/hero_1.png' },
   { id: 2, title: 'Gulabi Magenta Handloom Suit', price: 4899, originalPrice: 6200, category: 'Anarkali Suit', image: './assets/images/festive.png' },
-  { id: 3, title: 'Mint Blossom Organza Anarkali', price: 5999, originalPrice: 7500, category: 'Anarkali Set', image: './assets/images/wedding.png' },
+  { id: 3, title: 'Mint Blossom Organza Anarkali', price: 5999, originalPrice: 7500, category: 'Wedding Wear', image: './assets/images/wedding.png' },
   { id: 4, title: 'Rose Zardozi Heritage Lehenga', price: 12999, originalPrice: 16000, category: 'Bridal Lehenga', image: './assets/images/hero_2.png' },
-  { id: 5, title: 'Kashmiri Floral Embroidered Set', price: 4299, originalPrice: 5499, category: 'Kurta Set', image: './assets/images/hero_1.png' },
+  { id: 5, title: 'Kashmiri Floral Embroidered Set', price: 4299, originalPrice: 5499, category: 'Chudidar Set', image: './assets/images/hero_1.png' },
   { id: 6, title: 'Banarasi Silk Brocade Dupatta Set', price: 6499, originalPrice: 8000, category: 'Silk Ensemble', image: './assets/images/festive.png' },
   { id: 101, title: 'Nocturne Velvet Evening Gown', price: 16999, originalPrice: 22000, category: 'Velvet Gown', image: './assets/images/hero_2.png' },
   { id: 102, title: 'Crimson Mughal Rose Lehenga', price: 34999, originalPrice: 45000, category: 'Bridal Lehenga', image: './assets/images/festive.png' },
@@ -1937,43 +1918,161 @@ const WISHLIST_CATALOG = [
   { id: 104, title: 'Emerald Silk Sharara Ensemble', price: 14800, originalPrice: 19500, category: 'Sharara Set', image: './assets/images/wedding.png' }
 ];
 
-// Initialize wishlist from localStorage
-try {
-  const savedWishlist = localStorage.getItem('glam_wishlist');
-  if (savedWishlist) {
-    window.stateWishlist = JSON.parse(savedWishlist);
-  } else {
+// Initialize global wishlist
+(function initWishlist() {
+  try {
+    const saved = localStorage.getItem('glam_wishlist');
+    window.stateWishlist = saved ? JSON.parse(saved) : [1, 3];
+  } catch (e) {
     window.stateWishlist = [1, 3];
   }
-} catch (e) {
-  window.stateWishlist = [1, 3];
+  if (window.glamState) {
+    window.glamState.wishlist = window.stateWishlist;
+  }
+})();
+
+function getProductForWishlist(id) {
+  const sId = String(id).trim();
+  // 1. Check WISHLIST_CATALOG
+  let found = WISHLIST_CATALOG.find(p => String(p.id) === sId);
+  if (found) return found;
+
+  // 2. Check fancy products in state
+  if (window.glamState && Array.isArray(window.glamState.fancyProducts)) {
+    found = window.glamState.fancyProducts.find(p => String(p.id) === sId);
+    if (found) {
+      return {
+        id: found.id,
+        title: found.title,
+        price: found.price,
+        originalPrice: found.origPrice || found.price,
+        category: found.categoryName || 'Party Wear',
+        image: found.image
+      };
+    }
+  }
+
+  // 3. Check localStorage nf_products
+  try {
+    const raw = localStorage.getItem('nf_products');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        found = parsed.find(p => String(p.id) === sId);
+        if (found) {
+          return {
+            id: found.id,
+            title: found.name || found.title || 'Luxury Garment',
+            price: Number(found.price) || 0,
+            originalPrice: Number(found.originalPrice || found.price) || 0,
+            category: found.category || 'Luxury Collection',
+            image: found.image || './assets/images/hero_1.png'
+          };
+        }
+      }
+    }
+  } catch(e) {}
+
+  // 4. Check DOM for matching card
+  const domCard = document.querySelector(`.product-card[data-id="${id}"], .product-card[data-id="${sId}"]`);
+  if (domCard) {
+    const titleEl = domCard.querySelector('.product-title');
+    const priceEl = domCard.querySelector('.current-price');
+    const imgEl = domCard.querySelector('.product-img-primary') || domCard.querySelector('img');
+    const catEl = domCard.querySelector('.product-category-label');
+    const priceNum = priceEl ? parseInt(priceEl.textContent.replace(/[^\d]/g, ''), 10) : 4999;
+    return {
+      id: id,
+      title: titleEl ? titleEl.textContent.trim() : ('Luxury Garment #' + id),
+      price: priceNum || 4999,
+      originalPrice: priceNum ? Math.round(priceNum * 1.25) : 5999,
+      category: catEl ? catEl.textContent.trim() : 'Luxury Collection',
+      image: imgEl ? imgEl.getAttribute('src') : './assets/images/hero_1.png'
+    };
+  }
+
+  // 5. Default Fallback
+  return {
+    id: id,
+    title: 'Luxury Ethnic Wear #' + id,
+    price: 4999,
+    originalPrice: 6200,
+    category: 'Ethnic Wear',
+    image: './assets/images/hero_1.png'
+  };
 }
 
 function saveWishlist() {
   try {
     localStorage.setItem('glam_wishlist', JSON.stringify(window.stateWishlist));
-  } catch (e) {}
-  updateWishlistBadges();
+  } catch (e) {
+    console.warn('Could not save wishlist to localStorage:', e);
+  }
+  if (window.glamState) {
+    window.glamState.wishlist = window.stateWishlist;
+  }
+  updateWishlistUI();
 }
 
 function updateWishlistBadges() {
-  const badges = document.querySelectorAll('#wishlistBadge, .wishlist-badge-count');
+  const count = Array.isArray(window.stateWishlist) ? window.stateWishlist.length : 0;
+  const badges = document.querySelectorAll('#wishlistBadge, .wishlist-badge-count, span#wishlistBadge');
   badges.forEach(b => {
-    if (b) b.textContent = window.stateWishlist.length;
+    if (b) b.textContent = count;
   });
 }
+
+window.updateWishlistUI = function() {
+  updateWishlistBadges();
+
+  if (!Array.isArray(window.stateWishlist)) {
+    window.stateWishlist = [];
+  }
+
+  // Synchronize all wishlist heart buttons across the page
+  const allBtns = document.querySelectorAll('.wishlist-btn, .fancy-wishlist-btn');
+  allBtns.forEach(btn => {
+    let btnId = btn.dataset.productId || btn.dataset.id;
+    if (!btnId) {
+      const parentCard = btn.closest('.product-card');
+      if (parentCard && parentCard.dataset.id) {
+        btnId = parentCard.dataset.id;
+      }
+    }
+    if (!btnId) {
+      const onclickAttr = btn.getAttribute('onclick') || '';
+      const match = onclickAttr.match(/toggle(?:Fancy|Category)?Wishlist\s*\(\s*['"]?([^,'"\)]+)['"]?/);
+      if (match) {
+        btnId = match[1];
+      }
+    }
+
+    if (btnId !== undefined && btnId !== null) {
+      const isSaved = window.stateWishlist.some(item => String(item) === String(btnId));
+      if (isSaved) {
+        btn.classList.add('active');
+        const icon = btn.querySelector('i');
+        if (icon) icon.className = 'ri-heart-fill';
+      } else {
+        btn.classList.remove('active');
+        const icon = btn.querySelector('i');
+        if (icon) icon.className = 'ri-heart-line';
+      }
+    }
+  });
+};
 
 window.renderWishlistUI = function() {
   const listEl = document.getElementById('wishlistItemsList');
   if (!listEl) return;
 
-  if (window.stateWishlist.length === 0) {
+  if (!Array.isArray(window.stateWishlist) || window.stateWishlist.length === 0) {
     listEl.innerHTML = `
-      <div style="text-align:center; padding:4rem 1rem; color:#777;">
-        <i class="ri-heart-line" style="font-size:3.5rem; color:#e5e7eb; display:block; margin-bottom:1rem;"></i>
-        <h4 style="font-family:var(--font-serif); font-size:1.3rem; margin:0 0 0.5rem; color:var(--dark-text);">Your Wishlist is Empty</h4>
-        <p style="font-size:0.85rem; color:#888; max-width:240px; margin:0 auto 1.5rem;">Explore our luxury collections and tap the heart icon to save your favorite garments.</p>
-        <a href="#new-arrivals" onclick="window.closeWishlistDrawer()" class="btn-primary" style="display:inline-flex; padding:0.6rem 1.4rem; font-size:0.85rem;">Discover Collections</a>
+      <div style="text-align:center; padding:3.5rem 1rem; color:#777;">
+        <i class="ri-heart-line" style="font-size:3.5rem; color:#d1d5db; display:block; margin-bottom:1rem;"></i>
+        <h4 style="font-family:var(--font-serif, 'Cinzel', serif); font-size:1.35rem; margin:0 0 0.5rem; color:#181412;">Your Wishlist is Empty</h4>
+        <p style="font-size:0.85rem; color:#6b7280; max-width:260px; margin:0 auto 1.5rem; line-height:1.5;">Explore our luxury collections and tap the heart icon on any outfit to save your favorites.</p>
+        <a href="#new-arrivals" onclick="window.closeWishlistDrawer()" class="btn-primary" style="display:inline-flex; padding:0.65rem 1.4rem; font-size:0.85rem; justify-content:center; text-decoration:none;">Discover Collections</a>
       </div>`;
     const moveAllBtn = document.getElementById('addAllWishlistToCartBtn');
     if (moveAllBtn) moveAllBtn.style.display = 'none';
@@ -1984,26 +2083,22 @@ window.renderWishlistUI = function() {
   if (moveAllBtn) moveAllBtn.style.display = 'flex';
 
   listEl.innerHTML = window.stateWishlist.map(id => {
-    let item = WISHLIST_CATALOG.find(p => p.id === id || p.id === Number(id));
-    if (!item) {
-      item = { id: id, title: 'Luxury Couture Ensemble #' + id, price: 4999, category: 'Ethnic Wear', image: './assets/images/hero_1.png' };
-    }
-
+    const item = getProductForWishlist(id);
     return `
       <div class="cart-item" style="display:flex; gap:1rem; align-items:center; padding:1rem 0; border-bottom:1px solid #f3f4f6;">
-        <img src="${item.image}" alt="${item.title}" style="width:72px; height:90px; object-fit:cover; border-radius:8px; border:1px solid #eee; flex-shrink:0;">
+        <img src="${item.image}" alt="${item.title}" style="width:72px; height:90px; object-fit:cover; border-radius:8px; border:1px solid #eee; flex-shrink:0;" onerror="this.onerror=null; this.src='./assets/images/hero_1.png';">
         <div style="flex:1; min-width:0;">
-          <span style="font-size:0.75rem; text-transform:uppercase; color:var(--primary-pink); font-weight:700; letter-spacing:0.5px; display:block;">${item.category || 'Luxury Couture'}</span>
-          <h4 style="font-size:0.92rem; font-weight:600; color:var(--dark-text); margin:2px 0 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</h4>
+          <span style="font-size:0.75rem; text-transform:uppercase; color:var(--primary-pink, #b45309); font-weight:700; letter-spacing:0.5px; display:block;">${item.category || 'Luxury Couture'}</span>
+          <h4 style="font-size:0.92rem; font-weight:600; color:var(--dark-text, #111); margin:2px 0 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.title}</h4>
           <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:8px;">
-            <strong style="color:#b45309; font-size:1rem;">₹${item.price.toLocaleString('en-IN')}</strong>
-            ${item.originalPrice ? `<span style="text-decoration:line-through; font-size:0.8rem; color:#9ca3af;">₹${item.originalPrice.toLocaleString('en-IN')}</span>` : ''}
+            <strong style="color:#b45309; font-size:1rem;">₹${Number(item.price).toLocaleString('en-IN')}</strong>
+            ${item.originalPrice ? `<span style="text-decoration:line-through; font-size:0.8rem; color:#9ca3af;">₹${Number(item.originalPrice).toLocaleString('en-IN')}</span>` : ''}
           </div>
-          <button onclick="window.moveWishlistItemToCart(${item.id})" style="background:#b45309; color:#fff; border:none; padding:5px 12px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+          <button onclick="window.moveWishlistItemToCart('${item.id}')" style="background:#b45309; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all 0.2s;">
             <i class="ri-shopping-bag-line"></i> Move to Bag
           </button>
         </div>
-        <button onclick="window.removeWishlistItem(${item.id})" style="background:none; border:none; color:#9ca3af; cursor:pointer; font-size:1.2rem; padding:4px;" title="Remove from Wishlist">
+        <button onclick="window.removeWishlistItem('${item.id}')" style="background:none; border:none; color:#9ca3af; cursor:pointer; font-size:1.25rem; padding:6px; transition:color 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#9ca3af'" title="Remove from Wishlist">
           <i class="ri-delete-bin-line"></i>
         </button>
       </div>`;
@@ -2012,131 +2107,155 @@ window.renderWishlistUI = function() {
 
 window.openWishlistDrawer = function(e) {
   if (e && e.preventDefault) e.preventDefault();
-  const drawer = document.getElementById('wishlistDrawer');
-  const backdrop = document.getElementById('overlayBackdrop');
+  
+  // Close other open drawers / modals first
   const cartDrawer = document.getElementById('cartDrawer');
   if (cartDrawer) {
-    cartDrawer.classList.remove('active');
-    cartDrawer.classList.remove('open');
+    cartDrawer.classList.remove('active', 'open');
+    cartDrawer.style.removeProperty('right');
   }
+  const qv = document.getElementById('quickviewModal');
+  if (qv) qv.classList.remove('active');
+
+  const drawer = document.getElementById('wishlistDrawer');
+  const backdrop = document.getElementById('overlayBackdrop');
 
   if (drawer) {
-    drawer.classList.add('active');
-    drawer.classList.add('open');
-    drawer.style.right = '0px';
+    drawer.classList.add('active', 'open');
+    drawer.style.setProperty('transform', 'translateX(0)', 'important');
+    drawer.style.setProperty('right', '0', 'important');
   }
   if (backdrop) {
     backdrop.classList.add('active');
+    backdrop.style.setProperty('opacity', '1', 'important');
+    backdrop.style.setProperty('visibility', 'visible', 'important');
+    backdrop.style.setProperty('pointer-events', 'auto', 'important');
   }
-  if (typeof window.renderWishlistUI === 'function') {
-    window.renderWishlistUI();
-  }
+
+  window.renderWishlistUI();
 };
 
 window.closeWishlistDrawer = function() {
   const drawer = document.getElementById('wishlistDrawer');
   const backdrop = document.getElementById('overlayBackdrop');
   if (drawer) {
-    drawer.classList.remove('active');
-    drawer.classList.remove('open');
-    drawer.style.right = '-450px';
+    drawer.classList.remove('active', 'open');
+    drawer.style.removeProperty('transform');
+    drawer.style.removeProperty('right');
   }
-  if (backdrop) {
-    backdrop.classList.remove('active');
-  }
-};
-
-window.removeWishlistItem = function(id) {
-  const idx = window.stateWishlist.findIndex(item => String(item) === String(id));
-  const numIdx = window.stateWishlist.indexOf(Number(id));
-  const targetIdx = idx > -1 ? idx : numIdx;
-  if (targetIdx > -1) {
-    window.stateWishlist.splice(targetIdx, 1);
-    saveWishlist();
-    window.renderWishlistUI();
-    // Update card buttons
-    updateCardWishlistButtons(id, false);
-    if (typeof showToast === 'function') showToast('Removed from Wishlist');
-  }
-};
-
-window.moveWishlistItemToCart = function(id) {
-  let item = WISHLIST_CATALOG.find(p => p.id === id || p.id === Number(id));
-  if (!item) {
-    item = { id: id, title: 'Luxury Garment', price: 4999, image: './assets/images/hero_1.png' };
-  }
-  if (typeof addToCart === 'function') {
-    addToCart({ id: item.id, title: item.title, price: item.price, image: item.image });
-  }
-  window.removeWishlistItem(id);
-  if (typeof showToast === 'function') showToast('Moved to Shopping Bag! 🛍️');
-};
-
-window.moveAllWishlistToCart = function() {
-  if (window.stateWishlist.length === 0) return;
-  const ids = [...window.stateWishlist];
-  ids.forEach(id => {
-    let item = WISHLIST_CATALOG.find(p => p.id === id || p.id === Number(id));
-    if (item && typeof addToCart === 'function') {
-      addToCart({ id: item.id, title: item.title, price: item.price, image: item.image });
-    }
-  });
-  window.stateWishlist = [];
-  saveWishlist();
-  window.renderWishlistUI();
-  // Open cart drawer
-  window.closeWishlistDrawer();
+  
+  // Only remove backdrop if cartDrawer is not open
   const cartDrawer = document.getElementById('cartDrawer');
-  const backdrop = document.getElementById('overlayBackdrop');
-  if (cartDrawer) cartDrawer.classList.add('open');
-  if (backdrop) backdrop.classList.add('active');
-  if (typeof showToast === 'function') showToast('All wishlist items moved to Shopping Bag!');
+  const isCartOpen = cartDrawer && (cartDrawer.classList.contains('active') || cartDrawer.classList.contains('open'));
+  if (backdrop && !isCartOpen) {
+    backdrop.classList.remove('active');
+    backdrop.style.removeProperty('opacity');
+    backdrop.style.removeProperty('visibility');
+    backdrop.style.removeProperty('pointer-events');
+  }
 };
 
-function updateCardWishlistButtons(id, isActive) {
-  const btns = document.querySelectorAll(`.wishlist-btn[onclick*="(${id},"], .fancy-wishlist-btn[onclick*="(${id},"]`);
-  btns.forEach(btn => {
-    if (isActive) {
-      btn.classList.add('active');
-      const icon = btn.querySelector('i');
-      if (icon) icon.className = 'ri-heart-fill';
-    } else {
-      btn.classList.remove('active');
-      const icon = btn.querySelector('i');
-      if (icon) icon.className = 'ri-heart-line';
-    }
-  });
-}
-
-// Override toggleWishlist to sync with persistent storage and UI
 window.toggleWishlist = function(id, btn) {
-  const searchId = isNaN(Number(id)) ? String(id) : Number(id);
-  const idx = window.stateWishlist.indexOf(id);
+  if (id === undefined || id === null) return;
+  const sId = String(id);
+  const idx = window.stateWishlist.findIndex(item => String(item) === sId);
+
   if (idx > -1) {
     window.stateWishlist.splice(idx, 1);
-    if (btn) {
-      btn.classList.remove('active');
-      const icon = btn.querySelector('i');
-      if (icon) icon.className = 'ri-heart-line';
-    }
     if (typeof showToast === 'function') showToast('Removed from Wishlist');
   } else {
-    window.stateWishlist.push(id);
-    if (btn) {
-      btn.classList.add('active');
-      const icon = btn.querySelector('i');
-      if (icon) icon.className = 'ri-heart-fill';
-    }
+    const cleanId = !isNaN(Number(id)) && String(id).trim() !== '' ? Number(id) : id;
+    window.stateWishlist.push(cleanId);
     if (typeof showToast === 'function') showToast('Saved to Wishlist! ❤️');
   }
+
   saveWishlist();
+
+  // If drawer is currently visible, update it immediately
+  const drawer = document.getElementById('wishlistDrawer');
+  if (drawer && (drawer.classList.contains('open') || drawer.classList.contains('active'))) {
+    window.renderWishlistUI();
+  }
+};
+
+window.toggleCategoryWishlist = function(id, btn) {
+  window.toggleWishlist(id, btn);
 };
 
 window.toggleFancyWishlist = function(id, btn) {
   window.toggleWishlist(id, btn);
 };
 
-// Wire backdrop click to close wishlist drawer as well
+window.removeWishlistItem = function(id) {
+  const sId = String(id);
+  const idx = window.stateWishlist.findIndex(item => String(item) === sId);
+  if (idx > -1) {
+    window.stateWishlist.splice(idx, 1);
+    saveWishlist();
+    window.renderWishlistUI();
+    if (typeof showToast === 'function') showToast('Removed from Wishlist');
+  }
+};
+
+window.moveWishlistItemToCart = function(id) {
+  const item = getProductForWishlist(id);
+  const cartProduct = {
+    id: item.id,
+    title: item.title,
+    price: Number(item.price) || 0,
+    image: item.image || './assets/images/hero_1.png'
+  };
+
+  if (typeof window.executeAddToCart === 'function') {
+    window.executeAddToCart(cartProduct);
+  } else if (typeof window.addToCart === 'function') {
+    window.addToCart(cartProduct);
+  }
+
+  // Remove from wishlist
+  const sId = String(id);
+  const idx = window.stateWishlist.findIndex(item => String(item) === sId);
+  if (idx > -1) {
+    window.stateWishlist.splice(idx, 1);
+    saveWishlist();
+    window.renderWishlistUI();
+  }
+  if (typeof showToast === 'function') showToast(`Added "${item.title}" to Shopping Bag! 🛍️`);
+};
+
+window.moveAllWishlistToCart = function() {
+  if (!Array.isArray(window.stateWishlist) || window.stateWishlist.length === 0) return;
+  const ids = [...window.stateWishlist];
+  ids.forEach(id => {
+    const item = getProductForWishlist(id);
+    const cartProduct = {
+      id: item.id,
+      title: item.title,
+      price: Number(item.price) || 0,
+      image: item.image || './assets/images/hero_1.png'
+    };
+    if (typeof window.executeAddToCart === 'function') {
+      window.executeAddToCart(cartProduct);
+    } else if (typeof window.addToCart === 'function') {
+      window.addToCart(cartProduct);
+    }
+  });
+
+  window.stateWishlist = [];
+  saveWishlist();
+  window.renderWishlistUI();
+
+  // Close wishlist drawer and open shopping bag
+  window.closeWishlistDrawer();
+  if (typeof window.openCart === 'function') {
+    window.openCart();
+  } else if (typeof window.openCartDrawer === 'function') {
+    window.openCartDrawer();
+  }
+  if (typeof showToast === 'function') showToast('All wishlist items moved to Shopping Bag! 🛍️');
+};
+
+// Wire backdrop click, escape key, and cross-tab storage sync
 document.addEventListener('DOMContentLoaded', () => {
   const backdrop = document.getElementById('overlayBackdrop');
   if (backdrop) {
@@ -2144,7 +2263,30 @@ document.addEventListener('DOMContentLoaded', () => {
       window.closeWishlistDrawer();
     });
   }
-  updateWishlistBadges();
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      window.closeWishlistDrawer();
+    }
+  });
+
+  window.updateWishlistUI();
+
+  // Cross-tab synchronization
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'glam_wishlist') {
+      try {
+        window.stateWishlist = e.newValue ? JSON.parse(e.newValue) : [];
+        if (window.glamState) window.glamState.wishlist = window.stateWishlist;
+        window.updateWishlistUI();
+        const drawer = document.getElementById('wishlistDrawer');
+        if (drawer && (drawer.classList.contains('open') || drawer.classList.contains('active'))) {
+          window.renderWishlistUI();
+        }
+      } catch (err) {}
+    }
+  });
+
   // Final announcement promo check on DOM ready
-  if (typeof window.syncAnnouncementPromo === "function") window.syncAnnouncementPromo();
+  if (typeof window.syncAnnouncementPromo === 'function') window.syncAnnouncementPromo();
 });

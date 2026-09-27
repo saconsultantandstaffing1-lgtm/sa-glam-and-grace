@@ -1064,8 +1064,17 @@ function renderCartDrawer() {
   window.openWishlistDrawer = function() {
     const d = document.getElementById('wishlistDrawer');
     const b = document.getElementById('overlayBackdrop');
-    if (d) d.classList.add('active');
-    if (b) b.classList.add('active');
+    if (d) {
+      d.classList.add('active', 'open');
+      d.style.setProperty('transform', 'translateX(0)', 'important');
+      d.style.setProperty('right', '0', 'important');
+    }
+    if (b) {
+      b.classList.add('active');
+      b.style.setProperty('opacity', '1', 'important');
+      b.style.setProperty('visibility', 'visible', 'important');
+      b.style.setProperty('pointer-events', 'auto', 'important');
+    }
     renderWishlistList();
   };
 
@@ -1073,10 +1082,10 @@ function renderCartDrawer() {
     const list = document.getElementById('wishlistItemsList');
     if (!list) return;
     const allProds = getStoredProducts();
-    const wishItems = allProds.filter(p => window.stateWishlist.includes(p.id) || window.stateWishlist.includes(String(p.id)));
+    const wishItems = allProds.filter(p => window.stateWishlist.includes(p.id) || window.stateWishlist.includes(String(p.id)) || window.stateWishlist.includes(Number(p.id)));
 
     if (wishItems.length === 0) {
-      list.innerHTML = `<div style="text-align:center; padding:3rem 1rem; color:#888;"><i class="ri-heart-line" style="font-size:2.5rem; display:block; margin-bottom:0.5rem;"></i>Your wishlist is currently empty.</div>`;
+      list.innerHTML = `<div style="text-align:center; padding:3rem 1rem; color:#888;"><i class="ri-heart-line" style="font-size:2.5rem; display:block; margin-bottom:0.5rem; color:#d1d5db;"></i>Your wishlist is currently empty.</div>`;
       return;
     }
 
@@ -1099,16 +1108,25 @@ function renderCartDrawer() {
     const idx = window.stateWishlist.findIndex(item => String(item) === String(id));
     if (idx > -1) {
       window.stateWishlist.splice(idx, 1);
-      if (btn) btn.classList.remove('active');
+      if (btn) {
+        btn.classList.remove('active');
+        const icon = btn.querySelector('i');
+        if (icon) icon.className = 'ri-heart-line';
+      }
     } else {
       window.stateWishlist.push(id);
-      if (btn) btn.classList.add('active');
+      if (btn) {
+        btn.classList.add('active');
+        const icon = btn.querySelector('i');
+        if (icon) icon.className = 'ri-heart-fill';
+      }
     }
     localStorage.setItem('glam_wishlist', JSON.stringify(window.stateWishlist));
     updateBadges();
     renderCategoryProducts();
     renderWishlistList();
   };
+  window.toggleWishlist = window.toggleCategoryWishlist;
 
   window.closeAllDrawers = function() {
     const cd = document.getElementById('cartDrawer');
@@ -1120,7 +1138,11 @@ function renderCartDrawer() {
       cd.classList.remove('open');
       cd.style.removeProperty('right');
     }
-    if (wd) wd.classList.remove('active');
+    if (wd) {
+      wd.classList.remove('active', 'open');
+      wd.style.removeProperty('transform');
+      wd.style.removeProperty('right');
+    }
     if (qv) qv.classList.remove('active');
     if (b) {
       b.classList.remove('active');
@@ -1129,6 +1151,7 @@ function renderCartDrawer() {
       b.style.removeProperty('pointer-events');
     }
   };
+  window.closeWishlistDrawer = window.closeAllDrawers;
 
   window.categoryQuickView = function(prod) {
     const qvImg = document.getElementById('qvImg');
