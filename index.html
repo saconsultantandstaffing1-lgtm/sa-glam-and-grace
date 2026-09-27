@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1477,8 +1477,16 @@
           </div>
 
           <div style="margin-bottom:1.2rem;">
-            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Password</label>
-            <input type="password" id="custPassword" required placeholder="••••••••" style="width:100%; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
+              <label style="font-size:0.8rem; font-weight:600; color:#374151;">Password</label>
+              <button type="button" id="custForgotPassBtn" style="background:none; border:none; color:#b45309; font-size:0.75rem; font-weight:600; cursor:pointer; text-decoration:underline; padding:0;">Forgot Password?</button>
+            </div>
+            <div style="position:relative;">
+              <input type="password" id="custPassword" required placeholder="••••••••" style="width:100%; padding:0.65rem 2.2rem 0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+              <button type="button" class="toggle-pass-visibility" data-target="custPassword" title="Toggle password view" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:#9ca3af; cursor:pointer; padding:4px; font-size:1.1rem; display:flex; align-items:center;">
+                <i class="ri-eye-line"></i>
+              </button>
+            </div>
           </div>
 
           <div id="custAuthMsg" style="display:none; font-size:0.8rem; padding:0.5rem; border-radius:6px; margin-bottom:1rem;"></div>
@@ -1491,6 +1499,49 @@
             <span>✨</span> 1-Click VIP Member Sign In
           </button>
     
+        </form>
+      </div>
+
+      <!-- Forgot Password View -->
+      <div id="authForgotPassView" style="display:none;">
+        <div style="text-align:center; margin-bottom:1.5rem;">
+          <div style="width:50px; height:50px; background:#fef3c7; color:#b45309; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin:0 auto 0.75rem;">
+            <i class="ri-lock-unlock-line"></i>
+          </div>
+          <h3 style="font-family:'Cormorant Garamond', serif; font-size:1.7rem; margin:0; color:#1a1a1a;">Recover Account</h3>
+          <p style="font-size:0.85rem; color:#666; margin:4px 0 0;">Reset your SA Glam &amp; Grace luxury account password</p>
+        </div>
+
+        <form id="customerForgotPassForm">
+          <div style="margin-bottom:1rem;">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Registered Email Address</label>
+            <input type="email" id="custForgotEmail" required placeholder="client@luxury.com" style="width:100%; padding:0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+          </div>
+
+          <div id="custNewPassBlock" style="margin-bottom:1.2rem;">
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.3rem;">Set New Password</label>
+            <div style="position:relative;">
+              <input type="password" id="custNewPassword" placeholder="Enter new password (min. 6 chars)" style="width:100%; padding:0.65rem 2.2rem 0.65rem 0.85rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
+              <button type="button" class="toggle-pass-visibility" data-target="custNewPassword" title="Toggle password view" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:#9ca3af; cursor:pointer; padding:4px; font-size:1.1rem; display:flex; align-items:center;">
+                <i class="ri-eye-line"></i>
+              </button>
+            </div>
+            <span style="font-size:0.75rem; color:#6b7280; display:block; margin-top:4px;">Enter a new password to reset instantly, or request a reset link below.</span>
+          </div>
+
+          <div id="custForgotMsg" style="display:none; font-size:0.82rem; padding:0.65rem 0.85rem; border-radius:6px; margin-bottom:1rem; line-height:1.4;"></div>
+
+          <button type="submit" id="custSendResetBtn" style="width:100%; padding:0.75rem; background:#b45309; color:#fff; border:none; border-radius:6px; font-weight:700; font-size:0.95rem; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <i class="ri-refresh-line"></i> Update &amp; Reset Password
+          </button>
+
+          <button type="button" id="custSendEmailLinkBtn" style="width:100%; margin-top:0.6rem; padding:0.65rem; background:rgba(180,83,9,0.08); color:#b45309; border:1px solid rgba(180,83,9,0.3); border-radius:6px; font-weight:600; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <i class="ri-mail-send-line"></i> Send Recovery Link to Email
+          </button>
+
+          <button type="button" id="custBackToSignInBtn" style="width:100%; margin-top:0.6rem; padding:0.65rem; background:transparent; color:#6b7280; border:1px solid #d1d5db; border-radius:6px; font-weight:600; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <i class="ri-arrow-left-line"></i> Back to Sign In
+          </button>
         </form>
       </div>
 

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ====================================================================
  * SA GLAM & GRACE (NAIRA FASHION) - SUPABASE CLIENT & CLOUD SYNC
  * ====================================================================
@@ -77,6 +77,33 @@ window.GlamAuth = {
       await sb.auth.signOut();
     }
     localStorage.removeItem('glam_current_user');
+  },
+
+  // Reset Password for Email
+  async resetPasswordForEmail(email) {
+    const sb = getSb();
+    if (!sb) {
+      // Local fallback simulation
+      return { message: 'Password recovery email sent (local simulated mode).' };
+    }
+    const { data, error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    if (error) throw error;
+    return data;
+  },
+
+  // Update Password
+  async updatePassword(newPassword) {
+    const sb = getSb();
+    if (!sb) {
+      return { message: 'Password updated (local simulated mode).' };
+    }
+    const { data, error } = await sb.auth.updateUser({
+      password: newPassword
+    });
+    if (error) throw error;
+    return data;
   },
 
   // Get current active user & profile

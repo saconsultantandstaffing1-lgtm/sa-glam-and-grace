@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -669,10 +669,16 @@
         </div>
         
         <div style="margin-bottom:1.5rem;">
-          <label style="display:block; font-size:0.8rem; font-weight:600; color:#d4af37; margin-bottom:6px;">Password</label>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label style="font-size:0.8rem; font-weight:600; color:#d4af37;">Password</label>
+            <button type="button" id="adminForgotPassBtn" style="background:none; border:none; color:#d4af37; font-size:0.75rem; font-weight:600; cursor:pointer; text-decoration:underline; padding:0;">Forgot Password?</button>
+          </div>
           <div style="position:relative;">
             <i class="ri-lock-password-line" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#888;"></i>
-            <input type="password" id="adminGatePassword" value="admin123" placeholder="••••••••" required style="width:100%; box-sizing:border-box; padding:11px 12px 11px 38px; background:#141210; border:1px solid rgba(212,175,55,0.3); border-radius:8px; color:#fff; font-size:0.9rem; outline:none;" />
+            <input type="password" id="adminGatePassword" value="admin123" placeholder="••••••••" required style="width:100%; box-sizing:border-box; padding:11px 40px 11px 38px; background:#141210; border:1px solid rgba(212,175,55,0.3); border-radius:8px; color:#fff; font-size:0.9rem; outline:none;" />
+            <button type="button" class="toggle-pass-visibility" data-target="adminGatePassword" title="Toggle password view" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:#a39f99; cursor:pointer; padding:4px; font-size:1.1rem; display:flex; align-items:center;">
+              <i class="ri-eye-line"></i>
+            </button>
           </div>
         </div>
         
@@ -691,6 +697,52 @@
             <i class="ri-arrow-left-line"></i> Back to Live Storefront
           </a>
         </div>
+      </form>
+
+      <!-- Admin Forgot Password / Recovery Form -->
+      <form id="adminForgotForm" style="display:none; text-align:left;">
+        <div style="text-align:center; margin-bottom:1.5rem;">
+          <h3 style="font-family:'Cinzel', serif; font-size:1.35rem; color:#d4af37; margin:0 0 6px 0;">Admin Recovery</h3>
+          <p style="font-size:0.82rem; color:#a39f99; margin:0;">Reset or restore administrative credentials</p>
+        </div>
+
+        <div style="margin-bottom:1.2rem;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#d4af37; margin-bottom:6px;">Admin Email</label>
+          <div style="position:relative;">
+            <i class="ri-mail-line" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#888;"></i>
+            <input type="email" id="adminForgotEmail" value="admin@saglam.com" required style="width:100%; box-sizing:border-box; padding:11px 12px 11px 38px; background:#141210; border:1px solid rgba(212,175,55,0.3); border-radius:8px; color:#fff; font-size:0.9rem; outline:none;" />
+          </div>
+        </div>
+
+        <div style="margin-bottom:1.2rem;">
+          <label style="display:block; font-size:0.8rem; font-weight:600; color:#d4af37; margin-bottom:6px;">Set New Password</label>
+          <div style="position:relative;">
+            <i class="ri-key-2-line" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#888;"></i>
+            <input type="password" id="adminNewPassword" placeholder="Minimum 6 characters" style="width:100%; box-sizing:border-box; padding:11px 40px 11px 38px; background:#141210; border:1px solid rgba(212,175,55,0.3); border-radius:8px; color:#fff; font-size:0.9rem; outline:none;" />
+            <button type="button" class="toggle-pass-visibility" data-target="adminNewPassword" title="Toggle password view" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:#a39f99; cursor:pointer; padding:4px; font-size:1.1rem; display:flex; align-items:center;">
+              <i class="ri-eye-line"></i>
+            </button>
+          </div>
+          <span style="font-size:0.75rem; color:#888; display:block; margin-top:4px;">Enter a new password or restore the factory default below.</span>
+        </div>
+
+        <div id="adminForgotMsg" style="display:none; font-size:0.82rem; padding:9px 12px; border-radius:6px; margin-bottom:1.2rem; line-height:1.4;"></div>
+
+        <button type="submit" id="adminResetSubmitBtn" style="width:100%; padding:13px; background:linear-gradient(135deg, #d4af37, #b8860b); color:#111; font-weight:700; border:none; border-radius:8px; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 8px 22px rgba(212,175,55,0.28);">
+          <i class="ri-refresh-line"></i> Update Admin Password
+        </button>
+
+        <button type="button" id="adminSendResetLinkBtn" style="width:100%; margin-top:0.75rem; padding:10px; background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.4); color:#d4af37; font-weight:600; border-radius:8px; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <i class="ri-mail-send-line"></i> Send Recovery Link to Email
+        </button>
+
+        <button type="button" id="adminRestoreDefaultBtn" style="width:100%; margin-top:0.75rem; padding:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:#e5e7eb; font-weight:600; border-radius:8px; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <span>🔑</span> Restore Default Password ("admin123")
+        </button>
+
+        <button type="button" id="adminBackToLoginBtn" style="width:100%; margin-top:0.75rem; padding:9px; background:transparent; color:#a39f99; border:none; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+          <i class="ri-arrow-left-line"></i> Back to Admin Sign In
+        </button>
       </form>
     </div>
   </div>
