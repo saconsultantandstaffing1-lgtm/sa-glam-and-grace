@@ -299,31 +299,40 @@ window.closeCheckoutModal = function(e) {
         }
 
         try {
-          if (window.GlamAuth) {
-            if (mode === 'signup') {
-              await window.GlamAuth.signUp(email, password, fullName, phone, 'customer');
-              localStorage.setItem('glam_customer_pass_' + email.toLowerCase(), password);
-            } else {
-              const savedPass = localStorage.getItem('glam_customer_pass_' + email.toLowerCase());
-              try {
-                await window.GlamAuth.signIn(email, password);
-              } catch(sErr) {
-                if (savedPass && savedPass === password) {
-                  // Valid updated credentials
-                } else if (password.length >= 6) {
-                  // local fallback
-                } else {
-                  throw sErr;
-                }
+          if (!window.GlamAuth) throw new Error('Authentication service unavailable.');
+          if (mode === 'signup') {
+            await window.GlamAuth.signUp(email, password, fullName, phone, 'customer');
+            localStorage.setItem('glam_customer_pass_' + email.toLowerCase(), password);
+            localStorage.setItem('glam_customer_user', JSON.stringify({ email, fullName }));
+            if (authMsg) {
+              authMsg.style.background = '#dcfce7';
+              authMsg.style.color = '#15803d';
+              authMsg.textContent = 'Account created successfully!';
+            }
+          } else {
+            const savedPass = localStorage.getItem('glam_customer_pass_' + email.toLowerCase());
+            let authPassed = false;
+            try {
+              await window.GlamAuth.signIn(email, password);
+              authPassed = true;
+            } catch(sErr) {
+              if (savedPass && savedPass === password) {
+                authPassed = true;
+              } else {
+                throw new Error('Incorrect password or email. Please verify your credentials or use Forgot Password.');
               }
             }
-          }
-          localStorage.setItem('glam_customer_user', JSON.stringify({ email, fullName }));
 
-          if (authMsg) {
-            authMsg.style.background = '#dcfce7';
-            authMsg.style.color = '#15803d';
-            authMsg.textContent = 'Welcome back! Signed in successfully.';
+            if (!authPassed) {
+              throw new Error('Incorrect password or email. Please verify your credentials or use Forgot Password.');
+            }
+
+            localStorage.setItem('glam_customer_user', JSON.stringify({ email, fullName: fullName || email.split('@')[0] }));
+            if (authMsg) {
+              authMsg.style.background = '#dcfce7';
+              authMsg.style.color = '#15803d';
+              authMsg.textContent = 'Welcome back! Signed in successfully.';
+            }
           }
 
           setTimeout(() => {
@@ -335,21 +344,13 @@ window.closeCheckoutModal = function(e) {
             }
           }, 400);
         } catch(err) {
-          // Fallback demo local login
-          localStorage.setItem('glam_customer_user', JSON.stringify({ email, fullName: fullName || email.split('@')[0] }));
           if (authMsg) {
-            authMsg.style.background = '#dcfce7';
-            authMsg.style.color = '#15803d';
-            authMsg.textContent = 'Signed in successfully!';
+            authMsg.style.display = 'block';
+            authMsg.style.background = '#fee2e2';
+            authMsg.style.border = '1px solid #fca5a5';
+            authMsg.style.color = '#991b1b';
+            authMsg.innerHTML = `<i class="ri-error-warning-line"></i> ${err.message || 'Incorrect password or email. Please verify your credentials or use Forgot Password.'}`;
           }
-          setTimeout(() => {
-            window.closeCustomerAuth();
-            if (window.pendingCategoryAddToCart) {
-              const pending = window.pendingCategoryAddToCart;
-              window.pendingCategoryAddToCart = null;
-              window.executeCategoryAddToCart(pending);
-            }
-          }, 400);
         }
       });
     }

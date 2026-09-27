@@ -768,26 +768,34 @@ class AdminApp {
 
         const customAdminPass = localStorage.getItem('glam_admin_custom_password');
         const isCustomMatch = customAdminPass && password === customAdminPass;
-        const isDefaultMatch = password === 'admin123';
+        const isDefaultMatch = (!customAdminPass && password === 'admin123') || (customAdminPass && password === customAdminPass);
 
         try {
+          let adminAuthenticated = false;
           if (window.GlamAuth) {
             try {
               await window.GlamAuth.signIn(email, password);
+              adminAuthenticated = true;
             } catch(authErr) {
-              console.warn('Supabase auth fallback:', authErr.message);
-              if (isCustomMatch || isDefaultMatch || email.toLowerCase().includes('admin') || password.length >= 6) {
-                // accepted as local admin
+              if (isCustomMatch || isDefaultMatch) {
+                adminAuthenticated = true;
               } else {
-                throw authErr;
+                throw new Error('Invalid administrator credentials. Incorrect password.');
               }
             }
+          } else if (isCustomMatch || isDefaultMatch) {
+            adminAuthenticated = true;
           }
+
+          if (!adminAuthenticated) {
+            throw new Error('Invalid administrator credentials. Incorrect password.');
+          }
+
           localStorage.setItem('glam_admin_session', JSON.stringify({ email, role: 'admin', time: Date.now() }));
           unlockPortal(email);
         } catch(err) {
           if (gateError) {
-            gateError.textContent = err.message || 'Invalid administrator credentials.';
+            gateError.textContent = err.message || 'Invalid administrator credentials. Incorrect password.';
             gateError.style.display = 'block';
           }
         }

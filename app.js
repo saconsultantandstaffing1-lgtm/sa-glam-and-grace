@@ -1652,14 +1652,18 @@ function initCustomerAuth() {
             await window.GlamAuth.signIn(email, password);
             authPassed = true;
           } catch(authErr) {
+            // Only allow if password matches the user's previously set/updated password
             if (savedPass && savedPass === password) {
               authPassed = true;
-            } else if (password.length >= 6) {
-              authPassed = true;
             } else {
-              throw authErr;
+              throw new Error('Incorrect password or email. Please verify your credentials or use Forgot Password.');
             }
           }
+
+          if (!authPassed) {
+            throw new Error('Incorrect password or email. Please verify your credentials or use Forgot Password.');
+          }
+
           localStorage.setItem('glam_customer_user', JSON.stringify({ email }));
           authMsg.style.background = '#dcfce7';
           authMsg.style.color = '#15803d';
@@ -1678,9 +1682,11 @@ function initCustomerAuth() {
         }, 400);
       } catch (err) {
         if (authMsg) {
+          authMsg.style.display = 'block';
           authMsg.style.background = '#fee2e2';
+          authMsg.style.border = '1px solid #fca5a5';
           authMsg.style.color = '#991b1b';
-          authMsg.textContent = err.message || 'Authentication error. Please check your credentials.';
+          authMsg.innerHTML = `<i class="ri-error-warning-line"></i> ${err.message || 'Incorrect password or email. Please verify your credentials or use Forgot Password.'}`;
         }
       }
     });
