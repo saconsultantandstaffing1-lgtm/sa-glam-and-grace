@@ -1891,6 +1891,14 @@ function initSupabaseCheckout() {
       if (sOrderPayment) sOrderPayment.textContent = paymentMethod;
       if (sOrderTotal) sOrderTotal.textContent = totalText;
 
+      const trackBtn = document.getElementById('trackInDashboardBtn');
+      if (trackBtn) {
+        trackBtn.href = 'dashboard.html?orderId=' + encodeURIComponent(orderId) + '&email=' + encodeURIComponent(email);
+      }
+
+      // Notify any active user dashboard tabs of newly placed order
+      window.dispatchEvent(new CustomEvent('orders_updated', { detail: { orderId, email, customer: name } }));
+
       if (formView) formView.style.display = 'none';
       if (successView) successView.style.display = 'block';
 

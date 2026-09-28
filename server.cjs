@@ -38,6 +38,8 @@ const server = http.createServer((req, res) => {
     reqPath = '/index.html';
   } else if (reqPath === '/admin' || reqPath === '/admin/') {
     reqPath = '/admin.html';
+  } else if (reqPath === '/dashboard' || reqPath === '/dashboard/' || reqPath === '/orders' || reqPath === '/orders/') {
+    reqPath = '/dashboard.html';
   }
 
   let safePath = path.normalize(path.join(BASE_DIR, reqPath));
@@ -81,5 +83,6 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`SA Glam & Grace running at http://localhost:${PORT}/`);
+  console.log(`SA Glam & Grace User Dashboard at http://localhost:${PORT}/dashboard`);
   console.log(`SA Glam & Grace Admin at http://localhost:${PORT}/admin`);
 });

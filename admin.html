@@ -306,39 +306,40 @@
           </div>
         </section>
 
-        <!-- ═══════════ TAB 3: ORDERS MANAGEMENT ═══════════ -->
+        <!-- ═══════════ TAB 3: ORDERS & INVOICES MANAGEMENT ═══════════ -->
         <section class="tab-pane" id="tab-orders">
           <div class="table-panel-card">
             <div class="panel-header-toolbar">
               <div class="panel-title-area">
-                <h3>All Customer Orders</h3>
-                <span>Dispatch status, invoice downloads and tracking</span>
+                <h3>All Customer Orders & Invoices</h3>
+                <span>Real-time dispatch fulfillment, customer tracking, and official invoices</span>
               </div>
               <div class="toolbar-actions">
                 <div class="table-search-input">
                   <i class="ri-search-line"></i>
-                  <input type="text" placeholder="Search orders..." oninput="window.app.filterOrders(this.value.toLowerCase())" />
+                  <input type="text" id="adminOrderSearchInput" placeholder="Search by Order ID, customer, garment..." oninput="window.app.filterOrders(this.value.toLowerCase())" />
                 </div>
-                <button class="btn-luxury-outline" onclick="window.app.exportCSV('orders')">
-                  <i class="ri-download-2-line"></i> Export Orders
+                <button class="btn-luxury-outline" onclick="window.app.exportCSV('orders')" title="Export all orders to CSV">
+                  <i class="ri-download-2-line"></i> Export CSV
                 </button>
               </div>
             </div>
             <div class="luxury-table-wrapper">
-              <table class="luxury-table">
+              <table class="luxury-table orders-management-table" style="width: 100%; border-collapse: collapse; table-layout: auto;">
                 <thead>
-                  <tr>
-                    <th>Order #</th>
-                    <th>Client Details</th>
-                    <th>Items Ordered</th>
-                    <th>Gross Total</th>
-                    <th>Update Status</th>
-                    <th>Date</th>
-                    <th>Invoice</th>
+                  <tr style="background: var(--bg-card-alt); border-bottom: 2px solid var(--border-subtle);">
+                    <th style="width: 60px; text-align: center; padding: 1rem 0.6rem; font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">#</th>
+                    <th style="width: 120px; text-align: left; padding: 1rem 0.85rem; font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Order ID</th>
+                    <th style="width: 220px; text-align: left; padding: 1rem 0.85rem; font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Customer Details</th>
+                    <th style="min-width: 240px; text-align: left; padding: 1rem 0.85rem; font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Items Ordered</th>
+                    <th style="width: 130px; text-align: right; padding: 1rem 0.85rem; font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Gross Total</th>
+                    <th style="width: 160px; text-align: center; padding: 1rem 0.85rem; font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Fulfillment</th>
+                    <th style="width: 120px; text-align: center; padding: 1rem 0.85rem; font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Date</th>
+                    <th style="width: 110px; text-align: center; padding: 1rem 0.85rem; font-weight: 700; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Invoice</th>
                   </tr>
                 </thead>
                 <tbody id="ordersTableBody">
-                  <!-- Injected via JS -->
+                  <!-- Injected via JavaScript -->
                 </tbody>
               </table>
             </div>
@@ -747,5 +748,49 @@
     </div>
   </div>
 
+
+  <!-- ═══════════ LUXURY INVOICE MODAL (ADMIN) ═══════════ -->
+  <div class="modal-backdrop" id="adminInvoiceModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.72); z-index:999999; justify-content:center; align-items:center; backdrop-filter:blur(6px);">
+    <div class="modal-card" style="background:#FFFFFF; width:92%; max-width:640px; border-radius:14px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.35); overflow:hidden; border:1.5px solid #D4AF37; padding:2rem 2.2rem; position:relative; max-height:90vh; overflow-y:auto;">
+      <button type="button" id="adminInvoiceCloseBtn" onclick="window.closeAdminInvoiceModal && window.closeAdminInvoiceModal()" style="position:absolute; top:1rem; right:1.2rem; background:none; border:none; font-size:1.8rem; color:#78716C; cursor:pointer; line-height:1; padding:4px 8px; border-radius:4px; z-index:10; transition:color 0.2s;" title="Close Invoice (Esc)">&times;</button>
+      <div id="adminInvoiceModalBody">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Bulletproof Global Invoice Modal Closer
+    window.closeAdminInvoiceModal = function() {
+      var modal = document.getElementById('adminInvoiceModal');
+      if (modal) {
+        modal.style.setProperty('display', 'none', 'important');
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var modal = document.getElementById('adminInvoiceModal');
+      if (modal) {
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            window.closeAdminInvoiceModal();
+          }
+        });
+      }
+      var closeBtn = document.getElementById('adminInvoiceCloseBtn');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.closeAdminInvoiceModal();
+        });
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' || e.keyCode === 27) {
+        window.closeAdminInvoiceModal();
+      }
+    });
+  </script>
 </body>
 </html>

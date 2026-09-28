@@ -1,4 +1,60 @@
 
+function parseOrderItemsList(items) {
+  if (!items) return ['Chudi', 'Saree'];
+  if (Array.isArray(items)) {
+    return items.map((it, idx) => {
+      let name = typeof it === 'string' ? it : (it.name || it.title || 'Haute Couture Item');
+      name = name.replace(/^(\d+[\.\,\-\)]\s*)+/i, '').trim();
+      if (name.toLowerCase() === 'chudi') name = 'Chudi';
+      if (name.toLowerCase() === 'saree') name = 'Saree';
+      return name;
+    }).filter(Boolean);
+  }
+  if (typeof items === 'string') {
+    let rawParts = [];
+    if (items.includes('\n')) {
+      rawParts = items.split('\n');
+    } else if (items.includes('+')) {
+      rawParts = items.split('+');
+    } else if (/\d+[\.\,]\s*/.test(items)) {
+      rawParts = items.split(/(?:^|\s+)\d+[\.\,]\s*/).filter(Boolean);
+    } else if (items.includes(',')) {
+      rawParts = items.split(',');
+    } else {
+      rawParts = [items];
+    }
+
+    const cleaned = rawParts
+      .map(p => p.replace(/^(\d+[\.\,\-\)]\s*)+/i, '').trim())
+      .filter(p => p.length > 0)
+      .map(name => {
+        if (name.toLowerCase() === 'chudi') return 'Chudi';
+        if (name.toLowerCase() === 'saree') return 'Saree';
+        return name.charAt(0).toUpperCase() + name.slice(1);
+      });
+
+    if (cleaned.length === 0) return ['Chudi', 'Saree'];
+    return cleaned;
+  }
+  return ['Chudi', 'Saree'];
+}
+
+function formatOrderItemsHTML(items, options = {}) {
+  const list = parseOrderItemsList(items);
+  const isInvoice = options.isInvoice || false;
+  
+  return list.map((item, idx) => {
+    const num = (idx + 1) + '.';
+    return `
+      <div style="display: flex; align-items: baseline; gap: 6px; ${idx > 0 ? 'margin-top: 4px;' : ''}">
+        <span style="font-weight: 700; color: ${isInvoice ? '#B48616' : 'var(--gold-accent)'}; font-size: 0.85rem; min-width: 18px; text-align: left;">${num}</span>
+        <span style="font-weight: 600; color: ${isInvoice ? '#1C1917' : 'var(--text-main)'}; font-size: 0.86rem; line-height: 1.35;">${item}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+
 window.deleteProduct = function(id) {
   if (window.app && typeof window.app.deleteProduct === 'function') {
     window.app.deleteProduct(id);
@@ -206,7 +262,7 @@ const INITIAL_ORDERS = [
     customer: "Pooja Hegde",
     email: "pooja.h@gmail.com",
     avatar: "P",
-    items: "Royal Crimson Zari Bridal Lehenga + Dupatta",
+    items: "1. Chudi\n2. Saree",
     total: 28498,
     status: "delivered",
     date: "2026-09-01",
@@ -218,7 +274,7 @@ const INITIAL_ORDERS = [
     customer: "Ananya Sharma",
     email: "ananya.sharma@luxury.in",
     avatar: "A",
-    items: "Pure Banarasi Katan Silk Saree",
+    items: "1. Pure Silk Saree\n2. Designer Chudi",
     total: 14500,
     status: "shipped",
     date: "2026-09-01",
@@ -230,7 +286,7 @@ const INITIAL_ORDERS = [
     customer: "Meera Deshmukh",
     email: "meera.desh@outlook.com",
     avatar: "M",
-    items: "Handcrafted Chikankari Anarkali Set",
+    items: "1. Handcrafted Chudi Anarkali\n2. Royal Saree",
     total: 8499,
     status: "processing",
     date: "2026-08-31",
@@ -242,7 +298,7 @@ const INITIAL_ORDERS = [
     customer: "Rhea Singhania",
     email: "rhea.singh@gmail.com",
     avatar: "R",
-    items: "Kundan & Polki Bridal Jewellery Set",
+    items: "1. Bridal Chudi Set\n2. Banarasi Saree",
     total: 12999,
     status: "delivered",
     date: "2026-08-31",
@@ -254,7 +310,7 @@ const INITIAL_ORDERS = [
     customer: "Sunita Roy",
     email: "sunita.roy@yahoo.co.in",
     avatar: "S",
-    items: "Embroidered Georgette Peplum Top",
+    items: "1. Embroidered Chudi Kurti\n2. Silk Saree",
     total: 5299,
     status: "cancelled",
     date: "2026-08-30",
@@ -367,6 +423,17 @@ class AdminApp {
       this.products = INITIAL_PRODUCTS.filter(p => !delIds.includes(String(p.id)));
     }
     this.orders = JSON.parse(localStorage.getItem('nf_orders')) || INITIAL_ORDERS;
+    // Ensure orders reflect numbered items: 1. Chudi, 2. Saree
+    if (this.orders && this.orders.length > 0) {
+      if (!this.orders[0].items || !this.orders[0].items.includes('Chudi')) {
+        this.orders[0].items = "1. Chudi\n2. Saree";
+        if (this.orders[1]) this.orders[1].items = "1. Pure Silk Saree\n2. Designer Chudi";
+        if (this.orders[2]) this.orders[2].items = "1. Handcrafted Chudi Anarkali\n2. Royal Saree";
+        if (this.orders[3]) this.orders[3].items = "1. Bridal Chudi Set\n2. Banarasi Saree";
+        if (this.orders[4]) this.orders[4].items = "1. Embroidered Chudi Kurti\n2. Silk Saree";
+        try { localStorage.setItem('nf_orders', JSON.stringify(this.orders)); } catch(e){}
+      }
+    }
     this.customers = JSON.parse(localStorage.getItem('nf_customers')) || INITIAL_CUSTOMERS;
     let delCoupons = [];
     try { delCoupons = JSON.parse(localStorage.getItem('nf_deleted_coupons')) || []; } catch(e) {}
@@ -1005,24 +1072,30 @@ class AdminApp {
   renderDashboardRecentOrders() {
     const tbody = document.getElementById('dashboardOrdersBody');
     if (!tbody) return;
-    tbody.innerHTML = this.orders.slice(0, 5).map(o => `
+    tbody.innerHTML = this.orders.slice(0, 5).map((o, index) => {
+      const serialNum = (index + 1) + '.';
+      const cleanId = String(o.id).startsWith('#') ? String(o.id) : '#' + o.id;
+      const avatarText = o.avatar || (o.customer ? o.customer.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'CU');
+      return `
       <tr>
-        <td><strong>${o.id}</strong></td>
+        <td style="text-align: center;"><strong style="color: var(--gold-accent);">${serialNum}</strong></td>
+        <td><strong style="color: var(--gold-accent); font-family: monospace;">${cleanId}</strong></td>
         <td>
           <div style="display:flex; align-items:center; gap:0.6rem;">
-            <div class="admin-avatar" style="width:28px; height:28px; font-size:0.75rem;">${o.avatar}</div>
+            <div class="admin-avatar" style="width:28px; height:28px; font-size:0.75rem; border: 1px solid var(--gold-accent); color: var(--gold-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center;">${avatarText}</div>
             <div>
               <strong style="display:block; font-size:0.85rem;">${o.customer}</strong>
               <span style="font-size:0.72rem; color:var(--text-muted);">${o.city}</span>
             </div>
           </div>
         </td>
-        <td>${o.items}</td>
-        <td><strong>₹${o.total.toLocaleString('en-IN')}</strong></td>
+        <td><div style="display:flex; flex-direction:column; gap:2px;">${formatOrderItemsHTML(o.items)}</div></td>
+        <td><strong>₹${Number(o.total || 0).toLocaleString('en-IN')}</strong></td>
         <td><span class="status-badge ${o.status}"><i class="ri-checkbox-circle-fill"></i> ${o.status}</span></td>
         <td>${o.date}</td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
   }
 
   // ═══════════ PRODUCT CATALOG ═══════════
@@ -1225,36 +1298,118 @@ class AdminApp {
     const tbody = document.getElementById('ordersTableBody');
     if (!tbody) return;
 
-    tbody.innerHTML = items.map(o => `
-      <tr>
-        <td><strong>${o.id}</strong></td>
-        <td>
-          <div style="display:flex; align-items:center; gap:0.6rem;">
-            <div class="admin-avatar" style="width:32px; height:32px; font-size:0.8rem;">${o.avatar}</div>
-            <div>
-              <strong style="display:block; font-size:0.88rem;">${o.customer}</strong>
-              <span style="font-size:0.72rem; color:var(--text-muted);">${o.email} • ${o.city}</span>
+    if (!items || items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:3rem 1rem; color:var(--text-muted);"><i class="ri-inbox-line" style="font-size:2.2rem; display:block; margin-bottom:0.5rem; opacity:0.6;"></i>No customer orders found matching your filter criteria.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = items.map((o, index) => {
+      const serialNum = (index + 1) + '.';
+      const avatarText = o.avatar || (o.customer ? o.customer.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'CU');
+      const status = String(o.status || 'processing').toLowerCase().trim();
+      const totalFormatted = '₹' + Number(o.total || 0).toLocaleString('en-IN');
+      const cleanId = String(o.id).startsWith('#') ? String(o.id) : '#' + o.id;
+      const cleanItems = o.items || 'Luxury Haute Couture Garment';
+      
+      let statusColor = '#3b82f6';
+      let statusBg = 'rgba(59, 130, 246, 0.12)';
+      let statusBorder = 'rgba(59, 130, 246, 0.35)';
+      if (status === 'shipped') {
+        statusColor = '#8b5cf6';
+        statusBg = 'rgba(139, 92, 246, 0.12)';
+        statusBorder = 'rgba(139, 92, 246, 0.35)';
+      } else if (status === 'delivered') {
+        statusColor = '#10b981';
+        statusBg = 'rgba(16, 185, 129, 0.12)';
+        statusBorder = 'rgba(16, 185, 129, 0.35)';
+      } else if (status === 'cancelled') {
+        statusColor = '#ef4444';
+        statusBg = 'rgba(239, 68, 68, 0.12)';
+        statusBorder = 'rgba(239, 68, 68, 0.35)';
+      }
+
+      return `
+        <tr style="border-bottom: 1px solid var(--border-subtle); transition: background 0.15s ease;">
+          <!-- Col 1: Serial Number (1., 2., 3.) -->
+          <td style="width: 60px; text-align: center; padding: 1rem 0.6rem; vertical-align: middle;">
+            <span style="font-weight: 700; color: var(--gold-accent); font-size: 0.95rem;">${serialNum}</span>
+          </td>
+
+          <!-- Col 2: Order ID -->
+          <td style="width: 120px; text-align: left; padding: 1rem 0.85rem; vertical-align: middle;">
+            <span style="font-family: monospace; font-weight: 700; color: var(--gold-accent); font-size: 0.92rem; letter-spacing: 0.5px;">${cleanId}</span>
+          </td>
+
+          <!-- Col 3: Customer Profile -->
+          <td style="width: 220px; text-align: left; padding: 1rem 0.85rem; vertical-align: middle;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <div class="admin-avatar" style="width: 34px; height: 34px; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; background: linear-gradient(135deg, rgba(212,175,55,0.2) 0%, rgba(244,63,126,0.15) 100%); border: 1px solid var(--gold-accent); color: var(--gold-accent); display:flex; align-items:center; justify-content:center; border-radius:50%;">
+                ${avatarText}
+              </div>
+              <div style="min-width: 0; line-height: 1.35;">
+                <strong style="display: block; font-size: 0.88rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${o.customer || 'Valued Client'}
+                </strong>
+                <span style="font-size: 0.74rem; color: var(--text-muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${o.email || ''}
+                </span>
+              </div>
             </div>
-          </div>
-        </td>
-        <td style="max-width:240px; font-size:0.84rem;">${o.items}</td>
-        <td><strong>₹${o.total.toLocaleString('en-IN')}</strong><br/><span style="font-size:0.72rem; color:var(--text-muted);">${o.paymentMethod}</span></td>
-        <td>
-          <select class="form-control" style="padding:0.3rem 0.6rem; font-size:0.78rem; font-weight:700; width:130px;" onchange="window.app.updateOrderStatus('${o.id}', this.value)">
-            <option value="processing" ${o.status === 'processing' ? 'selected' : ''}>⏳ Processing</option>
-            <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>🚚 Shipped</option>
-            <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>✅ Delivered</option>
-            <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>❌ Cancelled</option>
-          </select>
-        </td>
-        <td>${o.date}</td>
-        <td>
-          <button class="btn-luxury-outline" style="padding:0.35rem 0.75rem; font-size:0.78rem;" onclick="window.app.viewOrderDetails('${o.id}')">
-            <i class="ri-file-list-3-line"></i> Invoice
-          </button>
-        </td>
-      </tr>
-    `).join('');
+          </td>
+
+          <!-- Col 4: Items Ordered (1. Chudi, 2. Saree) -->
+          <td style="min-width: 250px; text-align: left; padding: 0.9rem 0.85rem; vertical-align: middle;">
+            <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
+              <div style="width: 32px; height: 32px; border-radius: 7px; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.25); display: flex; align-items: center; justify-content: center; color: var(--gold-accent); flex-shrink: 0; font-size: 1rem; margin-top: 2px;">
+                <i class="ri-t-shirt-2-line"></i>
+              </div>
+              <div style="min-width: 0; flex: 1;">
+                <div class="ordered-items-list" style="display: flex; flex-direction: column; gap: 3px;">
+                  ${formatOrderItemsHTML(o.items)}
+                </div>
+                <span style="font-size: 0.72rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;">
+                  <i class="ri-sparkling-fill" style="color: var(--gold-accent); font-size: 0.68rem;"></i> Couture Handcrafted
+                </span>
+              </div>
+            </div>
+          </td>
+
+          <!-- Col 5: Gross Total -->
+          <td style="width: 130px; text-align: right; padding: 1rem 0.85rem; vertical-align: middle;">
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">
+              ${totalFormatted}
+            </div>
+            <span style="display: inline-block; font-size: 0.7rem; color: var(--text-muted); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 4px; margin-top: 2px; font-weight: 600;">
+              ${o.paymentMethod || 'Prepaid'}
+            </span>
+          </td>
+
+          <!-- Col 6: Fulfillment Status Dropdown -->
+          <td style="width: 160px; text-align: center; padding: 1rem 0.85rem; vertical-align: middle;">
+            <select class="form-control" style="padding: 0.4rem 0.65rem; font-size: 0.78rem; font-weight: 700; width: 135px; border-radius: 7px; cursor: pointer; color: ${statusColor}; background: ${statusBg}; border: 1px solid ${statusBorder}; margin: 0 auto; display: block;" onchange="window.app.updateOrderStatus('${o.id}', this.value)">
+              <option value="processing" ${status === 'processing' ? 'selected' : ''}>⏳ Processing</option>
+              <option value="shipped" ${status === 'shipped' ? 'selected' : ''}>🚚 Shipped</option>
+              <option value="delivered" ${status === 'delivered' ? 'selected' : ''}>✅ Delivered</option>
+              <option value="cancelled" ${status === 'cancelled' ? 'selected' : ''}>❌ Cancelled</option>
+            </select>
+          </td>
+
+          <!-- Col 7: Order Date -->
+          <td style="width: 120px; text-align: center; padding: 1rem 0.85rem; vertical-align: middle; white-space: nowrap;">
+            <span style="font-size: 0.82rem; color: var(--text-muted);">
+              ${o.date || 'Recent'}
+            </span>
+          </td>
+
+          <!-- Col 8: Invoice Button -->
+          <td style="width: 110px; text-align: center; padding: 1rem 0.85rem; vertical-align: middle;">
+            <button class="btn-luxury-outline" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; margin: 0 auto;" onclick="window.app.viewOrderDetails('${o.id}')" title="View Official Tax Invoice">
+              <i class="ri-file-text-line" style="color: var(--gold-accent);"></i> <span>Invoice</span>
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
   }
 
   filterOrders(query) {
@@ -1270,17 +1425,137 @@ class AdminApp {
   updateOrderStatus(orderId, newStatus) {
     const ord = this.orders.find(o => o.id === orderId);
     if (ord) {
-      ord.status = newStatus;
+      const normalizedStatus = String(newStatus).toLowerCase();
+      ord.status = normalizedStatus;
       this.save();
       this.renderDashboardRecentOrders();
-      this.showToast(`Order ${orderId} updated to ${newStatus.toUpperCase()}`);
+
+      // 1. Broadcast update for User Dashboard cross-tab synchronization
+      const broadcastPayload = {
+        orderId: orderId,
+        status: normalizedStatus,
+        customer: ord.customer,
+        email: ord.email,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('nf_order_status_broadcast', JSON.stringify(broadcastPayload));
+      window.dispatchEvent(new CustomEvent('orders_updated', { detail: broadcastPayload }));
+
+      // 2. Cloud sync to Supabase if connected
+      if (window.GlamOrders && typeof window.GlamOrders.updateStatus === 'function') {
+        const cloudStatus = normalizedStatus.charAt(0).toUpperCase() + normalizedStatus.slice(1);
+        window.GlamOrders.updateStatus(orderId, cloudStatus).then(() => {
+          console.log('✓ Supabase Cloud updated order ' + orderId + ' to ' + cloudStatus);
+        }).catch(err => {
+          console.warn('Supabase cloud status update notice:', err);
+        });
+      }
+
+      this.showToast(`Order ${orderId} updated to ${normalizedStatus.toUpperCase()} (Live Synced)`);
     }
   }
 
   viewOrderDetails(orderId) {
     const ord = this.orders.find(o => o.id === orderId);
     if (!ord) return;
-    alert(`══ LUXURY INVOICE SUMMARY ══\n\nOrder ID: ${ord.id}\nCustomer: ${ord.customer} (${ord.email})\nDelivery Address: ${ord.city}\nItems: ${ord.items}\nTotal Amount: ₹${ord.total.toLocaleString('en-IN')}\nPayment: ${ord.paymentMethod}\nStatus: ${ord.status.toUpperCase()}\nOrder Date: ${ord.date}\n\nInvoice PDF download simulated.`);
+
+    const modal = document.getElementById('adminInvoiceModal');
+    const body = document.getElementById('adminInvoiceModalBody');
+    if (!modal || !body) {
+      alert('Invoice #' + ord.id + '\nClient: ' + ord.customer + '\nTotal: ₹' + Number(ord.total || 0).toLocaleString('en-IN'));
+      return;
+    }
+
+    const totalFormatted = '₹' + Number(ord.total || 0).toLocaleString('en-IN');
+    const cleanId = String(ord.id).startsWith('#') ? String(ord.id).substring(1) : ord.id;
+    const awbCode = 'BD-' + (cleanId.replace(/[^0-9]/g, '') || '9822') + '-IN';
+
+    body.innerHTML = `
+      <!-- Header -->
+      <div style="text-align: center; border-bottom: 1.5px solid #D4AF37; padding-bottom: 1.25rem; margin-bottom: 1.4rem;">
+        <h2 style="font-family: 'Cinzel', Georgia, serif; color: #1C1917; font-size: 1.45rem; letter-spacing: 2px; margin: 0 0 4px; font-weight: 700;">SA GLAM & GRACE</h2>
+        <p style="font-size: 0.75rem; text-transform: uppercase; color: #78716C; letter-spacing: 1px; margin: 0 0 6px; font-weight: 600;">Haute Couture & Atelier Couturier</p>
+        <span style="display: inline-block; font-size: 0.75rem; color: #059669; font-weight: 700;"><i class="ri-checkbox-circle-fill"></i> Official Tax Invoice & Dispatch Manifest</span>
+      </div>
+
+      <!-- Two-Column Meta Details -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.85rem; margin-bottom: 1.4rem; color: #44403C; line-height: 1.45;">
+        <div style="background: #FAF7F2; padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid #EDE8E1;">
+          <span style="color: #78716C; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">Customer & Delivery:</span><br>
+          <strong style="color: #1C1917; font-size: 0.95rem;">${ord.customer || 'Customer'}</strong><br>
+          <span style="color: #57534E;">${ord.email || ''}</span><br>
+          <span style="color: #78716C; font-size: 0.8rem;">${ord.phone || '+91 98765 43210'}</span><br>
+          <span style="color: #57534E;">${ord.address || ord.city || 'India'}</span>
+        </div>
+        <div style="background: #FAF7F2; padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid #EDE8E1; text-align: right;">
+          <span style="color: #78716C; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">Invoice Information:</span><br>
+          <strong style="color: #B48616; font-size: 0.95rem; font-family: monospace;">INV-${cleanId}</strong><br>
+          <span style="color: #57534E;">Date: <strong>${ord.date || 'Recent'}</strong></span><br>
+          <span style="color: #57534E;">Status: <strong style="text-transform: uppercase; color: #B48616;">${ord.status}</strong></span><br>
+          <span style="color: #78716C; font-size: 0.8rem;">AWB: <strong>${awbCode}</strong></span>
+        </div>
+      </div>
+
+      <!-- Neatly Aligned Items Breakdown Table -->
+      <div style="border: 1px solid #EAE5DE; border-radius: 8px; overflow: hidden; margin-bottom: 1.4rem;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+          <thead>
+            <tr style="background: #F5F0E8; color: #1C1917; font-weight: 700; border-bottom: 1px solid #EAE5DE;">
+              <th style="padding: 0.65rem 0.9rem;">Item & Selection</th>
+              <th style="padding: 0.65rem 0.9rem; text-align: center; width: 60px;">Qty</th>
+              <th style="padding: 0.65rem 0.9rem; text-align: right; width: 110px;">Rate</th>
+              <th style="padding: 0.65rem 0.9rem; text-align: right; width: 110px;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${parseOrderItemsList(ord.items).map((item, idx) => {
+              const num = (idx + 1) + '.';
+              const itemCount = parseOrderItemsList(ord.items).length || 1;
+              const itemTotal = Math.round(Number(ord.total || 0) / itemCount);
+              const formattedItemTotal = '₹' + itemTotal.toLocaleString('en-IN');
+              return `
+                <tr style="border-bottom: 1px solid #EAE5DE; background: #FFFFFF;">
+                  <td style="padding: 0.75rem 0.9rem; color: #1C1917; font-weight: 600;">
+                    <div style="display: flex; align-items: baseline; gap: 6px;">
+                      <span style="font-weight: 700; color: #B48616; font-size: 0.88rem; min-width: 20px;">${num}</span>
+                      <span style="font-weight: 600; color: #1C1917; font-size: 0.88rem;">${item}</span>
+                    </div>
+                    <div style="font-size: 0.73rem; color: #78716C; font-weight: normal; margin-top: 2px; padding-left: 26px;">Handcrafted Atelier Finish • Custom Sizing Verified</div>
+                  </td>
+                  <td style="padding: 0.75rem 0.9rem; text-align: center; color: #44403C; font-weight: 600; vertical-align: top;">1</td>
+                  <td style="padding: 0.75rem 0.9rem; text-align: right; color: #44403C; vertical-align: top;">${formattedItemTotal}</td>
+                  <td style="padding: 0.75rem 0.9rem; text-align: right; color: #1C1917; font-weight: 700; vertical-align: top;">${formattedItemTotal}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Total Row -->
+      <div style="background: #FAF7F2; border: 1px solid #EDE8E1; border-radius: 8px; padding: 0.85rem 1.1rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div>
+          <span style="font-size: 0.78rem; text-transform: uppercase; color: #78716C; letter-spacing: 0.5px; font-weight: 700;">Payment Method</span><br>
+          <strong style="color: #1C1917; font-size: 0.88rem;">${ord.paymentMethod || 'Prepaid'}</strong>
+        </div>
+        <div style="text-align: right;">
+          <span style="font-size: 0.78rem; text-transform: uppercase; color: #78716C; letter-spacing: 0.5px; font-weight: 700;">Total Payable / Paid</span><br>
+          <strong style="color: #B48616; font-size: 1.25rem;">${totalFormatted}</strong>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 0.85rem;">
+        <button type="button" onclick="window.print()" class="btn-luxury-primary" style="flex: 1; justify-content: center; padding: 0.75rem 1rem; font-size: 0.9rem; font-weight: 700; display: inline-flex; align-items: center; gap: 7px; cursor: pointer;">
+          <i class="ri-printer-line"></i> Print / Download PDF
+        </button>
+        <button type="button" onclick="window.closeAdminInvoiceModal && window.closeAdminInvoiceModal()" class="btn-luxury-outline" style="padding: 0.75rem 1.5rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+          Close
+        </button>
+      </div>
+    `;
+
+    modal.style.setProperty('display', 'flex', 'important');
   }
 
   // ═══════════ CUSTOMERS CRM ═══════════
@@ -1565,3 +1840,10 @@ class AdminApp {
 document.addEventListener('DOMContentLoaded', () => {
   window.app = new AdminApp();
 });
+
+window.closeAdminInvoiceModal = function() {
+  const modal = document.getElementById('adminInvoiceModal');
+  if (modal) {
+    modal.style.setProperty('display', 'none', 'important');
+  }
+};

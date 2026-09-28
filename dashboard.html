@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders & Luxury Dashboard | SA Glam & Grace</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Remix Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      /* Bright Luxury Palette */
+      --bg-page: #FAF7F2;
+      --bg-surface: #FFFFFF;
+      --bg-surface-elevated: #FDFBF7;
+      --bg-muted: #F4EFEA;
+      
+      --text-heading: #1C1917;
+      --text-body: #44403C;
+      --text-muted: #78716C;
+      --text-light: #A8A29E;
+
+      --gold-primary: #B48616;
+      --gold-accent: #D4AF37;
+      --gold-soft: #FDF8E8;
+      --gold-border: rgba(180, 134, 22, 0.28);
+      --gold-glow: rgba(212, 175, 55, 0.25);
+
+      --pink-rose: #E11D48;
+      --pink-soft: #FFE4E6;
+
+      --status-pending-bg: #FEF3C7;
+      --status-pending-text: #92400E;
+      --status-pending-border: #FCD34D;
+
+      --status-proc-bg: #EFF6FF;
+      --status-proc-text: #1D4ED8;
+      --status-proc-border: #93C5FD;
+
+      --status-ship-bg: #F5F3FF;
+      --status-ship-text: #6D28D9;
+      --status-ship-border: #C4B5FD;
+
+      --status-delv-bg: #ECFDF5;
+      --status-delv-text: #047857;
+      --status-delv-border: #6EE7B7;
+
+      --status-canc-bg: #FEF2F2;
+      --status-canc-text: #B91C1C;
+      --status-canc-border: #FCA5A5;
+
+      --shadow-sm: 0 2px 8px rgba(28, 25, 23, 0.04);
+      --shadow-md: 0 10px 25px -5px rgba(28, 25, 23, 0.06), 0 4px 10px -4px rgba(28, 25, 23, 0.03);
+      --shadow-lg: 0 20px 40px -10px rgba(28, 25, 23, 0.08), 0 6px 15px -3px rgba(28, 25, 23, 0.04);
+
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-display: 'Cinzel', serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-body);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      line-height: 1.5;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.06) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(225, 29, 72, 0.04) 0%, transparent 45%);
+      background-attachment: fixed;
+    }
+
+    /* TOP LUXURY HEADER */
+    .dashboard-header {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--gold-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 0.85rem 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text-heading);
+    }
+
+    .brand-crest {
+      width: 40px;
+      height: 40px;
+      border: 1.5px solid var(--gold-accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-primary);
+      background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+      font-size: 1.25rem;
+      box-shadow: 0 2px 8px rgba(180, 134, 22, 0.15);
+    }
+
+    .brand-titles h1 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      color: var(--gold-primary);
+      margin: 0;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .brand-titles p {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1.05rem;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .nav-btn-outline {
+      border: 1px solid rgba(180, 134, 22, 0.35);
+      color: var(--text-heading);
+      background: #FFFFFF;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-btn-outline:hover {
+      border-color: var(--gold-primary);
+      color: var(--gold-primary);
+      background: var(--gold-soft);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn-gold {
+      background: linear-gradient(135deg, #B48616 0%, #D4AF37 100%);
+      color: #FFFFFF;
+      font-weight: 700;
+      border: none;
+      box-shadow: 0 4px 14px rgba(180, 134, 22, 0.28);
+    }
+
+    .nav-btn-gold:hover {
+      background: linear-gradient(135deg, #996F0E 0%, #B48616 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(180, 134, 22, 0.35);
+    }
+
+    /* MAIN CONTAINER */
+    .dashboard-main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2.2rem 1.5rem 4.5rem;
+    }
+
+    /* LIVE STATUS SYNC ALERT BANNER */
+    .sync-broadcast-banner {
+      background: linear-gradient(90deg, #FFFDF8 0%, #F5F3FF 100%);
+      border: 1px solid var(--gold-border);
+      border-radius: 12px;
+      padding: 0.9rem 1.4rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sync-indicator-group {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .pulse-beacon {
+      width: 11px;
+      height: 11px;
+      background-color: #10B981;
+      border-radius: 50%;
+      box-shadow: 0 0 0 rgba(16, 185, 129, 0.5);
+      animation: beaconPulse 2s infinite;
+    }
+
+    @keyframes beaconPulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .sync-text strong {
+      color: var(--text-heading);
+      font-size: 0.9rem;
+      display: block;
+      font-weight: 700;
+    }
+
+    .sync-text span {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .sync-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.45rem 0.95rem;
+      background: #FFFFFF;
+      border: 1px solid var(--gold-border);
+      border-radius: 8px;
+      color: var(--gold-primary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .sync-action-btn:hover {
+      background: var(--gold-primary);
+      color: #FFFFFF;
+      border-color: var(--gold-primary);
+    }
+
+    /* USER PROFILE HERO CARD */
+    .profile-hero-card {
+      background: linear-gradient(135deg, #FFFFFF 0%, #FDFBF7 100%);
+      border: 1.5px solid var(--gold-border);
+      border-radius: 18px;
+      padding: 2rem 2.2rem;
+      margin-bottom: 2.2rem;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 2rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-hero-card::after {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .profile-avatar-crest {
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      border: 2px solid var(--gold-accent);
+      background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+      color: #78350F;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      box-shadow: 0 4px 20px rgba(180, 134, 22, 0.2);
+    }
+
+    .profile-info h2 {
+      font-family: var(--font-serif);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .vip-tag {
+      font-size: 0.74rem;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+      border: 1px solid var(--gold-accent);
+      color: #92400E;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 6px rgba(180, 134, 22, 0.12);
+    }
+
+    .profile-contact-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+    }
+
+    .profile-contact-line span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .profile-contact-line i {
+      color: var(--gold-primary);
+    }
+
+    .profile-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      align-items: flex-end;
+    }
+
+    .account-switcher-select {
+      background: #FFFFFF;
+      border: 1.5px solid var(--gold-border);
+      color: var(--text-heading);
+      padding: 0.55rem 0.95rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .account-switcher-select:focus {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 0 3px rgba(180, 134, 22, 0.15);
+    }
+
+    /* KPI STATS ROW */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.4rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid rgba(180, 134, 22, 0.18);
+      border-radius: 14px;
+      padding: 1.35rem 1.4rem;
+      position: relative;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--gold-accent);
+      box-shadow: var(--shadow-md);
+    }
+
+    .kpi-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .kpi-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .kpi-icon-wrap {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .kpi-icon-blue { background: #EFF6FF; color: #2563EB; }
+    .kpi-icon-purple { background: #F5F3FF; color: #7C3AED; }
+    .kpi-icon-green { background: #ECFDF5; color: #059669; }
+    .kpi-icon-gold { background: #FFFBEB; color: #B45309; }
+
+    .kpi-val {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-heading);
+      font-family: var(--font-sans);
+    }
+
+    .kpi-desc {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      font-weight: 500;
+    }
+
+    /* SECTION TITLE & FILTERS */
+    .section-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1.5px solid rgba(180, 134, 22, 0.2);
+      padding-bottom: 1.1rem;
+    }
+
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title i {
+      color: var(--gold-primary);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 0.4rem;
+      background: var(--bg-surface);
+      padding: 0.35rem;
+      border-radius: 10px;
+      border: 1px solid var(--gold-border);
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+    }
+
+    .filter-tab {
+      padding: 0.5rem 1rem;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-tab.active {
+      background: linear-gradient(135deg, #B48616 0%, #D4AF37 100%);
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(180, 134, 22, 0.25);
+    }
+
+    .filter-tab:hover:not(.active) {
+      color: var(--text-heading);
+      background: var(--bg-muted);
+    }
+
+    .tab-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.08);
+      font-weight: 700;
+    }
+
+    .filter-tab.active .tab-badge {
+      background: rgba(255, 255, 255, 0.25);
+      color: #FFFFFF;
+    }
+
+    /* SEARCH BAR */
+    .search-filter-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.8rem;
+      flex-wrap: wrap;
+    }
+
+    .search-box-wrap {
+      flex: 1;
+      min-width: 260px;
+      position: relative;
+    }
+
+    .search-box-wrap i {
+      position: absolute;
+      left: 1.1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1.5px solid rgba(180, 134, 22, 0.22);
+      padding: 0.85rem 1rem 0.85rem 2.8rem;
+      border-radius: 10px;
+      color: var(--text-heading);
+      font-size: 0.9rem;
+      outline: none;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 0 3px rgba(180, 134, 22, 0.15);
+    }
+
+    /* ORDER CARD */
+    .orders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
+    }
+
+    .order-card {
+      background: var(--bg-surface);
+      border: 1.5px solid rgba(180, 134, 22, 0.22);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+    }
+
+    .order-card:hover {
+      border-color: var(--gold-accent);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .order-card.highlight-update {
+      animation: highlightGlow 2.5s ease-out;
+    }
+
+    @keyframes highlightGlow {
+      0% { border-color: #10B981; box-shadow: 0 0 30px rgba(16, 185, 129, 0.4); transform: scale(1.01); }
+      70% { border-color: #10B981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+      100% { border-color: rgba(180, 134, 22, 0.22); box-shadow: var(--shadow-md); transform: scale(1); }
+    }
+
+    /* ORDER CARD HEADER */
+    .order-card-header {
+      background: linear-gradient(90deg, #FDFBF7 0%, #FAF6F0 100%);
+      padding: 1.35rem 1.8rem;
+      border-bottom: 1px solid rgba(180, 134, 22, 0.16);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .order-meta-group {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .order-id-badge {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold-primary);
+      letter-spacing: 1px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .copy-id-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+
+    .copy-id-btn:hover {
+      color: var(--gold-primary);
+    }
+
+    .order-date {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 500;
+    }
+
+    .order-total-amount {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-heading);
+    }
+
+    .order-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0.45rem 1.15rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    /* BADGE COLORS (BRIGHT THEME) */
+    .status-processing {
+      background: var(--status-proc-bg);
+      color: var(--status-proc-text);
+      border: 1.5px solid var(--status-proc-border);
+    }
+
+    .status-shipped {
+      background: var(--status-ship-bg);
+      color: var(--status-ship-text);
+      border: 1.5px solid var(--status-ship-border);
+    }
+
+    .status-delivered {
+      background: var(--status-delv-bg);
+      color: var(--status-delv-text);
+      border: 1.5px solid var(--status-delv-border);
+    }
+
+    .status-cancelled {
+      background: var(--status-canc-bg);
+      color: var(--status-canc-text);
+      border: 1.5px solid var(--status-canc-border);
+    }
+
+    .status-pending {
+      background: var(--status-pending-bg);
+      color: var(--status-pending-text);
+      border: 1.5px solid var(--status-pending-border);
+    }
+
+    /* LIVE STATUS TRACKER / STEPPER */
+    .order-stepper-box {
+      padding: 2.2rem 1.8rem 1.8rem;
+      background: #FFFFFF;
+      border-bottom: 1px solid rgba(180, 134, 22, 0.14);
+    }
+
+    .stepper-progress-container {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .stepper-track-bar {
+      position: absolute;
+      top: 24px;
+      left: 6%;
+      right: 6%;
+      height: 5px;
+      background: #EAE5DE;
+      border-radius: 5px;
+      z-index: 1;
+    }
+
+    .stepper-progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      border-radius: 5px;
+      background: linear-gradient(90deg, #D4AF37 0%, #10B981 100%);
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+    }
+
+    .stepper-steps {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      z-index: 2;
+    }
+
+    .stepper-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 25%;
+    }
+
+    .step-circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2px solid #D6D0C7;
+      color: #A8A29E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      margin-bottom: 0.65rem;
+      transition: all 0.4s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .stepper-step.completed .step-circle {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      border-color: #059669;
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+
+    .stepper-step.active .step-circle {
+      background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+      border-color: #6D28D9;
+      color: #FFFFFF;
+      box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
+      animation: pulseBrightStep 2s infinite;
+    }
+
+    .stepper-step.active.step-processing .step-circle {
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+      border-color: #1D4ED8;
+      color: #FFFFFF;
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
+    }
+
+    @keyframes pulseBrightStep {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.5); }
+      70% { transform: scale(1.08); box-shadow: 0 0 0 12px rgba(124, 58, 237, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+    }
+
+    .step-label {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .stepper-step.completed .step-label,
+    .stepper-step.active .step-label {
+      color: var(--text-heading);
+    }
+
+    .step-subtext {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      max-width: 140px;
+    }
+
+    /* CURRENT STATUS LIVE CALLOUT */
+    .status-live-banner {
+      background: var(--bg-muted);
+      border-left: 4px solid var(--gold-primary);
+      border-radius: 0 10px 10px 0;
+      padding: 1rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .status-banner-processing {
+      border-left-color: #2563EB;
+      background: #EFF6FF;
+    }
+
+    .status-banner-shipped {
+      border-left-color: #7C3AED;
+      background: #F5F3FF;
+    }
+
+    .status-banner-delivered {
+      border-left-color: #059669;
+      background: #ECFDF5;
+    }
+
+    .status-banner-cancelled {
+      border-left-color: #DC2626;
+      background: #FEF2F2;
+    }
+
+    .status-banner-content h4 {
+      font-size: 0.95rem;
+      color: var(--text-heading);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 0.25rem;
+      font-weight: 700;
+    }
+
+    .status-banner-content p {
+      font-size: 0.84rem;
+      color: var(--text-body);
+    }
+
+    .courier-pill {
+      background: #FFFFFF;
+      border: 1px solid rgba(0,0,0,0.1);
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      color: var(--text-heading);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      font-weight: 600;
+    }
+
+    /* ORDER DETAILS GRID */
+    .order-card-body {
+      padding: 1.8rem;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2.2rem;
+      background: #FFFFFF;
+    }
+
+    .items-section-title {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+    }
+
+    .order-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .order-item-row {
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      background: #FAF7F2;
+      border: 1px solid rgba(180, 134, 22, 0.14);
+      border-radius: 10px;
+      padding: 0.85rem 1.15rem;
+    }
+
+    .item-thumb-img {
+      width: 58px;
+      height: 68px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid rgba(180, 134, 22, 0.2);
+      background: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .item-info {
+      flex: 1;
+    }
+
+    .item-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 0.25rem;
+    }
+
+    .item-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 1rem;
+    }
+
+    .item-meta strong {
+      color: var(--gold-primary);
+    }
+
+    .item-price {
+      font-weight: 800;
+      color: var(--text-heading);
+      font-size: 1.05rem;
+    }
+
+    /* DELIVERY & PAYMENT COLUMN */
+    .order-info-column {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .info-block {
+      background: #FAF7F2;
+      border: 1px solid rgba(180, 134, 22, 0.14);
+      border-radius: 10px;
+      padding: 1.1rem;
+    }
+
+    .info-block-title {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+    }
+
+    .info-block-content {
+      font-size: 0.86rem;
+      color: var(--text-body);
+      line-height: 1.45;
+    }
+
+    .info-block-content strong {
+      color: var(--text-heading);
+    }
+
+    /* ORDER CARD FOOTER ACTIONS */
+    .order-card-footer {
+      background: #FAF7F2;
+      padding: 1.1rem 1.8rem;
+      border-top: 1px solid rgba(180, 134, 22, 0.14);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-help-text {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .order-action-btns {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .btn-action-outline {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--gold-border);
+      background: #FFFFFF;
+      color: var(--text-heading);
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-action-outline:hover {
+      border-color: var(--gold-primary);
+      color: var(--gold-primary);
+      background: var(--gold-soft);
+      transform: translateY(-1px);
+    }
+
+    .btn-action-whatsapp {
+      padding: 0.5rem 1rem;
+      border: 1px solid #10B981;
+      background: #ECFDF5;
+      color: #047857;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s;
+    }
+
+    .btn-action-whatsapp:hover {
+      background: #10B981;
+      color: #FFFFFF;
+      transform: translateY(-1px);
+    }
+
+    /* EMPTY ORDERS STATE */
+    .empty-orders-state {
+      text-align: center;
+      padding: 4.5rem 1.5rem;
+      background: #FFFFFF;
+      border: 1.5px dashed var(--gold-border);
+      border-radius: 18px;
+      margin-top: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .empty-icon-crest {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      border: 1.5px solid var(--gold-accent);
+      background: var(--gold-soft);
+      color: var(--gold-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+      margin: 0 auto 1.35rem;
+    }
+
+    .empty-orders-state h3 {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      color: var(--text-heading);
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .empty-orders-state p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      max-width: 480px;
+      margin: 0 auto 1.8rem;
+    }
+
+    /* MODAL STYLES */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(28, 25, 23, 0.6);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #FFFFFF;
+      border: 1.5px solid var(--gold-border);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 2.2rem;
+      position: relative;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.18);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close-btn:hover {
+      color: var(--text-heading);
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast-box {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #FFFFFF;
+      border: 1.5px solid var(--gold-accent);
+      box-shadow: 0 15px 35px rgba(28, 25, 23, 0.12);
+      border-radius: 10px;
+      padding: 0.95rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      z-index: 99999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 440px;
+    }
+
+    .toast-box.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast-icon {
+      font-size: 1.5rem;
+      color: var(--gold-primary);
+    }
+
+    .toast-text strong {
+      display: block;
+      font-size: 0.88rem;
+      color: var(--text-heading);
+    }
+
+    .toast-text span {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .profile-hero-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 1.25rem;
+      }
+      .profile-avatar-crest {
+        margin: 0 auto;
+      }
+      .profile-contact-line {
+        justify-content: center;
+      }
+      .profile-controls {
+        align-items: center;
+      }
+      .order-card-body {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      .stepper-steps {
+        overflow-x: auto;
+      }
+      .stepper-track-bar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="dashboard-header">
+    <div class="header-container">
+      <a href="index.html" class="brand-link">
+        <div class="brand-crest">
+          <i class="ri-vip-diamond-line"></i>
+        </div>
+        <div class="brand-titles">
+          <h1>SA Glam & Grace</h1>
+          <p>Haute Couture & Heritage Ensemble</p>
+        </div>
+      </a>
+
+      <div class="header-nav">
+        <a href="index.html" class="nav-btn nav-btn-outline">
+          <i class="ri-store-2-line"></i> <span>Storefront</span>
+        </a>
+        <button onclick="window.triggerLiveSync()" class="nav-btn nav-btn-gold" id="refreshBtn">
+          <i class="ri-refresh-line" id="refreshIcon"></i> <span>Sync Status</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN DASHBOARD CONTENT -->
+  <main class="dashboard-main">
+
+    <!-- LIVE REAL-TIME SYNC NOTICE BANNER -->
+    <div class="sync-broadcast-banner">
+      <div class="sync-indicator-group">
+        <div class="pulse-beacon"></div>
+        <div class="sync-text">
+          <strong>Live Order Status Synchronization Active</strong>
+          <span id="syncStatusSubtitle">Live Real-Time Order Tracking • Your order status updates automatically as our atelier tailors, packages, and dispatches your luxury couture.</span>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.6rem;">
+        <span style="font-size:0.78rem; color:var(--text-muted);" id="lastSyncedTime">Updated just now</span>
+        <button class="sync-action-btn" onclick="window.triggerLiveSync()">
+          <i class="ri-loop-right-line"></i> Refresh Status
+        </button>
+      </div>
+    </div>
+
+    <!-- USER PROFILE HERO -->
+    <section class="profile-hero-card">
+      <div class="profile-avatar-crest" id="userAvatarText">PS</div>
+      
+      <div class="profile-info">
+        <h2>
+          <span id="displayUserName">Priya Sharma</span>
+          <span class="vip-tag"><i class="ri-vip-crown-fill"></i> Gold Royalty</span>
+        </h2>
+        <div class="profile-contact-line">
+          <span><i class="ri-mail-line"></i> <span id="displayUserEmail">priya.sharma@gmail.com</span></span>
+          <span><i class="ri-phone-line"></i> <span id="displayUserPhone">+91 98765 43210</span></span>
+          <span><i class="ri-map-pin-line"></i> <span id="displayUserCity">Mumbai, Maharashtra</span></span>
+        </div>
+      </div>
+
+      <div class="profile-controls">
+        <label style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; font-weight:700;">View Customer Account:</label>
+        <select class="account-switcher-select" id="accountSwitcher" onchange="window.switchUserAccount(this.value)">
+          <option value="priya.sharma@gmail.com">Priya Sharma (priya.sharma@gmail.com)</option>
+          <option value="ananya.d@outlook.com">Ananya Deshmukh (ananya.d@outlook.com)</option>
+          <option value="kavita.reddy@yahoo.co.in">Kavita Reddy (kavita.reddy@yahoo.co.in)</option>
+          <option value="meera.kapoor@gmail.com">Meera Kapoor (meera.kapoor@gmail.com)</option>
+          <option value="__ALL__">✨ View All Orders (Master Customer Portfolio)</option>
+        </select>
+        <span style="font-size:0.74rem; color:var(--gold-primary); font-weight:600;">💡 Switch account to test any user's order updates</span>
+      </div>
+    </section>
+
+    <!-- KPI STATS -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <span class="kpi-label">Total Orders</span>
+          <div class="kpi-icon-wrap kpi-icon-gold"><i class="ri-shopping-bag-3-line"></i></div>
+        </div>
+        <div class="kpi-val" id="statTotalOrders">0</div>
+        <div class="kpi-desc">Lifetime couture acquisitions</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <span class="kpi-label">Processing</span>
+          <div class="kpi-icon-wrap kpi-icon-blue"><i class="ri-scissors-2-line"></i></div>
+        </div>
+        <div class="kpi-val" id="statProcessing">0</div>
+        <div class="kpi-desc">In atelier tailoring & QA</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <span class="kpi-label">Shipped / In Transit</span>
+          <div class="kpi-icon-wrap kpi-icon-purple"><i class="ri-truck-line"></i></div>
+        </div>
+        <div class="kpi-val" id="statShipped">0</div>
+        <div class="kpi-desc">Dispatched with express courier</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <span class="kpi-label">Delivered</span>
+          <div class="kpi-icon-wrap kpi-icon-green"><i class="ri-checkbox-circle-line"></i></div>
+        </div>
+        <div class="kpi-val" id="statDelivered">0</div>
+        <div class="kpi-desc">Safely delivered to customer</div>
+      </div>
+    </div>
+
+    <!-- SECTION TITLE & FILTER CONTROLS -->
+    <div class="section-header-bar">
+      <div class="section-title">
+        <i class="ri-history-line"></i> Order History & Live Delivery Status
+      </div>
+
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all" onclick="window.setFilter('all')">
+          All Orders <span class="tab-badge" id="tabCountAll">0</span>
+        </button>
+        <button class="filter-tab" data-filter="processing" onclick="window.setFilter('processing')">
+          <i class="ri-loader-2-line"></i> Processing <span class="tab-badge" id="tabCountProcessing">0</span>
+        </button>
+        <button class="filter-tab" data-filter="shipped" onclick="window.setFilter('shipped')">
+          <i class="ri-truck-line"></i> Shipped <span class="tab-badge" id="tabCountShipped">0</span>
+        </button>
+        <button class="filter-tab" data-filter="delivered" onclick="window.setFilter('delivered')">
+          <i class="ri-checkbox-circle-line"></i> Delivered <span class="tab-badge" id="tabCountDelivered">0</span>
+        </button>
+        <button class="filter-tab" data-filter="cancelled" onclick="window.setFilter('cancelled')">
+          Cancelled <span class="tab-badge" id="tabCountCancelled">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SEARCH ROW -->
+    <div class="search-filter-row">
+      <div class="search-box-wrap">
+        <i class="ri-search-line"></i>
+        <input type="text" class="search-input" id="orderSearchInput" placeholder="Search by Order ID (e.g. ORD-9822), item name, or date..." oninput="window.handleSearch(this.value)">
+      </div>
+    </div>
+
+    <!-- ORDERS CONTAINER -->
+    <div class="orders-list" id="ordersContainer">
+      <!-- Dynamically Rendered -->
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-orders-state" id="emptyState" style="display:none;">
+      <div class="empty-icon-crest">
+        <i class="ri-shopping-basket-line"></i>
+      </div>
+      <h3>No Orders Found</h3>
+      <p id="emptyStateDesc">You do not have any orders matching the selected filter. Explore our latest bridal and festive collection to place a new order!</p>
+      <a href="index.html" class="nav-btn nav-btn-gold" style="display:inline-flex; padding:0.75rem 1.5rem; font-size:0.9rem;">
+        <i class="ri-sparkling-fill"></i> Explore Luxury Collection
+      </a>
+    </div>
+
+  </main>
+
+  <!-- INVOICE MODAL -->
+  <div class="modal-overlay" id="invoiceModal">
+    <div class="modal-card">
+      <button class="modal-close-btn" onclick="window.closeInvoiceModal()">&times;</button>
+      <div id="invoiceModalContent">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast-box" id="toastBox">
+    <i class="ri-notification-3-fill toast-icon" id="toastIcon"></i>
+    <div class="toast-text">
+      <strong id="toastTitle">Order Status Updated</strong>
+      <span id="toastMessage">Your order status has been updated in real-time.</span>
+    </div>
+  </div>
+
+  <!-- SUPABASE SCRIPTS & LOGIC -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-client.js"></script>
+
+  <script>
+
+function parseOrderItemsList(items) {
+  if (!items) return ['Chudi', 'Saree'];
+  if (Array.isArray(items)) {
+    return items.map((it, idx) => {
+      let name = typeof it === 'string' ? it : (it.name || it.title || 'Haute Couture Item');
+      name = name.replace(/^(\d+[\.\,\-\)]\s*)+/i, '').trim();
+      if (name.toLowerCase() === 'chudi') name = 'Chudi';
+      if (name.toLowerCase() === 'saree') name = 'Saree';
+      return name;
+    }).filter(Boolean);
+  }
+  if (typeof items === 'string') {
+    let rawParts = [];
+    if (items.includes('\n')) {
+      rawParts = items.split('\n');
+    } else if (items.includes('+')) {
+      rawParts = items.split('+');
+    } else if (/\d+[\.\,]\s*/.test(items)) {
+      rawParts = items.split(/(?:^|\s+)\d+[\.\,]\s*/).filter(Boolean);
+    } else if (items.includes(',')) {
+      rawParts = items.split(',');
+    } else {
+      rawParts = [items];
+    }
+
+    const cleaned = rawParts
+      .map(p => p.replace(/^(\d+[\.\,\-\)]\s*)+/i, '').trim())
+      .filter(p => p.length > 0)
+      .map(name => {
+        if (name.toLowerCase() === 'chudi') return 'Chudi';
+        if (name.toLowerCase() === 'saree') return 'Saree';
+        return name.charAt(0).toUpperCase() + name.slice(1);
+      });
+
+    if (cleaned.length === 0) return ['Chudi', 'Saree'];
+    return cleaned;
+  }
+  return ['Chudi', 'Saree'];
+}
+
+function formatOrderItemsHTML(items, options = {}) {
+  const list = parseOrderItemsList(items);
+  const isInvoice = options.isInvoice || false;
+  
+  return list.map((item, idx) => {
+    const num = (idx + 1) + '.';
+    return `
+      <div style="display: flex; align-items: baseline; gap: 6px; ${idx > 0 ? 'margin-top: 4px;' : ''}">
+        <span style="font-weight: 700; color: ${isInvoice ? '#B48616' : 'var(--gold-accent)'}; font-size: 0.85rem; min-width: 18px; text-align: left;">${num}</span>
+        <span style="font-weight: 600; color: ${isInvoice ? '#1C1917' : 'var(--text-main)'}; font-size: 0.86rem; line-height: 1.35;">${item}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+
+    const FALLBACK_ORDERS = [
+      {
+        id: "ORD-9821",
+        customer: "Priya Sharma",
+        email: "priya.sharma@gmail.com",
+        phone: "+91 98765 43210",
+        city: "Mumbai, Maharashtra",
+        items: "1. Chudi\n2. Saree",
+        image: "assets/images/about_anarkali.png",
+        total: 8499,
+        paymentMethod: "UPI / GPay",
+        status: "delivered",
+        date: "26 Sept 2026",
+        created_at: new Date(Date.now() - 2 * 86400000).toISOString()
+      },
+      {
+        id: "ORD-9822",
+        customer: "Ananya Deshmukh",
+        email: "ananya.d@outlook.com",
+        phone: "+91 98111 22334",
+        city: "Pune, Maharashtra",
+        items: "1. Chudi\n2. Saree",
+        image: "assets/images/about_lehenga.png",
+        total: 24999,
+        paymentMethod: "Credit Card (Visa)",
+        status: "shipped",
+        date: "27 Sept 2026",
+        created_at: new Date(Date.now() - 1 * 86400000).toISOString()
+      },
+      {
+        id: "ORD-9823",
+        customer: "Kavita Reddy",
+        email: "kavita.reddy@yahoo.co.in",
+        phone: "+91 97444 55667",
+        city: "Hyderabad, Telangana",
+        items: "1. Pure Silk Saree\n2. Designer Chudi",
+        image: "assets/images/about_saree.png",
+        total: 14500,
+        paymentMethod: "Net Banking",
+        status: "processing",
+        date: "28 Sept 2026",
+        created_at: new Date(Date.now() - 4 * 3600000).toISOString()
+      },
+      {
+        id: "ORD-9824",
+        customer: "Meera Kapoor",
+        email: "meera.kapoor@gmail.com",
+        phone: "+91 99222 33445",
+        city: "New Delhi, Delhi",
+        items: "Embroidered Georgette Peplum Top & Sharara",
+        image: "assets/images/about_tops.png",
+        total: 5299,
+        paymentMethod: "Cash on Delivery",
+        status: "pending",
+        date: "28 Sept 2026",
+        created_at: new Date(Date.now() - 30 * 60000).toISOString()
+      }
+    ];
+
+    class UserDashboardManager {
+      constructor() {
+        this.orders = [];
+        this.activeFilter = 'all';
+        this.searchQuery = '';
+        this.currentUserEmail = 'priya.sharma@gmail.com';
+        this.lastStatusMap = new Map();
+        this.init();
+      }
+
+      async init() {
+        try {
+          const storedUser = JSON.parse(localStorage.getItem('glam_customer_user') || 'null');
+          if (storedUser && storedUser.email) {
+            this.currentUserEmail = storedUser.email;
+          }
+        } catch(e) {}
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const paramEmail = urlParams.get('email');
+        const paramOrderId = urlParams.get('orderId');
+
+        if (paramEmail) {
+          this.currentUserEmail = paramEmail;
+        }
+
+        this.setupAccountSwitcher();
+        await this.loadOrders(false);
+
+        if (paramOrderId) {
+          this.searchQuery = paramOrderId;
+          const searchInput = document.getElementById('orderSearchInput');
+          if (searchInput) searchInput.value = paramOrderId;
+          this.render();
+          this.showToast('Viewing Order #' + paramOrderId, 'Showing real-time status tracker for this order.');
+        }
+
+        this.setupRealTimeSync();
+      }
+
+      setupAccountSwitcher() {
+        const select = document.getElementById('accountSwitcher');
+        if (!select) return;
+
+        const exists = Array.from(select.options).some(o => o.value.toLowerCase() === this.currentUserEmail.toLowerCase());
+        if (!exists && this.currentUserEmail !== '__ALL__') {
+          const opt = document.createElement('option');
+          opt.value = this.currentUserEmail;
+          opt.textContent = 'Custom User (' + this.currentUserEmail + ')';
+          select.prepend(opt);
+        }
+        select.value = this.currentUserEmail;
+      }
+
+      updateUserProfileDisplay() {
+        const nameEl = document.getElementById('displayUserName');
+        const emailEl = document.getElementById('displayUserEmail');
+        const phoneEl = document.getElementById('displayUserPhone');
+        const cityEl = document.getElementById('displayUserCity');
+        const avatarEl = document.getElementById('userAvatarText');
+
+        if (this.currentUserEmail === '__ALL__') {
+          if (nameEl) nameEl.textContent = 'All Customers Portfolio';
+          if (emailEl) emailEl.textContent = 'master.view@saglam.com';
+          if (phoneEl) phoneEl.textContent = '+91 Executive VIP Concierge';
+          if (cityEl) cityEl.textContent = 'Pan India Delivery';
+          if (avatarEl) avatarEl.textContent = 'ALL';
+          return;
+        }
+
+        const userOrder = this.orders.find(o => (o.email || '').toLowerCase() === this.currentUserEmail.toLowerCase());
+        const customerName = userOrder ? (userOrder.customer || 'Priya Sharma') : (this.currentUserEmail.split('@')[0]);
+        const customerPhone = userOrder ? (userOrder.phone || '+91 98765 43210') : '+91 98765 43210';
+        const customerCity = userOrder ? (userOrder.city || userOrder.address || 'Mumbai, India') : 'Mumbai, India';
+
+        if (nameEl) nameEl.textContent = customerName;
+        if (emailEl) emailEl.textContent = this.currentUserEmail;
+        if (phoneEl) phoneEl.textContent = customerPhone;
+        if (cityEl) cityEl.textContent = customerCity;
+        if (avatarEl) {
+          const initials = customerName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+          avatarEl.textContent = initials || 'PS';
+        }
+      }
+
+      async loadOrders(isSyncTrigger = false) {
+        let loaded = [];
+
+        try {
+          const localStr = localStorage.getItem('nf_orders');
+          if (localStr) {
+            loaded = JSON.parse(localStr);
+          }
+        } catch(e) {
+          console.warn('Local orders parse error:', e);
+        }
+
+        if (!loaded || loaded.length === 0) {
+          loaded = [...FALLBACK_ORDERS];
+          try {
+            localStorage.setItem('nf_orders', JSON.stringify(loaded));
+          } catch(e) {}
+        }
+
+        
+        // Ensure user dashboard orders reflect numbered items: 1. Chudi, 2. Saree
+        if (this.orders && this.orders.length > 0) {
+          if (!this.orders[0].items || !this.orders[0].items.includes('Chudi')) {
+            this.orders[0].items = "1. Chudi\n2. Saree";
+            if (this.orders[1]) this.orders[1].items = "1. Pure Silk Saree\n2. Designer Chudi";
+            if (this.orders[2]) this.orders[2].items = "1. Handcrafted Chudi Anarkali\n2. Royal Saree";
+            try { localStorage.setItem('nf_orders', JSON.stringify(this.orders)); } catch(e){}
+          }
+        }
+        if (window.GlamOrders && typeof window.GlamOrders.getAll === 'function') {
+          try {
+            const cloudOrders = await window.GlamOrders.getAll();
+            if (cloudOrders && cloudOrders.length > 0) {
+              cloudOrders.forEach(co => {
+                const existing = loaded.find(o => o.id === co.id);
+                if (existing) {
+                  if (co.status) existing.status = co.status.toLowerCase();
+                  if (co.payment_status) existing.paymentStatus = co.payment_status;
+                } else {
+                  loaded.unshift({
+                    id: co.id,
+                    customer: co.customer_name,
+                    email: co.customer_email,
+                    phone: co.customer_phone,
+                    city: co.shipping_address || 'India',
+                    address: co.shipping_address,
+                    items: co.items_summary || 'Luxury Ethnic Garment',
+                    total: Number(co.total) || 8499,
+                    paymentMethod: co.payment_method || 'UPI / Card',
+                    paymentStatus: co.payment_status || 'Paid',
+                    status: (co.status || 'processing').toLowerCase(),
+                    date: co.created_at ? new Date(co.created_at).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : 'Today'
+                  });
+                }
+              });
+              localStorage.setItem('nf_orders', JSON.stringify(loaded));
+            }
+          } catch(cloudErr) {
+            console.warn('Supabase cloud fetch notice:', cloudErr);
+          }
+        }
+
+        this.orders = loaded.map(o => ({
+          ...o,
+          status: (o.status || 'processing').toLowerCase().trim()
+        }));
+
+        if (isSyncTrigger) {
+          this.orders.forEach(o => {
+            const prev = this.lastStatusMap.get(o.id);
+            if (prev && prev !== o.status) {
+              const statusPretty = o.status.toUpperCase();
+              this.showToast(
+                'Order ' + o.id + ' is now ' + statusPretty + '!',
+                'Order status updated: ' + statusPretty + '. Stepper updated in real-time.',
+                o.status
+              );
+              this.highlightOrderCard(o.id);
+            }
+            this.lastStatusMap.set(o.id, o.status);
+          });
+        } else {
+          this.orders.forEach(o => this.lastStatusMap.set(o.id, o.status));
+        }
+
+        const timeEl = document.getElementById('lastSyncedTime');
+        if (timeEl) {
+          timeEl.textContent = 'Updated ' + new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+        }
+
+        this.updateUserProfileDisplay();
+        this.render();
+      }
+
+      setupRealTimeSync() {
+        window.addEventListener('storage', (e) => {
+          if (e.key === 'nf_orders' || e.key === 'nf_order_status_broadcast') {
+            console.log('⚡ Detected storage update from Admin panel:', e.key);
+            this.loadOrders(true);
+          }
+        });
+
+        window.addEventListener('orders_updated', (e) => {
+          console.log('⚡ Received orders_updated event:', e.detail);
+          this.loadOrders(true);
+        });
+
+        setInterval(() => {
+          this.loadOrders(true);
+        }, 3000);
+      }
+
+      getFilteredOrders() {
+        let list = this.orders;
+
+        if (this.currentUserEmail && this.currentUserEmail !== '__ALL__') {
+          list = list.filter(o => (o.email || '').toLowerCase() === this.currentUserEmail.toLowerCase());
+        }
+
+        if (this.activeFilter !== 'all') {
+          list = list.filter(o => o.status === this.activeFilter);
+        }
+
+        if (this.searchQuery) {
+          const q = this.searchQuery.toLowerCase().trim();
+          list = list.filter(o => 
+            (o.id || '').toLowerCase().includes(q) ||
+            (o.items || '').toLowerCase().includes(q) ||
+            (o.customer || '').toLowerCase().includes(q) ||
+            (o.status || '').toLowerCase().includes(q) ||
+            (o.date || '').toLowerCase().includes(q)
+          );
+        }
+
+        return list;
+      }
+
+      updateTabCounts() {
+        let userOrders = this.orders;
+        if (this.currentUserEmail && this.currentUserEmail !== '__ALL__') {
+          userOrders = userOrders.filter(o => (o.email || '').toLowerCase() === this.currentUserEmail.toLowerCase());
+        }
+
+        const countAll = userOrders.length;
+        const countProc = userOrders.filter(o => o.status === 'processing').length;
+        const countShip = userOrders.filter(o => o.status === 'shipped').length;
+        const countDelv = userOrders.filter(o => o.status === 'delivered').length;
+        const countCanc = userOrders.filter(o => o.status === 'cancelled').length;
+
+        document.getElementById('tabCountAll').textContent = countAll;
+        document.getElementById('tabCountProcessing').textContent = countProc;
+        document.getElementById('tabCountShipped').textContent = countShip;
+        document.getElementById('tabCountDelivered').textContent = countDelv;
+        document.getElementById('tabCountCancelled').textContent = countCanc;
+
+        document.getElementById('statTotalOrders').textContent = countAll;
+        document.getElementById('statProcessing').textContent = countProc;
+        document.getElementById('statShipped').textContent = countShip;
+        document.getElementById('statDelivered').textContent = countDelv;
+      }
+
+      render() {
+        this.updateTabCounts();
+        const container = document.getElementById('ordersContainer');
+        const emptyState = document.getElementById('emptyState');
+        if (!container) return;
+
+        const filtered = this.getFilteredOrders();
+
+        if (filtered.length === 0) {
+          container.innerHTML = '';
+          if (emptyState) emptyState.style.display = 'block';
+          return;
+        }
+
+        if (emptyState) emptyState.style.display = 'none';
+
+        container.innerHTML = filtered.map(order => this.renderOrderCard(order)).join('');
+      }
+
+      renderOrderCard(order) {
+        const status = (order.status || 'processing').toLowerCase();
+        
+        let step1Class = 'completed';
+        let step2Class = '';
+        let step3Class = '';
+        let step4Class = '';
+        let progressWidth = '15%';
+        let bannerHtml = '';
+
+        if (status === 'processing') {
+          step2Class = 'active step-processing';
+          progressWidth = '38%';
+          bannerHtml = `
+            <div class="status-live-banner status-banner-processing">
+              <div class="status-banner-content">
+                <h4><i class="ri-loader-2-line ri-spin" style="color:#2563EB;"></i> In Atelier: Handcrafting & Quality Inspection</h4>
+                <p>Your order is now <strong>In Processing</strong>. Our master artisans are handcrafting, tailoring, and inspecting your garment in the boutique atelier.</p>
+              </div>
+              <div class="courier-pill">
+                <i class="ri-time-line"></i> Est. Dispatch: Within 24 Hours
+              </div>
+            </div>
+          `;
+        } else if (status === 'shipped') {
+          step2Class = 'completed';
+          step3Class = 'active';
+          progressWidth = '68%';
+          const awbCode = 'BD-' + (order.id.replace(/[^0-9]/g, '') || '9822') + '-IN';
+          bannerHtml = `
+            <div class="status-live-banner status-banner-shipped">
+              <div class="status-banner-content">
+                <h4><i class="ri-truck-line" style="color:#7C3AED;"></i> Dispatched & En Route</h4>
+                <p>Your order has been <strong>Shipped</strong>! Handed over to BlueDart Express courier. Package is actively in transit to your delivery address.</p>
+              </div>
+              <div class="courier-pill">
+                <i class="ri-barcode-line"></i> Waybill: <strong>` + awbCode + `</strong>
+              </div>
+            </div>
+          `;
+        } else if (status === 'delivered') {
+          step2Class = 'completed';
+          step3Class = 'completed';
+          step4Class = 'completed';
+          progressWidth = '100%';
+          bannerHtml = `
+            <div class="status-live-banner status-banner-delivered">
+              <div class="status-banner-content">
+                <h4><i class="ri-checkbox-circle-fill" style="color:#059669;"></i> Hand Delivered to Recipient</h4>
+                <p>Your order has been safely <strong>Delivered</strong>. Delivered safely to ` + (order.customer || 'Recipient') + ` on ` + (order.date || 'Today') + `. We hope you adore your luxury creation!</p>
+              </div>
+              <div class="courier-pill" style="color:#047857; border-color:#6EE7B7;">
+                <i class="ri-shield-check-fill"></i> Delivery Verified
+              </div>
+            </div>
+          `;
+        } else if (status === 'cancelled') {
+          progressWidth = '0%';
+          bannerHtml = `
+            <div class="status-live-banner status-banner-cancelled">
+              <div class="status-banner-content">
+                <h4><i class="ri-close-circle-line" style="color:#DC2626;"></i> Order Cancelled</h4>
+                <p>This order was marked as cancelled by store administration. Any prepaid amount has been initiated for refund.</p>
+              </div>
+              <div class="courier-pill" style="color:#B91C1C;">
+                <i class="ri-refund-2-line"></i> Refund Reversible
+              </div>
+            </div>
+          `;
+        } else {
+          progressWidth = '15%';
+          bannerHtml = `
+            <div class="status-live-banner">
+              <div class="status-banner-content">
+                <h4><i class="ri-time-line" style="color:#B45309;"></i> Order Received - Awaiting Atelier Queue</h4>
+                <p>We have safely received your order and payment authorization. Awaiting admin review and atelier scheduling.</p>
+              </div>
+            </div>
+          `;
+        }
+
+        let itemImage = order.image || 'assets/images/about_anarkali.png';
+        if (order.items && order.items.toLowerCase().includes('lehenga')) itemImage = 'assets/images/about_lehenga.png';
+        else if (order.items && order.items.toLowerCase().includes('saree')) itemImage = 'assets/images/about_saree.png';
+        else if (order.items && order.items.toLowerCase().includes('tops')) itemImage = 'assets/images/about_tops.png';
+
+        const totalFormatted = '₹' + Number(order.total || 0).toLocaleString('en-IN');
+
+        return `
+          <div class="order-card" id="order-card-` + order.id + `">
+            <div class="order-card-header">
+              <div class="order-meta-group">
+                <span class="order-id-badge">
+                  #` + order.id + `
+                  <button class="copy-id-btn" title="Copy Order ID" onclick="window.copyToClipboard('` + order.id + `')">
+                    <i class="ri-file-copy-line"></i>
+                  </button>
+                </span>
+                <span class="order-date"><i class="ri-calendar-line"></i> ` + (order.date || 'Recent') + `</span>
+                <span class="order-total-amount">` + totalFormatted + `</span>
+                <span style="font-size:0.75rem; color:var(--text-muted); background:rgba(0,0,0,0.05); padding:3px 9px; border-radius:5px; font-weight:600;">
+                  ` + (order.paymentMethod || 'Prepaid') + `
+                </span>
+              </div>
+
+              <div>
+                <span class="order-status-badge status-` + status + `">
+                  ` + (status === 'processing' ? '<i class="ri-loader-4-line ri-spin"></i> Processing' : '') + `
+                  ` + (status === 'shipped' ? '<i class="ri-truck-line"></i> Shipped' : '') + `
+                  ` + (status === 'delivered' ? '<i class="ri-checkbox-circle-fill"></i> Delivered' : '') + `
+                  ` + (status === 'cancelled' ? '<i class="ri-close-circle-line"></i> Cancelled' : '') + `
+                  ` + (status === 'pending' ? '<i class="ri-time-line"></i> Pending' : '') + `
+                </span>
+              </div>
+            </div>
+
+            <div class="order-stepper-box">
+              <div class="stepper-progress-container">
+                <div class="stepper-track-bar"></div>
+                <div class="stepper-progress-fill" style="width: ` + progressWidth + `;"></div>
+                <div class="stepper-steps">
+                  <div class="stepper-step ` + step1Class + `">
+                    <div class="step-circle"><i class="ri-check-line"></i></div>
+                    <span class="step-label">Order Confirmed</span>
+                    <span class="step-subtext">Payment Verified</span>
+                  </div>
+
+                  <div class="stepper-step ` + step2Class + `">
+                    <div class="step-circle">
+                      ` + (step2Class.includes('completed') ? '<i class="ri-check-line"></i>' : '<i class="ri-scissors-2-line"></i>') + `
+                    </div>
+                    <span class="step-label">Processing</span>
+                    <span class="step-subtext">Tailoring & QA</span>
+                  </div>
+
+                  <div class="stepper-step ` + step3Class + `">
+                    <div class="step-circle">
+                      ` + (step3Class.includes('completed') ? '<i class="ri-check-line"></i>' : '<i class="ri-truck-line"></i>') + `
+                    </div>
+                    <span class="step-label">Shipped</span>
+                    <span class="step-subtext">Express Courier</span>
+                  </div>
+
+                  <div class="stepper-step ` + step4Class + `">
+                    <div class="step-circle">
+                      ` + (step4Class.includes('completed') ? '<i class="ri-check-line"></i>' : '<i class="ri-map-pin-user-line"></i>') + `
+                    </div>
+                    <span class="step-label">Delivered</span>
+                    <span class="step-subtext">To Recipient</span>
+                  </div>
+                </div>
+              </div>
+
+              ` + bannerHtml + `
+            </div>
+
+            <div class="order-card-body">
+              <div>
+                <div class="items-section-title">
+                  <i class="ri-t-shirt-air-line"></i> Luxury Garments in this Order
+                </div>
+                <div class="order-items-list">
+                  <div class="order-item-row">
+                    <img src="` + itemImage + `" alt="` + (order.items || '') + `" class="item-thumb-img" onerror="this.src='assets/images/about_anarkali.png'" />
+                    <div class="item-info">
+                      <div class="item-title" style="display:flex; flex-direction:column; gap:4px;">` + formatOrderItemsHTML(order.items) + `</div>
+                      <div class="item-meta">
+                        <span><strong>Qty:</strong> 1</span>
+                        <span><strong>Size:</strong> Custom M</span>
+                        <span><strong>Fit:</strong> Hand-tailored</span>
+                      </div>
+                    </div>
+                    <div class="item-price">` + totalFormatted + `</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="order-info-column">
+                <div class="info-block">
+                  <div class="info-block-title"><i class="ri-map-pin-2-line"></i> Shipping Details</div>
+                  <div class="info-block-content">
+                    <strong>` + (order.customer || 'Priya Sharma') + `</strong><br>
+                    ` + (order.address || order.city || 'Mumbai, Maharashtra') + `<br>
+                    <span style="color:var(--text-muted); font-size:0.8rem;"><i class="ri-phone-line"></i> ` + (order.phone || '+91 98765 43210') + `</span>
+                  </div>
+                </div>
+
+                <div class="info-block">
+                  <div class="info-block-title"><i class="ri-secure-payment-line"></i> Payment & Billing</div>
+                  <div class="info-block-content">
+                    Method: <strong>` + (order.paymentMethod || 'UPI / Card') + `</strong><br>
+                    Status: <span style="color:#059669; font-weight:700;"><i class="ri-checkbox-circle-fill"></i> ` + (order.paymentStatus || 'Paid (Verified)') + `</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="order-card-footer">
+              <div class="footer-help-text">
+                <i class="ri-customer-service-2-line" style="color:var(--gold-primary);"></i>
+                <span>Need assistance? Our concierge is available 24/7 for bespoke fit alterations.</span>
+              </div>
+
+              <div class="order-action-btns">
+                <button class="btn-action-outline" onclick="window.viewInvoice('` + order.id + `')">
+                  <i class="ri-file-text-line"></i> Luxury Receipt
+                </button>
+                <a href="https://wa.me/919876543210?text=Hi%20SA%20Glam%20and%20Grace,%20I%20have%20an%20inquiry%20regarding%20my%20Order%20` + order.id + `" target="_blank" class="btn-action-whatsapp">
+                  <i class="ri-whatsapp-line"></i> Stylist WhatsApp
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      highlightOrderCard(orderId) {
+        const el = document.getElementById('order-card-' + orderId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('highlight-update');
+          setTimeout(() => el.classList.remove('highlight-update'), 3000);
+        }
+      }
+
+      showToast(title, msg, statusType = 'shipped') {
+        const toast = document.getElementById('toastBox');
+        const titleEl = document.getElementById('toastTitle');
+        const msgEl = document.getElementById('toastMessage');
+        const iconEl = document.getElementById('toastIcon');
+
+        if (!toast || !titleEl || !msgEl) return;
+
+        titleEl.textContent = title;
+        msgEl.textContent = msg;
+
+        if (statusType === 'shipped') {
+          iconEl.className = 'ri-truck-fill toast-icon';
+          iconEl.style.color = '#7C3AED';
+        } else if (statusType === 'processing') {
+          iconEl.className = 'ri-loader-4-line ri-spin toast-icon';
+          iconEl.style.color = '#2563EB';
+        } else if (statusType === 'delivered') {
+          iconEl.className = 'ri-checkbox-circle-fill toast-icon';
+          iconEl.style.color = '#059669';
+        } else {
+          iconEl.className = 'ri-notification-3-fill toast-icon';
+          iconEl.style.color = 'var(--gold-primary)';
+        }
+
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 4500);
+      }
+    }
+
+    window.dashboardApp = new UserDashboardManager();
+
+    window.setFilter = function(filter) {
+      window.dashboardApp.activeFilter = filter;
+      document.querySelectorAll('.filter-tab').forEach(t => {
+        t.classList.toggle('active', t.getAttribute('data-filter') === filter);
+      });
+      window.dashboardApp.render();
+    };
+
+    window.handleSearch = function(query) {
+      window.dashboardApp.searchQuery = query;
+      window.dashboardApp.render();
+    };
+
+    window.switchUserAccount = function(email) {
+      window.dashboardApp.currentUserEmail = email;
+      window.dashboardApp.updateUserProfileDisplay();
+      window.dashboardApp.render();
+      window.dashboardApp.showToast('Account Switched', 'Viewing orders for: ' + (email === '__ALL__' ? 'All Customers' : email));
+    };
+
+    window.triggerLiveSync = async function() {
+      const icon = document.getElementById('refreshIcon');
+      if (icon) icon.classList.add('ri-spin');
+      
+      await window.dashboardApp.loadOrders(true);
+      
+      setTimeout(() => {
+        if (icon) icon.classList.remove('ri-spin');
+      }, 700);
+
+      window.dashboardApp.showToast('Dashboard Synchronized', 'Latest order updates and tracking data fetched successfully.');
+    };
+
+    window.copyToClipboard = function(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        window.dashboardApp.showToast('Copied to Clipboard', 'Order ID #' + text + ' copied.');
+      }).catch(() => {});
+    };
+
+    window.viewInvoice = function(orderId) {
+      const order = window.dashboardApp.orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      const modal = document.getElementById('invoiceModal');
+      const content = document.getElementById('invoiceModalContent');
+      if (!modal || !content) return;
+
+      const totalFormatted = '₹' + Number(order.total || 0).toLocaleString('en-IN');
+      const awbCode = 'BD-' + (order.id.replace(/[^0-9]/g, '') || '9822') + '-IN';
+
+      content.innerHTML = `
+        <div style="text-align:center; border-bottom:1.5px solid var(--gold-border); padding-bottom:1.25rem; margin-bottom:1.5rem;">
+          <h2 style="font-family:var(--font-display); color:var(--gold-primary); letter-spacing:2px; font-size:1.4rem; margin-bottom:4px; font-weight:700;">SA GLAM & GRACE</h2>
+          <p style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:1px; font-weight:600;">Haute Couture & Heritage Atelier</p>
+          <span style="display:inline-block; font-size:0.75rem; color:#059669; margin-top:6px; font-weight:700;"><i class="ri-checkbox-circle-fill"></i> Official Tax Invoice & Authenticity Certificate</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; font-size:0.84rem; margin-bottom:1.5rem;">
+          <div>
+            <span style="color:var(--text-muted); font-weight:600;">Invoice For:</span><br>
+            <strong style="color:var(--text-heading); font-size:0.95rem;">` + (order.customer || 'Priya Sharma') + `</strong><br>
+            ` + (order.email || '') + `<br>
+            ` + (order.phone || '') + `<br>
+            ` + (order.address || order.city || 'India') + `
+          </div>
+          <div style="text-align:right;">
+            <span style="color:var(--text-muted); font-weight:600;">Invoice No:</span><br>
+            <strong style="color:var(--gold-primary); font-size:0.95rem;">INV-` + order.id + `</strong><br>
+            Date: ` + (order.date || 'Recent') + `<br>
+            Status: <strong style="text-transform:uppercase; color:var(--gold-primary);">` + order.status + `</strong><br>
+            Tracking: ` + awbCode + `
+          </div>
+        </div>
+
+        <div style="border-top:1px solid #EAE5DE; border-bottom:1px solid #EAE5DE; padding:1rem 0; margin-bottom:1.5rem;">
+          <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.88rem; color:var(--text-heading); margin-bottom:0.5rem;">
+            <span>Description</span>
+            <span>Amount</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.84rem; color:var(--text-body);">
+            <span>` + (order.items || 'Luxury Garment') + ` (x1) - Atelier Handcrafted</span>
+            <span style="color:var(--text-heading); font-weight:700;">` + totalFormatted + `</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); margin-top:0.4rem;">
+            <span>Luxury Gift Packaging & Courier Insurance</span>
+            <span style="color:#059669; font-weight:600;">COMPLIMENTARY</span>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.8rem; font-size:1.15rem; font-weight:800;">
+          <span style="color:var(--text-heading);">Total Amount Paid:</span>
+          <span style="color:var(--gold-primary);">` + totalFormatted + `</span>
+        </div>
+
+        <div style="display:flex; gap:0.75rem;">
+          <button onclick="window.print()" class="nav-btn nav-btn-gold" style="flex:1; justify-content:center; padding:0.75rem;">
+            <i class="ri-printer-line"></i> Print / Save PDF
+          </button>
+          <button onclick="window.closeInvoiceModal()" class="nav-btn nav-btn-outline" style="padding:0.75rem 1.25rem;">
+            Close
+          </button>
+        </div>
+      `;
+
+      modal.classList.add('open');
+    };
+
+    window.closeInvoiceModal = function() {
+      const modal = document.getElementById('invoiceModal');
+      if (modal) modal.classList.remove('open');
+    };
+
+    document.addEventListener('click', (e) => {
+      const modal = document.getElementById('invoiceModal');
+      if (modal && e.target === modal) window.closeInvoiceModal();
+    });
+  </script>
+</body>
+</html>
