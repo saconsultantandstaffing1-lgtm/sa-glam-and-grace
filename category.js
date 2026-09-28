@@ -1,4 +1,37 @@
 
+  window.categoryCardSelectedSizes = {};
+  window.selectCategoryCardSize = function(prodId, size, btn, e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    window.categoryCardSelectedSizes[prodId] = size;
+    const card = btn.closest('.product-card');
+    if (card) {
+      card.querySelectorAll('.card-size-btn').forEach(b => b.classList.remove('active'));
+    }
+    btn.classList.add('active');
+  };
+
+  window.addCategoryCardToCart = function(prodId, prodObj) {
+    const avail = prodObj.sizes && prodObj.sizes.length > 0 ? prodObj.sizes : ['S', 'M', 'L', 'XL', 'XXL'];
+    const chosenSize = window.categoryCardSelectedSizes[prodId] || (avail.includes('M') ? 'M' : avail[0]);
+    window.categoryAddToCart({
+      ...prodObj,
+      size: chosenSize
+    });
+  };
+
+  window.selectCategoryQvSize = function(size, btn) {
+    window.selectedCategoryQvSize = size;
+    const container = document.getElementById('qvSizeSelector');
+    if (container) {
+      container.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    }
+    if (btn) btn.classList.add('active');
+  };
+  
+
 window.openCheckoutModal = function(e) {
   if (e && e.preventDefault) e.preventDefault();
 
@@ -540,6 +573,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let delIds = [];
         try { delIds = JSON.parse(localStorage.getItem('nf_deleted_products')) || []; } catch(e) {}
         if (Array.isArray(parsed) && parsed.length > 0) {
+          parsed.forEach(p => {
+            if (!p.sizes || !Array.isArray(p.sizes) || p.sizes.length === 0) {
+              p.sizes = (p.category === 'Saree' || p.category === 'Dupatta') ? ['Free Size'] : ['S', 'M', 'L', 'XL', 'XXL'];
+            }
+          });
           prods = parsed.filter(p => !delIds.includes(String(p.id)));
         }
       }
@@ -621,12 +659,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const isWishlisted = (window.stateWishlist && window.stateWishlist.includes(id));
 
+      const availSizes = prod.sizes && prod.sizes.length > 0 ? prod.sizes : (prod.category === 'Saree' || prod.category === 'Dupatta' ? ['Free Size'] : ['S', 'M', 'L', 'XL', 'XXL']);
+      const defaultSize = availSizes.includes('M') ? 'M' : availSizes[0];
+      if (!window.categoryCardSelectedSizes[id]) {
+        window.categoryCardSelectedSizes[id] = defaultSize;
+      }
+      const activeSize = window.categoryCardSelectedSizes[id] || defaultSize;
+
       const safeProdObj = JSON.stringify({
         id: id,
         title: name,
         price: price,
         image: image,
-        category: category
+        category: category,
+        sizes: availSizes
       }).replace(/"/g, '&quot;');
 
       return `
@@ -639,7 +685,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <img src="${image}" alt="${name}" class="product-img-primary" onerror="this.onerror=null; this.src='./assets/images/hero_1.png';" style="object-fit:cover; width:100%; height:100%;">
             
             <div class="product-hover-actions">
-              <button class="btn-quick-add" onclick="window.categoryAddToCart(${safeProdObj})">
+              <button class="btn-quick-add" onclick="window.addCategoryCardToCart('${id}', ${safeProdObj})">
                 Add to Cart
               </button>
               <button class="btn-quick-view" onclick="window.categoryQuickView(${safeProdObj})" title="Quick View">
@@ -650,6 +696,17 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="product-info">
             <span class="product-category-label">${category}</span>
             <h3 class="product-title">${name}</h3>
+            
+            <!-- Selectable Sizes (S, M, L, XL, XXL) in Category -->
+            <div class="product-sizes-selector-row">
+              <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:#78716c; letter-spacing:0.5px; margin-right:3px;">Size:</span>
+              ${availSizes.map(s => `
+                <button type="button" class="card-size-btn ${s === activeSize ? 'active' : ''}" onclick="window.selectCategoryCardSize('${id}', '${s}', this, event)">
+                  ${s}
+                </button>
+              `).join('')}
+            </div>
+
             <div class="product-price-row">
               <div class="price-box">
                 <span class="current-price">₹${price.toLocaleString('en-IN')}</span>
@@ -662,7 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
         </div>
-      `;
+      `;;
     }).join('');
   }
 
@@ -883,6 +940,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
 function renderCartDrawer() {
+    try {
+      const saved = localStorage.getItem('glam_cart');
+      if (saved) localCart = JSON.parse(saved);
+    } catch(e) {}
+
     const list = document.getElementById('cartItemsList');
     const subtotalEl = document.getElementById('cartSubtotal');
     const discountRow = document.getElementById('cartDiscountRow');
@@ -915,6 +977,11 @@ function renderCartDrawer() {
         <img src="${item.image}" alt="${item.title}" style="width:55px; height:70px; object-fit:cover; border-radius:4px;" />
         <div style="flex:1;">
           <h4 style="font-size:0.85rem; margin:0 0 4px 0; font-family:var(--font-serif); color:#181412;">${item.title}</h4>
+          <div style="margin: 2px 0 5px 0;">
+            <span style="display:inline-block; font-size:0.75rem; font-weight:700; color:#8c733e; background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.3); padding:2px 7px; border-radius:4px;">
+              Size: ${item.size || 'M'}
+            </span>
+          </div>
           <span style="font-size:0.82rem; color:#b45309; font-weight:700;">₹${Number(item.price).toLocaleString('en-IN')}</span>
           <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
             <button onclick="window.changeCartQty(${idx}, -1)" style="padding:2px 8px; border:1px solid #ddd; background:#fff; cursor:pointer; border-radius:4px;">-</button>
@@ -1008,11 +1075,23 @@ function renderCartDrawer() {
   };
 
   window.executeCategoryAddToCart = function(product) {
-    const existing = localCart.find(i => String(i.id) === String(product.id));
+    try {
+      const saved = localStorage.getItem('glam_cart');
+      if (saved) localCart = JSON.parse(saved);
+    } catch(e) {}
+    const chosenSize = product.size || (product.sizes && product.sizes.length > 0 ? (product.sizes.includes('M') ? 'M' : product.sizes[0]) : 'M');
+    const cartKey = String(product.id) + '_' + chosenSize;
+
+    const existing = localCart.find(i => (i.cartKey ? i.cartKey === cartKey : (String(i.id) === String(product.id) && i.size === chosenSize)));
     if (existing) {
       existing.qty = (existing.qty || 1) + 1;
     } else {
-      localCart.push({ ...product, qty: 1, size: 'M' });
+      localCart.push({
+        ...product,
+        cartKey: cartKey,
+        qty: 1,
+        size: chosenSize
+      });
     }
     localStorage.setItem('glam_cart', JSON.stringify(localCart));
     updateBadges();
@@ -1044,6 +1123,10 @@ function renderCartDrawer() {
   };
 
   window.openCartDrawer = function() {
+    try {
+      const saved = localStorage.getItem('glam_cart');
+      if (saved) localCart = JSON.parse(saved);
+    } catch(e) {}
     renderCartDrawer();
     const d = document.getElementById('cartDrawer');
     const b = document.getElementById('overlayBackdrop');
@@ -1164,9 +1247,19 @@ function renderCartDrawer() {
     if (qvTitle) qvTitle.textContent = prod.title;
     if (qvPrice) qvPrice.textContent = `₹${Number(prod.price).toLocaleString('en-IN')}`;
     if (qvCat) qvCat.textContent = (prod.category || currentMeta.name).toUpperCase();
+
+    // Populate dynamic size buttons in quickview
+    const qvSizeSelector = document.getElementById('qvSizeSelector');
+    if (qvSizeSelector) {
+      const avail = prod.sizes && prod.sizes.length > 0 ? prod.sizes : (prod.category === 'Saree' || prod.category === 'Dupatta' ? ['Free Size'] : ['S', 'M', 'L', 'XL', 'XXL']);
+      window.selectedCategoryQvSize = avail.includes('M') ? 'M' : avail[0];
+      qvSizeSelector.innerHTML = avail.map(s => `
+        <button type="button" class="size-btn ${s === window.selectedCategoryQvSize ? 'active' : ''}" onclick="window.selectCategoryQvSize('${s}', this)">${s}</button>
+      `).join('');
+    }
     if (qvBtn) {
       qvBtn.onclick = () => {
-        window.categoryAddToCart(prod);
+        window.categoryAddToCart({ ...prod, size: window.selectedCategoryQvSize || 'M' });
         window.closeAllDrawers();
       };
     }

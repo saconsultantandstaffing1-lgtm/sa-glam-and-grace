@@ -291,6 +291,7 @@
                   <tr>
                     <th>Product & SKU</th>
                     <th>Category</th>
+                    <th style="min-width: 140px;">Available Sizes</th>
                     <th>Price</th>
                     <th>Stock Units</th>
                     <th>Availability</th>
@@ -545,6 +546,53 @@
             </div>
           </div>
 
+          
+          <!-- Available Dress Sizes (S, M, L, XL, XXL) -->
+          <div class="form-group" style="margin-top: 1rem; margin-bottom: 1.2rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <label style="margin:0; font-weight:700; font-size:0.84rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-main);">
+                Available Dress Sizes <span style="color:var(--gold-accent);">*</span>
+              </label>
+              <div style="display:flex; gap:0.5rem;">
+                <button type="button" class="btn-luxury-outline" style="padding:2px 8px; font-size:0.72rem; cursor:pointer;" onclick="window.setAllAdminSizes(['S','M','L','XL','XXL'])">Standard (S-XXL)</button>
+                <button type="button" class="btn-luxury-outline" style="padding:2px 8px; font-size:0.72rem; cursor:pointer;" onclick="window.setAllAdminSizes(['Free Size'])">Free Size</button>
+              </div>
+            </div>
+            
+            <div id="adminProductSizesSelector" style="display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center; background:var(--bg-card-alt); padding:0.85rem 1rem; border-radius:8px; border:1px solid var(--border-subtle);">
+              <label class="admin-size-pill" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:6px; border:1.5px solid var(--border-subtle); background:var(--bg-card); font-size:0.82rem; font-weight:700; color:var(--text-main); user-select:none; transition:all 0.2s ease;">
+                <input type="checkbox" name="prodSize" value="XS" style="cursor:pointer; accent-color:var(--gold-accent);" />
+                <span>XS</span>
+              </label>
+              <label class="admin-size-pill" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:6px; border:1.5px solid var(--border-subtle); background:var(--bg-card); font-size:0.82rem; font-weight:700; color:var(--text-main); user-select:none; transition:all 0.2s ease;">
+                <input type="checkbox" name="prodSize" value="S" checked style="cursor:pointer; accent-color:var(--gold-accent);" />
+                <span>S</span>
+              </label>
+              <label class="admin-size-pill" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:6px; border:1.5px solid var(--border-subtle); background:var(--bg-card); font-size:0.82rem; font-weight:700; color:var(--text-main); user-select:none; transition:all 0.2s ease;">
+                <input type="checkbox" name="prodSize" value="M" checked style="cursor:pointer; accent-color:var(--gold-accent);" />
+                <span>M</span>
+              </label>
+              <label class="admin-size-pill" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:6px; border:1.5px solid var(--border-subtle); background:var(--bg-card); font-size:0.82rem; font-weight:700; color:var(--text-main); user-select:none; transition:all 0.2s ease;">
+                <input type="checkbox" name="prodSize" value="L" checked style="cursor:pointer; accent-color:var(--gold-accent);" />
+                <span>L</span>
+              </label>
+              <label class="admin-size-pill" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:6px; border:1.5px solid var(--border-subtle); background:var(--bg-card); font-size:0.82rem; font-weight:700; color:var(--text-main); user-select:none; transition:all 0.2s ease;">
+                <input type="checkbox" name="prodSize" value="XL" checked style="cursor:pointer; accent-color:var(--gold-accent);" />
+                <span>XL</span>
+              </label>
+              <label class="admin-size-pill" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:6px; border:1.5px solid var(--border-subtle); background:var(--bg-card); font-size:0.82rem; font-weight:700; color:var(--text-main); user-select:none; transition:all 0.2s ease;">
+                <input type="checkbox" name="prodSize" value="XXL" checked style="cursor:pointer; accent-color:var(--gold-accent);" />
+                <span>XXL</span>
+              </label>
+              <label class="admin-size-pill" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:6px; border:1.5px solid var(--border-subtle); background:var(--bg-card); font-size:0.82rem; font-weight:700; color:var(--text-main); user-select:none; transition:all 0.2s ease;">
+                <input type="checkbox" name="prodSize" value="Free Size" style="cursor:pointer; accent-color:var(--gold-accent);" />
+                <span>Free Size</span>
+              </label>
+            </div>
+            <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-top:0.4rem;">
+              <i class="ri-information-line" style="color:var(--gold-accent);"></i> Clients will see and select from these sizes on the online boutique before adding to bag.
+            </span>
+          </div>
           <div class="form-grid-2">
             <div class="form-group">
               <label>Special Price (₹)</label>
@@ -791,6 +839,15 @@
         window.closeAdminInvoiceModal();
       }
     });
+  </script>
+
+  <script>
+    window.setAllAdminSizes = function(targetSizes) {
+      const cbs = document.querySelectorAll('#adminProductSizesSelector input[name="prodSize"]');
+      cbs.forEach(cb => {
+        cb.checked = targetSizes.includes(cb.value);
+      });
+    };
   </script>
 </body>
 </html>

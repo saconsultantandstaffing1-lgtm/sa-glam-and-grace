@@ -16,6 +16,41 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-client.js"></script>
   <link rel="stylesheet" href="./style.css?v=220">
+
+<style id="interactive-sizes-style">
+  .card-size-btn {
+    padding: 3px 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1.5px solid #d4c5a3;
+    background: #faf7f0;
+    color: #444;
+    transition: all 0.18s ease;
+    line-height: 1.2;
+    user-select: none;
+  }
+  .card-size-btn:hover {
+    border-color: #c69214;
+    color: #c69214;
+    background: #fff;
+  }
+  .card-size-btn.active {
+    background: #c69214 !important;
+    color: #ffffff !important;
+    border-color: #c69214 !important;
+    box-shadow: 0 2px 6px rgba(198, 146, 20, 0.35);
+  }
+  .product-sizes-selector-row {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin: 8px 0 6px 0;
+    align-items: center;
+  }
+</style>
+
 </head>
 <body>
 
@@ -1431,7 +1466,7 @@
       </p>
 
       <div style="font-weight: 600; font-size: 0.85rem; text-transform: uppercase;">Select Size</div>
-      <div class="size-selector">
+      <div class="size-selector" id="qvSizeSelector">
         <button class="size-btn">XS</button>
         <button class="size-btn">S</button>
         <button class="size-btn active">M</button>

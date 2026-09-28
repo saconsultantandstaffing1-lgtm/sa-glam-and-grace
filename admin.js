@@ -162,6 +162,7 @@ const INITIAL_PRODUCTS = [
     id: "NF-101",
     name: "Handcrafted Chikankari Anarkali Set",
     category: "Anarkali",
+    sizes: ["S", "M", "L", "XL", "XXL"],
     price: 8499,
     originalPrice: 10999,
     stock: 24,
@@ -174,6 +175,7 @@ const INITIAL_PRODUCTS = [
     id: "NF-102",
     name: "Royal Crimson Zari Bridal Lehenga",
     category: "Lehenga",
+    sizes: ["S", "M", "L", "XL", "XXL"],
     price: 24999,
     originalPrice: 32000,
     stock: 8,
@@ -186,6 +188,7 @@ const INITIAL_PRODUCTS = [
     id: "NF-103",
     name: "Pure Banarasi Katan Silk Saree",
     category: "Saree",
+    sizes: ["Free Size"],
     price: 14500,
     originalPrice: 18500,
     stock: 18,
@@ -198,6 +201,7 @@ const INITIAL_PRODUCTS = [
     id: "NF-104",
     name: "Embroidered Georgette Peplum Top & Sharara",
     category: "Tops",
+    sizes: ["S", "M", "L", "XL", "XXL"],
     price: 5299,
     originalPrice: 6999,
     stock: 35,
@@ -210,6 +214,7 @@ const INITIAL_PRODUCTS = [
     id: "NF-105",
     name: "Velvet Royal Churidar & Zardozi Kurti",
     category: "Churidar",
+    sizes: ["S", "M", "L", "XL", "XXL"],
     price: 7800,
     originalPrice: 9500,
     stock: 0,
@@ -1121,6 +1126,13 @@ class AdminApp {
         </td>
         <td><span style="font-weight:600; color:var(--gold-accent);">${p.category}</span></td>
         <td>
+          <div style="display:flex; gap:3px; flex-wrap:wrap; max-width:160px;">
+            ${(p.sizes && p.sizes.length > 0 ? p.sizes : ['S','M','L','XL','XXL']).map(s => `
+              <span style="font-size:0.72rem; font-weight:700; color:var(--gold-accent); background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.3); padding:1px 6px; border-radius:4px;">${s}</span>
+            `).join('')}
+          </div>
+        </td>
+        <td>
           <strong>₹${p.price.toLocaleString('en-IN')}</strong>
           ${p.originalPrice ? `<span style="text-decoration:line-through; font-size:0.75rem; color:var(--text-muted); margin-left:4px;">₹${p.originalPrice.toLocaleString('en-IN')}</span>` : ''}
         </td>
@@ -1185,6 +1197,14 @@ class AdminApp {
     document.getElementById('prodStock').value = prod.stock;
     document.getElementById('prodImage').value = prod.image;
     document.getElementById('productImagePreview').src = prod.image;
+    
+    // Populate sizes checkboxes
+    const targetSizes = prod.sizes || (prod.category === 'Saree' ? ['Free Size'] : ['S', 'M', 'L', 'XL', 'XXL']);
+    const cbs = document.querySelectorAll('#adminProductSizesSelector input[name="prodSize"]');
+    cbs.forEach(cb => {
+      cb.checked = targetSizes.includes(cb.value);
+    });
+
     document.getElementById('productModal').classList.add('show');
   }
 
@@ -1195,6 +1215,9 @@ class AdminApp {
     const price = Number(document.getElementById('prodPrice').value);
     const originalPrice = Number(document.getElementById('prodOriginalPrice').value) || price;
     const stock = Number(document.getElementById('prodStock').value);
+    // Read selected sizes
+    const selectedSizes = Array.from(document.querySelectorAll('#adminProductSizesSelector input[name="prodSize"]:checked')).map(cb => cb.value);
+    const sizes = selectedSizes.length > 0 ? selectedSizes : ['S', 'M', 'L', 'XL', 'XXL'];
     const image = document.getElementById('prodImage').value.trim() || 'assets/images/about_anarkali.png';
 
     let status = 'in-stock';
@@ -1204,7 +1227,7 @@ class AdminApp {
     if (this.editingProductId) {
       const idx = this.products.findIndex(p => p.id === this.editingProductId);
       if (idx !== -1) {
-        this.products[idx] = { ...this.products[idx], name, category, price, originalPrice, stock, image, status };
+        this.products[idx] = { ...this.products[idx], name, category, sizes, price, originalPrice, stock, image, status };
         this.showToast(`Product "${name}" updated successfully!`);
       }
     } else {
@@ -1216,6 +1239,7 @@ class AdminApp {
         originalPrice,
         stock,
         image,
+        sizes,
         status,
         rating: 5.0,
         sales: 0

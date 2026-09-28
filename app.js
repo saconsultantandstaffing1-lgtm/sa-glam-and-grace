@@ -1,3 +1,38 @@
+
+  window.addCardProductToCart = function(prodId, prodObj) {
+    const chosenSize = window.cardSelectedSizes[prodId] || (prodObj.sizes && prodObj.sizes.length > 0 ? (prodObj.sizes.includes('M') ? 'M' : prodObj.sizes[0]) : 'M');
+    window.addToCart({
+      ...prodObj,
+      size: chosenSize
+    });
+  };
+  
+
+  window.cardSelectedSizes = {};
+  window.selectCardSize = function(prodId, size, btn, e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    window.cardSelectedSizes[prodId] = size;
+    const card = btn.closest('.product-card') || btn.closest('.fancy-product-card');
+    if (card) {
+      card.querySelectorAll('.card-size-btn').forEach(b => b.classList.remove('active'));
+    }
+    btn.classList.add('active');
+  };
+  
+
+  window.selectedQvSize = 'M';
+  window.selectQuickViewSize = function(size, btn) {
+    window.selectedQvSize = size;
+    const container = document.getElementById('qvSizeSelector');
+    if (container) {
+      container.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    }
+    if (btn) btn.classList.add('active');
+  };
+  
 // Global Customer Auth Triggers
 window.openCustomerAuth = function(e) {
   if (e && e.preventDefault) e.preventDefault();
@@ -111,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: "NF-100",
       name: "Amber Chanderi Handloom Kurti Set",
       category: "Kurtis",
+      sizes: ["S", "M", "L", "XL", "XXL"],
       price: 3499,
       originalPrice: 4999,
       stock: 28,
@@ -123,6 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: "NF-101",
       name: "Handcrafted Chikankari Anarkali Set",
       category: "Anarkali",
+      sizes: ["S", "M", "L", "XL", "XXL"],
       price: 8499,
       originalPrice: 10999,
       stock: 24,
@@ -135,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: "NF-102",
       name: "Royal Crimson Zari Bridal Lehenga",
       category: "Lehenga",
+      sizes: ["S", "M", "L", "XL", "XXL"],
       price: 24999,
       originalPrice: 32000,
       stock: 8,
@@ -147,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: "NF-103",
       name: "Pure Banarasi Katan Silk Saree",
       category: "Saree",
+      sizes: ["Free Size"],
       price: 14500,
       originalPrice: 18500,
       stock: 18,
@@ -159,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: "NF-104",
       name: "Embroidered Georgette Peplum Top & Sharara",
       category: "Tops",
+      sizes: ["S", "M", "L", "XL", "XXL"],
       price: 5299,
       originalPrice: 6999,
       stock: 35,
@@ -171,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: "NF-105",
       name: "Velvet Royal Churidar & Zardozi Kurti",
       category: "Churidar",
+      sizes: ["S", "M", "L", "XL", "XXL"],
       price: 7800,
       originalPrice: 9500,
       stock: 15,
@@ -226,6 +267,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let delIds = [];
         try { delIds = JSON.parse(localStorage.getItem('nf_deleted_products')) || []; } catch(e) {}
         if (Array.isArray(parsed) && parsed.length > 0) {
+          parsed.forEach(p => {
+            if (!p.sizes || !Array.isArray(p.sizes) || p.sizes.length === 0) {
+              p.sizes = (p.category === 'Saree' || p.category === 'Dupatta' || p.category === 'Accessories')
+                ? ['Free Size']
+                : ['S', 'M', 'L', 'XL', 'XXL'];
+            }
+          });
           prods = parsed.filter(p => !delIds.includes(String(p.id)));
         }
       }
@@ -282,11 +330,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
+      const availSizes = prod.sizes && prod.sizes.length > 0 ? prod.sizes : (prod.category === 'Saree' || prod.category === 'Dupatta' ? ['Free Size'] : ['S', 'M', 'L', 'XL', 'XXL']);
+      const defaultSize = availSizes.includes('M') ? 'M' : availSizes[0];
+      if (!window.cardSelectedSizes[id]) {
+        window.cardSelectedSizes[id] = defaultSize;
+      }
+      const activeSize = window.cardSelectedSizes[id] || defaultSize;
+
       const safeProdObj = JSON.stringify({
         id: id,
         title: name,
         price: price,
-        image: image
+        image: image,
+        sizes: availSizes
       }).replace(/"/g, '&quot;');
 
       return `
@@ -299,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <img src="${image}" alt="${name}" class="product-img-primary" onerror="this.onerror=null; this.src='./assets/images/hero_1.png';" style="object-fit:cover; width:100%; height:100%;">
             
             <div class="product-hover-actions">
-              <button class="btn-quick-add" onclick="addToCart(${safeProdObj})">
+              <button class="btn-quick-add" onclick="window.addCardProductToCart('${id}', ${safeProdObj})">
                 Add to Cart
               </button>
               <button class="btn-quick-view" onclick="openQuickView(${safeProdObj})" title="Quick View">
@@ -310,6 +366,17 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="product-info">
             <span class="product-category-label">${category}</span>
             <h3 class="product-title">${name}</h3>
+            
+            <!-- Selectable Sizes (S, M, L, XL, XXL) -->
+            <div class="product-sizes-selector-row">
+              <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:#78716c; letter-spacing:0.5px; margin-right:3px;">Size:</span>
+              ${availSizes.map(s => `
+                <button type="button" class="card-size-btn ${s === activeSize ? 'active' : ''}" onclick="window.selectCardSize('${id}', '${s}', this, event)">
+                  ${s}
+                </button>
+              `).join('')}
+            </div>
+
             <div class="product-price-row">
               <div class="price-box">
                 <span class="current-price">₹${price.toLocaleString('en-IN')}</span>
@@ -322,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
         </div>
-      `;
+      `;;
     }).join('');
   }
 
@@ -623,7 +690,11 @@ document.addEventListener('DOMContentLoaded', () => {
           <img src="${item.image}" alt="${item.title}">
           <div class="cart-item-details">
             <h4 class="cart-item-title">${item.title}</h4>
-            <div style="font-size: 0.8rem; color: #666;">Size: ${item.size}</div>
+            <div style="margin: 3px 0;">
+              <span style="display:inline-block; font-size:0.75rem; font-weight:700; color:#8c733e; background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.3); padding:2px 7px; border-radius:4px;">
+                Size: ${item.size || 'M'}
+              </span>
+            </div>
             <div class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</div>
             <div class="qty-btn-group">
               <button type="button" onclick="window.changeCartQty('${item.id}', -1)">-</button>
@@ -737,16 +808,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Actual execution to append item to bag
   window.executeAddToCart = function(product) {
-    const existing = state.cart.find(i => String(i.id) === String(product.id));
+    const chosenSize = product.size || (product.sizes && product.sizes.length > 0 ? (product.sizes.includes('M') ? 'M' : product.sizes[0]) : 'M');
+    const cartKey = String(product.id) + '_' + chosenSize;
+
+    const existing = state.cart.find(i => (i.cartKey ? i.cartKey === cartKey : (String(i.id) === String(product.id) && i.size === chosenSize)));
     if (existing) {
       existing.qty += 1;
     } else {
-      state.cart.push({ ...product, qty: 1, size: 'M' });
+      state.cart.push({
+        ...product,
+        cartKey: cartKey,
+        qty: 1,
+        size: chosenSize
+      });
     }
     localStorage.setItem('glam_cart', JSON.stringify(state.cart));
     updateCartUI();
     openCart();
-    showToast(`Added "${product.title || product.name}" to bag! 🛍️`);
+    showToast(`Added "${product.title || product.name}" (Size: ${chosenSize}) to bag! 🛍️`);
   };
 
   // Add to Cart with Mandatory Sign In Guard
@@ -829,6 +908,16 @@ document.addEventListener('DOMContentLoaded', () => {
     quickviewModal.dataset.productPrice = product.price;
     quickviewModal.dataset.productImage = product.image;
 
+    // Populate dynamic size buttons
+    const qvSizeSelector = document.getElementById('qvSizeSelector');
+    if (qvSizeSelector) {
+      const availSizes = product.sizes && product.sizes.length > 0 ? product.sizes : ['S', 'M', 'L', 'XL', 'XXL'];
+      window.selectedQvSize = availSizes.includes('M') ? 'M' : availSizes[0];
+      qvSizeSelector.innerHTML = availSizes.map(s => `
+        <button type="button" class="size-btn ${s === window.selectedQvSize ? 'active' : ''}" onclick="window.selectQuickViewSize('${s}', this)">${s}</button>
+      `).join('');
+    }
+
     quickviewModal.classList.add('active');
     overlayBackdrop.classList.add('active');
   };
@@ -844,7 +933,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const price = parseInt(quickviewModal.dataset.productPrice);
       const image = quickviewModal.dataset.productImage;
 
-      addToCart({ id, title, price, image });
+      addToCart({ id, title, price, image, size: window.selectedQvSize || 'M' });
       closeAllOverlays();
     });
   }
@@ -1811,7 +1900,7 @@ function initSupabaseCheckout() {
 
       // 1. Build order item summary
       const cartItems = (window.state && window.state.cart) ? window.state.cart : (JSON.parse(localStorage.getItem('glam_cart') || '[]'));
-      const itemsDesc = cartItems.map(i => `${i.title || i.name} (x${i.qty || 1})`).join(', ') || 'Luxury Ethnic Couture';
+      const itemsDesc = cartItems.map(i => `${i.title || i.name} (Size: ${i.size || 'M'}) (x${i.qty || 1})`).join(', ') || 'Luxury Ethnic Couture';
 
       // 2. Save order to Admin Portal orders in localStorage
       try {

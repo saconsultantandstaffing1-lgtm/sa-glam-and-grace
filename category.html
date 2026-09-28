@@ -156,6 +156,41 @@
       grid-column: 1 / -1;
     }
   </style>
+
+<style id="interactive-sizes-style">
+  .card-size-btn {
+    padding: 3px 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1.5px solid #d4c5a3;
+    background: #faf7f0;
+    color: #444;
+    transition: all 0.18s ease;
+    line-height: 1.2;
+    user-select: none;
+  }
+  .card-size-btn:hover {
+    border-color: #c69214;
+    color: #c69214;
+    background: #fff;
+  }
+  .card-size-btn.active {
+    background: #c69214 !important;
+    color: #ffffff !important;
+    border-color: #c69214 !important;
+    box-shadow: 0 2px 6px rgba(198, 146, 20, 0.35);
+  }
+  .product-sizes-selector-row {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin: 8px 0 6px 0;
+    align-items: center;
+  }
+</style>
+
 </head>
 <body>
 
@@ -352,6 +387,17 @@
       <span class="product-category-label" id="qvCat">LUXURY COLLECTION</span>
       <h2 class="qv-title" id="qvTitle"></h2>
       <div class="qv-price" id="qvPrice"></div>
+      
+      <div style="font-weight: 700; font-size: 0.82rem; text-transform: uppercase; margin-bottom: 0.45rem; color: #1C1917; letter-spacing: 0.5px;">
+        Select Dress Size:
+      </div>
+      <div class="size-selector" id="qvSizeSelector" style="display:flex; gap:0.5rem; margin-bottom:1.2rem; flex-wrap:wrap;">
+        <button type="button" class="size-btn">S</button>
+        <button type="button" class="size-btn active">M</button>
+        <button type="button" class="size-btn">L</button>
+        <button type="button" class="size-btn">XL</button>
+        <button type="button" class="size-btn">XXL</button>
+      </div>
       <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.2rem;" id="qvDesc">
         Exquisitely designed with authentic craftsmanship, pure handwoven materials, and intricate regal detailing.
       </p>
