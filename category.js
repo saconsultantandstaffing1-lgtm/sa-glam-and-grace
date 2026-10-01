@@ -1,5 +1,120 @@
 
   window.categoryCardSelectedSizes = {};
+  window.categoryCardSelectedColors = {};
+
+  // Card Image Slider & Hover Auto-Slide State
+  window.cardImageIndex = window.cardImageIndex || {};
+  window.cardImagesList = window.cardImagesList || {};
+  window.cardSlideTimers = window.cardSlideTimers || {};
+
+  window.registerCardImages = function(prodId, images) {
+    if (!images || !Array.isArray(images) || images.length === 0) return;
+    const cleanList = Array.from(new Set(images.filter(Boolean)));
+    window.cardImagesList[String(prodId)] = cleanList;
+    if (typeof window.cardImageIndex[String(prodId)] === 'undefined') {
+      window.cardImageIndex[String(prodId)] = 0;
+    }
+  };
+
+  window.goToCardImage = function(prodId, index, event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const pid = String(prodId);
+    const imgs = window.cardImagesList[pid];
+    if (!imgs || imgs.length <= 1) return;
+    const count = imgs.length;
+    window.cardImageIndex[pid] = ((index % count) + count) % count;
+    const currIdx = window.cardImageIndex[pid];
+
+    const imgEl = document.getElementById('cardImg_' + pid);
+    if (imgEl) {
+      imgEl.src = imgs[currIdx];
+    }
+
+    // Update Progress Bars
+    const prog = document.getElementById('cardProgress_' + pid);
+    if (prog) {
+      const bars = prog.querySelectorAll('.card-slider-bar');
+      bars.forEach((b, i) => {
+        if (i === currIdx) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+    }
+
+    // Update Bottom Thumbnail Dots
+    const thumbs = document.getElementById('cardThumbs_' + pid);
+    if (thumbs) {
+      const dots = thumbs.querySelectorAll('.card-thumb-dot');
+      dots.forEach((d, i) => {
+        d.style.borderColor = (i === currIdx) ? '#D4AF37' : 'transparent';
+      });
+    }
+  };
+
+  window.slideCardImage = function(prodId, delta, event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const pid = String(prodId);
+    const curr = window.cardImageIndex[pid] || 0;
+    window.goToCardImage(pid, curr + delta, event);
+  };
+
+  window.startCardAutoSlide = function(prodId) {
+    const pid = String(prodId);
+    const imgs = window.cardImagesList[pid];
+    if (!imgs || imgs.length <= 1) return;
+    window.stopCardAutoSlide(pid);
+    window.cardSlideTimers[pid] = setInterval(() => {
+      window.slideCardImage(pid, 1);
+    }, 1600);
+  };
+
+  window.stopCardAutoSlide = function(prodId) {
+    const pid = String(prodId);
+    if (window.cardSlideTimers[pid]) {
+      clearInterval(window.cardSlideTimers[pid]);
+      delete window.cardSlideTimers[pid];
+    }
+  };
+
+  // Quick View Image Slider Logic
+  window.currentQvImages = [];
+  window.currentQvIndex = 0;
+
+  window.slideQvImage = function(delta, event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    if (!window.currentQvImages || window.currentQvImages.length <= 1) return;
+    const count = window.currentQvImages.length;
+    window.currentQvIndex = ((window.currentQvIndex + delta) % count + count) % count;
+    window.setQvImage(window.currentQvIndex);
+  };
+
+  window.setQvImage = function(idx) {
+    if (!window.currentQvImages || !window.currentQvImages[idx]) return;
+    window.currentQvIndex = idx;
+    const qvImg = document.getElementById('qvImg');
+    if (qvImg) {
+      qvImg.src = window.currentQvImages[idx];
+    }
+    const counter = document.getElementById('qvImgCounter');
+    if (counter) {
+      counter.textContent = `${idx + 1} / ${window.currentQvImages.length}`;
+    }
+    const thumbs = document.getElementById('qvGalleryThumbs');
+    if (thumbs) {
+      thumbs.querySelectorAll('img').forEach((im, i) => {
+        im.style.borderColor = (i === idx) ? 'var(--gold-accent, #b45309)' : 'transparent';
+      });
+    }
+  };
+
   window.selectCategoryCardSize = function(prodId, size, btn, e) {
     if (e) {
       e.preventDefault();
@@ -13,14 +128,53 @@
     btn.classList.add('active');
   };
 
+  window.selectCategoryCardColor = function(prodId, colorName, colorHex, btn, e, imageOverride) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    window.categoryCardSelectedColors[prodId] = { name: colorName, hex: colorHex };
+    const card = btn.closest('.product-card');
+    if (card) {
+      card.querySelectorAll('.card-color-swatch-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.borderColor = '#e5e7eb';
+        b.style.transform = 'scale(1)';
+      });
+      btn.classList.add('active');
+      btn.style.borderColor = 'var(--gold-accent, #b45309)';
+      btn.style.transform = 'scale(1.25)';
+      const label = card.querySelector('.card-color-label');
+      if (label) label.textContent = colorName;
+      if (imageOverride) {
+        const img = card.querySelector('.product-img-primary');
+        if (img) img.src = imageOverride;
+      }
+    }
+  };
+
   window.addCategoryCardToCart = function(prodId, prodObj) {
+    const availableStock = (typeof window.getCategoryProductStock === 'function') ? window.getCategoryProductStock(prodId) : (prodObj && prodObj.stock !== undefined ? Number(prodObj.stock) : 15);
+    if (availableStock <= 0) {
+      alert(`Sorry, "${prodObj.title || prodObj.name}" is completely SOLD OUT! No more orders can be placed for this item.`);
+      return;
+    }
     const avail = prodObj.sizes && prodObj.sizes.length > 0 ? prodObj.sizes : ['S', 'M', 'L', 'XL', 'XXL'];
     const chosenSize = window.categoryCardSelectedSizes[prodId] || (avail.includes('M') ? 'M' : avail[0]);
+    const chosenColorObj = window.categoryCardSelectedColors[prodId] || (prodObj.colors && prodObj.colors.length > 0 ? (typeof prodObj.colors[0] === 'object' ? prodObj.colors[0] : { name: prodObj.colors[0], hex: '#D4AF37' }) : null);
+    const chosenColor = chosenColorObj ? chosenColorObj.name : null;
+    const chosenColorHex = chosenColorObj ? chosenColorObj.hex : null;
+
     window.categoryAddToCart({
       ...prodObj,
-      size: chosenSize
+      size: chosenSize,
+      color: chosenColor,
+      colorHex: chosenColorHex
     });
   };
+
+  window.selectedCategoryQvSize = 'M';
+  window.selectedCategoryQvColor = null;
 
   window.selectCategoryQvSize = function(size, btn) {
     window.selectedCategoryQvSize = size;
@@ -29,6 +183,29 @@
       container.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
     }
     if (btn) btn.classList.add('active');
+  };
+
+  window.selectCategoryQvColor = function(colorName, colorHex, btn, imageOverride) {
+    window.selectedCategoryQvColor = { name: colorName, hex: colorHex };
+    const label = document.getElementById('qvSelectedColorName');
+    if (label) label.textContent = colorName;
+    const container = document.getElementById('qvColorSelector');
+    if (container) {
+      container.querySelectorAll('.qv-color-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.borderColor = '#e5e7eb';
+        b.style.transform = 'scale(1)';
+      });
+    }
+    if (btn) {
+      btn.classList.add('active');
+      btn.style.borderColor = 'var(--gold-accent, #b45309)';
+      btn.style.transform = 'scale(1.25)';
+    }
+    if (imageOverride) {
+      const qvImg = document.getElementById('qvImg');
+      if (qvImg) qvImg.src = imageOverride;
+    }
   };
   
 
@@ -55,6 +232,18 @@ window.openCheckoutModal = function(e) {
   }
   if (totalDisplay) totalDisplay.textContent = payableText;
 
+  // Pre-fill customer details if logged in
+  try {
+    const cust = JSON.parse(localStorage.getItem('glam_customer_user') || 'null');
+    if (cust) {
+      const nameVal = cust.fullName || cust.name || '';
+      if (document.getElementById('orderCustName') && nameVal) document.getElementById('orderCustName').value = nameVal;
+      if (document.getElementById('orderCustEmail') && cust.email) document.getElementById('orderCustEmail').value = cust.email;
+      if (document.getElementById('orderCustPhone') && cust.phone) document.getElementById('orderCustPhone').value = cust.phone;
+      if (document.getElementById('orderCustAddress') && cust.address) document.getElementById('orderCustAddress').value = cust.address;
+    }
+  } catch(e) {}
+
   const formView = document.getElementById('checkoutFormView');
   const successView = document.getElementById('checkoutSuccessView');
   if (formView) formView.style.display = 'block';
@@ -65,6 +254,11 @@ window.openCheckoutModal = function(e) {
     modal.style.setProperty('display', 'flex', 'important');
     modal.style.setProperty('opacity', '1', 'important');
     modal.style.setProperty('visibility', 'visible', 'important');
+  }
+
+  // Ensure category checkout engine is initialized and event listeners are active
+  if (typeof initCategoryCheckout === 'function') {
+    initCategoryCheckout();
   }
 };
 
@@ -573,9 +767,34 @@ document.addEventListener('DOMContentLoaded', () => {
         let delIds = [];
         try { delIds = JSON.parse(localStorage.getItem('nf_deleted_products')) || []; } catch(e) {}
         if (Array.isArray(parsed) && parsed.length > 0) {
+          const fallbackSeed = [
+            { id: "NF-100", colors: [{ name: "Mustard Yellow", hex: "#E5A93C" }, { name: "Rani Pink", hex: "#E0218A" }, { name: "Emerald Green", hex: "#097969" }], images: ["./assets/images/hero_1.png", "./assets/images/festive.png"] },
+            { id: "NF-101", colors: [{ name: "Ivory White", hex: "#FDFBF7" }, { name: "Rani Pink", hex: "#E0218A" }, { name: "Emerald Green", hex: "#097969" }], images: ["./assets/images/about_anarkali.png", "./assets/images/hero_1.png"] },
+            { id: "NF-102", colors: [{ name: "Maroon", hex: "#800020" }, { name: "Wine Plum", hex: "#58111A" }], images: ["./assets/images/about_lehenga.png", "./assets/images/wedding.png"] },
+            { id: "NF-103", colors: [{ name: "Royal Blue", hex: "#2B4C7E" }, { name: "Rani Pink", hex: "#E0218A" }], images: ["./assets/images/about_saree.png", "./assets/images/saree.png"] },
+            { id: "NF-104", colors: [{ name: "Pista Green", hex: "#93C572" }, { name: "Coral Peach", hex: "#F88379" }], images: ["./assets/images/about_tops.png", "./assets/images/hero_2.png"] },
+            { id: "NF-105", colors: [{ name: "Royal Blue", hex: "#2B4C7E" }, { name: "Maroon", hex: "#800020" }], images: ["./assets/images/chudidar.png", "./assets/images/hero_1.png"] },
+            { id: "NF-106", colors: [{ name: "Ivory White", hex: "#FDFBF7" }, { name: "Coral Peach", hex: "#F88379" }], images: ["./assets/images/dupatta.png"] },
+            { id: "NF-107", colors: [{ name: "Metallic Gold", hex: "#D4AF37" }, { name: "Emerald Green", hex: "#097969" }], images: ["./assets/images/jewellery.png"] },
+            { id: "NF-108", colors: [{ name: "Metallic Gold", hex: "#D4AF37" }, { name: "Maroon", hex: "#800020" }], images: ["./assets/images/handbag_modern.png"] }
+          ];
           parsed.forEach(p => {
             if (!p.sizes || !Array.isArray(p.sizes) || p.sizes.length === 0) {
               p.sizes = (p.category === 'Saree' || p.category === 'Dupatta') ? ['Free Size'] : ['S', 'M', 'L', 'XL', 'XXL'];
+            }
+            if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) {
+              const matched = fallbackSeed.find(f => String(f.id) === String(p.id));
+              if (matched && matched.colors) {
+                p.colors = matched.colors;
+              }
+            }
+            if (!p.images || !Array.isArray(p.images) || p.images.length === 0) {
+              const matched = fallbackSeed.find(f => String(f.id) === String(p.id));
+              if (matched && matched.images) {
+                p.images = matched.images;
+              } else if (p.image) {
+                p.images = [p.image];
+              }
             }
           });
           prods = parsed.filter(p => !delIds.includes(String(p.id)));
@@ -586,20 +805,195 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fallback seed catalog if empty
     if (prods.length === 0) {
       prods = [
-        { id: "NF-100", name: "Amber Chanderi Handloom Kurti Set", category: "Kurtis", price: 3499, originalPrice: 4999, stock: 28, status: "in-stock", image: "./assets/images/hero_1.png", rating: 4.9, sales: 185 },
-        { id: "NF-101", name: "Handcrafted Chikankari Anarkali Set", category: "Anarkali", price: 8499, originalPrice: 10999, stock: 24, status: "in-stock", image: "./assets/images/about_anarkali.png", rating: 4.9, sales: 142 },
-        { id: "NF-102", name: "Royal Crimson Zari Bridal Lehenga", category: "Lehenga", price: 24999, originalPrice: 32000, stock: 8, status: "low-stock", image: "./assets/images/about_lehenga.png", rating: 5.0, sales: 89 },
-        { id: "NF-103", name: "Pure Banarasi Katan Silk Saree", category: "Saree", price: 14500, originalPrice: 18500, stock: 18, status: "in-stock", image: "./assets/images/about_saree.png", rating: 4.8, sales: 210 },
-        { id: "NF-104", name: "Embroidered Georgette Peplum Top & Sharara", category: "Tops", price: 5299, originalPrice: 6999, stock: 35, status: "in-stock", image: "./assets/images/about_tops.png", rating: 4.7, sales: 165 },
-        { id: "NF-105", name: "Velvet Royal Churidar & Zardozi Kurti", category: "Churidar", price: 7800, originalPrice: 9500, stock: 15, status: "in-stock", image: "./assets/images/chudidar.png", rating: 4.9, sales: 115 },
-        { id: "NF-106", name: "Heritage Organza Hand-Painted Dupatta", category: "Dupatta", price: 3499, originalPrice: 4200, stock: 42, status: "in-stock", image: "./assets/images/dupatta.png", rating: 4.9, sales: 310 },
-        { id: "NF-107", name: "Kundan & Polki Bridal Jewellery Choker Set", category: "Jewellery", price: 12999, originalPrice: 16000, stock: 12, status: "in-stock", image: "./assets/images/jewellery.png", rating: 5.0, sales: 78 },
-        { id: "NF-108", name: "Artisan Hand-Embroidered Potli Handbag", category: "Handbags", price: 2499, originalPrice: 3200, stock: 50, status: "in-stock", image: "./assets/images/handbag_modern.png", rating: 4.8, sales: 190 }
+        { 
+          id: "NF-100", 
+          name: "Amber Chanderi Handloom Kurti Set", 
+          category: "Kurtis", 
+          sizes: ["S", "M", "L", "XL", "XXL"],
+          colors: [
+            { name: "Mustard Yellow", hex: "#E5A93C" },
+            { name: "Rani Pink", hex: "#E0218A" },
+            { name: "Emerald Green", hex: "#097969" }
+          ],
+          price: 3499, 
+          originalPrice: 4999, 
+          stock: 28, 
+          status: "in-stock", 
+          image: "./assets/images/hero_1.png", 
+          images: ["./assets/images/hero_1.png", "./assets/images/festive.png", "./assets/images/about_anarkali.png"],
+          rating: 4.9, 
+          sales: 185 
+        },
+        { 
+          id: "NF-101", 
+          name: "Handcrafted Chikankari Anarkali Set", 
+          category: "Anarkali", 
+          sizes: ["S", "M", "L", "XL", "XXL"],
+          colors: [
+            { name: "Ivory White", hex: "#FDFBF7" },
+            { name: "Rani Pink", hex: "#E0218A" },
+            { name: "Emerald Green", hex: "#097969" },
+            { name: "Mustard Yellow", hex: "#E5A93C" }
+          ],
+          price: 8499, 
+          originalPrice: 10999, 
+          stock: 24, 
+          status: "in-stock", 
+          image: "./assets/images/about_anarkali.png", 
+          images: ["./assets/images/about_anarkali.png", "./assets/images/hero_1.png", "./assets/images/festive.png"],
+          rating: 4.9, 
+          sales: 142 
+        },
+        { 
+          id: "NF-102", 
+          name: "Royal Crimson Zari Bridal Lehenga", 
+          category: "Lehenga", 
+          sizes: ["S", "M", "L", "XL", "XXL"],
+          colors: [
+            { name: "Maroon", hex: "#800020" },
+            { name: "Wine Plum", hex: "#58111A" },
+            { name: "Emerald Green", hex: "#097969" }
+          ],
+          price: 24999, 
+          originalPrice: 32000, 
+          stock: 8, 
+          status: "low-stock", 
+          image: "./assets/images/about_lehenga.png", 
+          images: ["./assets/images/about_lehenga.png", "./assets/images/featured_banner_wedding_1785416855384.png", "./assets/images/wedding.png"],
+          rating: 5.0, 
+          sales: 89 
+        },
+        { 
+          id: "NF-103", 
+          name: "Pure Banarasi Katan Silk Saree", 
+          category: "Saree", 
+          sizes: ["Free Size"],
+          colors: [
+            { name: "Royal Blue", hex: "#2B4C7E" },
+            { name: "Rani Pink", hex: "#E0218A" },
+            { name: "Rust Brown", hex: "#8B4513" }
+          ],
+          price: 14500, 
+          originalPrice: 18500, 
+          stock: 18, 
+          status: "in-stock", 
+          image: "./assets/images/about_saree.png", 
+          images: ["./assets/images/about_saree.png", "./assets/images/saree.png", "./assets/images/saree_tn.png"],
+          rating: 4.8, 
+          sales: 210 
+        },
+        { 
+          id: "NF-104", 
+          name: "Embroidered Georgette Peplum Top & Sharara", 
+          category: "Tops", 
+          sizes: ["S", "M", "L", "XL", "XXL"],
+          colors: [
+            { name: "Pista Green", hex: "#93C572" },
+            { name: "Coral Peach", hex: "#F88379" },
+            { name: "Midnight Black", hex: "#1A1A1A" }
+          ],
+          price: 5299, 
+          originalPrice: 6999, 
+          stock: 35, 
+          status: "in-stock", 
+          image: "./assets/images/about_tops.png", 
+          images: ["./assets/images/about_tops.png", "./assets/images/hero_2.png"],
+          rating: 4.7, 
+          sales: 165 
+        },
+        { 
+          id: "NF-105", 
+          name: "Velvet Royal Churidar & Zardozi Kurti", 
+          category: "Churidar", 
+          sizes: ["S", "M", "L", "XL", "XXL"],
+          colors: [
+            { name: "Royal Blue", hex: "#2B4C7E" },
+            { name: "Maroon", hex: "#800020" },
+            { name: "Teal Blue", hex: "#008080" }
+          ],
+          price: 7800, 
+          originalPrice: 9500, 
+          stock: 15, 
+          status: "in-stock", 
+          image: "./assets/images/chudidar.png", 
+          images: ["./assets/images/chudidar.png", "./assets/images/hero_1.png"],
+          rating: 4.9, 
+          sales: 115 
+        },
+        { 
+          id: "NF-106", 
+          name: "Heritage Organza Hand-Painted Dupatta", 
+          category: "Dupatta", 
+          sizes: ["Free Size"],
+          colors: [
+            { name: "Ivory White", hex: "#FDFBF7" },
+            { name: "Coral Peach", hex: "#F88379" },
+            { name: "Mustard Yellow", hex: "#E5A93C" }
+          ],
+          price: 3499, 
+          originalPrice: 4200, 
+          stock: 42, 
+          status: "in-stock", 
+          image: "./assets/images/dupatta.png", 
+          images: ["./assets/images/dupatta.png", "./assets/images/festive.png"],
+          rating: 4.9, 
+          sales: 310 
+        },
+        { 
+          id: "NF-107", 
+          name: "Kundan & Polki Bridal Jewellery Choker Set", 
+          category: "Jewellery", 
+          sizes: ["Free Size"],
+          colors: [
+            { name: "Metallic Gold", hex: "#D4AF37" },
+            { name: "Wine Plum", hex: "#58111A" },
+            { name: "Emerald Green", hex: "#097969" }
+          ],
+          price: 12999, 
+          originalPrice: 16000, 
+          stock: 12, 
+          status: "in-stock", 
+          image: "./assets/images/jewellery.png", 
+          images: ["./assets/images/jewellery.png"],
+          rating: 5.0, 
+          sales: 78 
+        },
+        { 
+          id: "NF-108", 
+          name: "Artisan Hand-Embroidered Potli Handbag", 
+          category: "Handbags", 
+          sizes: ["Free Size"],
+          colors: [
+            { name: "Metallic Gold", hex: "#D4AF37" },
+            { name: "Maroon", hex: "#800020" },
+            { name: "Midnight Black", hex: "#1A1A1A" }
+          ],
+          price: 2499, 
+          originalPrice: 3200, 
+          stock: 50, 
+          status: "in-stock", 
+          image: "./assets/images/handbag_modern.png", 
+          images: ["./assets/images/handbag_modern.png", "./assets/images/handbag.png"],
+          rating: 4.8, 
+          sales: 190 
+        }
       ];
       localStorage.setItem('nf_products', JSON.stringify(prods));
     }
     return prods;
   }
+
+  window.getCategoryProductStock = function(productId) {
+    try {
+      const all = getStoredProducts();
+      const match = all.find(p => String(p.id) === String(productId));
+      if (match) {
+        if (match.status === 'out-of-stock') return 0;
+        return (match.stock !== undefined) ? Number(match.stock) : 15;
+      }
+    } catch(e) {}
+    return 15;
+  };
 
   let currentSort = 'featured';
 
@@ -655,7 +1049,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const origPrice = Number(prod.originalPrice || prod.original_price || prod.price) || price;
       const image = prod.image || './assets/images/hero_1.png';
       const category = prod.category || currentMeta.name;
-      const badge = prod.status === 'low-stock' ? 'LOW STOCK' : (prod.status === 'out-of-stock' ? 'SOLD OUT' : (idx === 0 ? 'NEW' : (idx === 1 ? 'BESTSELLER' : 'EXCLUSIVE')));
+
+      const stockCount = (prod.stock !== undefined) ? Number(prod.stock) : 15;
+      const isOutOfStock = stockCount <= 0 || prod.status === 'out-of-stock';
+      const isLowStock = !isOutOfStock && (stockCount <= 5 || prod.status === 'low-stock');
+
+      let badge = '';
+      let badgeClass = '';
+      if (isOutOfStock) {
+        badge = 'SOLD OUT';
+        badgeClass = 'out-of-stock';
+      } else if (isLowStock) {
+        badge = `ONLY ${stockCount} LEFT`;
+        badgeClass = 'low-stock';
+      } else if (idx === 0) {
+        badge = 'NEW';
+      } else if (idx === 1) {
+        badge = 'BESTSELLER';
+      } else {
+        badge = 'EXCLUSIVE';
+      }
 
       const isWishlisted = (window.stateWishlist && window.stateWishlist.includes(id));
 
@@ -666,28 +1079,83 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const activeSize = window.categoryCardSelectedSizes[id] || defaultSize;
 
+      const availColors = prod.colors && prod.colors.length > 0 ? prod.colors.map(c => typeof c === 'string' ? { name: c, hex: '#D4AF37' } : c) : [];
+      if (!window.categoryCardSelectedColors[id] && availColors.length > 0) {
+        window.categoryCardSelectedColors[id] = availColors[0];
+      }
+      const activeColor = window.categoryCardSelectedColors[id] || (availColors.length > 0 ? availColors[0] : null);
+
+      const rawImages = (prod.images && Array.isArray(prod.images) && prod.images.length > 0) ? prod.images : [image];
+      const imagesList = Array.from(new Set(rawImages.filter(Boolean)));
+      window.registerCardImages(id, imagesList);
+
       const safeProdObj = JSON.stringify({
         id: id,
         title: name,
         price: price,
         image: image,
         category: category,
-        sizes: availSizes
+        sizes: availSizes,
+        colors: availColors,
+        images: imagesList,
+        stock: stockCount,
+        status: prod.status || (isOutOfStock ? 'out-of-stock' : 'in-stock')
       }).replace(/"/g, '&quot;');
 
       return `
-        <div class="product-card" data-id="${id}">
-          <div class="product-img-wrapper">
-            <span class="product-badge">${badge}</span>
+        <div class="product-card ${isOutOfStock ? 'is-out-of-stock' : ''}" data-id="${id}"
+          onmouseenter="window.startCardAutoSlide('${id}')" 
+          onmouseleave="window.stopCardAutoSlide('${id}')">
+          <div class="product-img-wrapper" id="cardImgWrap_${id}">
+            <span class="product-badge ${badgeClass}">${badge}</span>
             <button class="wishlist-btn ${isWishlisted ? 'active' : ''}" onclick="window.toggleCategoryWishlist('${id}', this)">
               <i class="${isWishlisted ? 'ri-heart-fill' : 'ri-heart-line'}"></i>
             </button>
-            <img src="${image}" alt="${name}" class="product-img-primary" onerror="this.onerror=null; this.src='./assets/images/hero_1.png';" style="object-fit:cover; width:100%; height:100%;">
             
-            <div class="product-hover-actions">
-              <button class="btn-quick-add" onclick="window.addCategoryCardToCart('${id}', ${safeProdObj})">
-                Add to Cart
+            <!-- Top Slide Progress Indicator Bars for Multi-Images -->
+            ${imagesList.length > 1 ? `
+              <div class="card-slider-progress" id="cardProgress_${id}">
+                ${imagesList.map((_, i) => `<span class="card-slider-bar ${i === 0 ? 'active' : ''}"></span>`).join('')}
+              </div>
+            ` : ''}
+
+            <img src="${image}" alt="${name}" class="product-img-primary" id="cardImg_${id}" onerror="this.onerror=null; this.src='./assets/images/hero_1.png';" style="object-fit:cover; width:100%; height:100%; transition: opacity 0.2s ease;">
+            
+            <!-- Prev & Next Carousel Arrows for Sliding One by One -->
+            ${imagesList.length > 1 ? `
+              <button type="button" class="card-slider-arrow prev" onclick="window.slideCardImage('${id}', -1, event)" title="Previous image">
+                <i class="ri-arrow-left-s-line"></i>
               </button>
+              <button type="button" class="card-slider-arrow next" onclick="window.slideCardImage('${id}', 1, event)" title="Next image">
+                <i class="ri-arrow-right-s-line"></i>
+              </button>
+            ` : ''}
+
+            <!-- Bottom Angle Thumbnails -->
+            ${imagesList.length > 1 ? `
+              <div class="card-angle-thumbnails" id="cardThumbs_${id}" style="position:absolute; bottom:8px; left:8px; display:flex; gap:4px; z-index:4; background:rgba(0,0,0,0.65); padding:3px 5px; border-radius:6px; backdrop-filter:blur(3px);">
+                ${imagesList.slice(0, 4).map((imgUrl, imgIdx) => `
+                  <span class="card-thumb-dot ${imgIdx === 0 ? 'active' : ''}" 
+                    title="Angle ${imgIdx + 1}"
+                    onclick="window.goToCardImage('${id}', ${imgIdx}, event)"
+                    style="width:20px; height:24px; border-radius:3px; overflow:hidden; border:1.5px solid ${imgIdx === 0 ? '#D4AF37' : 'transparent'}; cursor:pointer; display:inline-block; transition:all 0.15s ease;">
+                    <img src="${imgUrl}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='./assets/images/hero_1.png';" />
+                  </span>
+                `).join('')}
+                ${imagesList.length > 4 ? `<span style="font-size:0.62rem; color:#fff; font-weight:700; align-self:center; margin-left:2px;">+${imagesList.length - 4}</span>` : ''}
+              </div>
+            ` : ''}
+
+            <div class="product-hover-actions">
+              ${isOutOfStock ? `
+                <button class="btn-quick-add disabled-stock" disabled title="This item is currently sold out / out of stock">
+                  <i class="ri-close-circle-line"></i> Sold Out
+                </button>
+              ` : `
+                <button class="btn-quick-add" onclick="window.addCategoryCardToCart('${id}', ${safeProdObj})">
+                  Add to Cart
+                </button>
+              `}
               <button class="btn-quick-view" onclick="window.categoryQuickView(${safeProdObj})" title="Quick View">
                 <i class="ri-eye-line"></i>
               </button>
@@ -707,19 +1175,39 @@ document.addEventListener('DOMContentLoaded', () => {
               `).join('')}
             </div>
 
-            <div class="product-price-row">
+            <!-- Dynamic Available Colors for this dress -->
+            ${availColors.length > 0 ? `
+              <div class="product-colors-selector-row" style="margin-top:4px; display:flex; align-items:center; gap:6px;">
+                <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:#78716c; letter-spacing:0.5px;">Color:</span>
+                <span class="card-color-label" style="font-size:0.75rem; font-weight:600; color:#57534e;">${activeColor ? activeColor.name : ''}</span>
+                <div class="color-swatches" style="display:flex; gap:6px; align-items:center; margin-left:auto;">
+                  ${availColors.map(c => `
+                    <button type="button" class="card-color-swatch-btn ${activeColor && activeColor.name === c.name ? 'active' : ''}" 
+                      title="${c.name}" 
+                      onclick="window.selectCategoryCardColor('${id}', '${c.name.replace(/'/g, "\\'")}', '${c.hex}', this, event, '${c.image || ''}')"
+                      style="width:18px; height:18px; border-radius:50%; background:${c.hex}; border:2px solid ${activeColor && activeColor.name === c.name ? 'var(--gold-accent, #b45309)' : '#e5e7eb'}; cursor:pointer; padding:0; outline:none; transition:all 0.15s ease; box-shadow:0 1px 2px rgba(0,0,0,0.1); transform:${activeColor && activeColor.name === c.name ? 'scale(1.25)' : 'scale(1)'};">
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="product-price-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
               <div class="price-box">
                 <span class="current-price">₹${price.toLocaleString('en-IN')}</span>
                 ${origPrice > price ? `<span class="original-price">₹${origPrice.toLocaleString('en-IN')}</span>` : ''}
               </div>
-              <div class="color-swatches">
-                <span class="swatch active" style="background: #F8C146;"></span>
-                <span class="swatch" style="background: #F43F7E;"></span>
-              </div>
+              ${isOutOfStock ? `
+                <span class="stock-counter-badge out-of-stock"><i class="ri-close-circle-fill"></i> Sold Out</span>
+              ` : (isLowStock ? `
+                <span class="stock-counter-badge low-stock"><i class="ri-time-line"></i> Only ${stockCount} left</span>
+              ` : `
+                <span class="stock-counter-badge in-stock"><i class="ri-checkbox-circle-fill"></i> In Stock (${stockCount})</span>
+              `)}
             </div>
           </div>
         </div>
-      `;;
+      `;
     }).join('');
   }
 
@@ -831,16 +1319,52 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch(e) {}
   window.addEventListener('storage', () => {
     try { window.syncCategoryAnnouncementPromo(); } catch(e) {}
-    try { renderCartDrawer();
+    try { renderCartDrawer(); } catch(e) {}
+  });
 
-  const catCheckoutForm = document.getElementById('checkoutOrderForm');
-  if (catCheckoutForm) {
-    catCheckoutForm.addEventListener('submit', async (e) => {
+  function initCategoryCheckout() {
+    const catCheckoutForm = document.getElementById('checkoutOrderForm');
+    if (!catCheckoutForm) return;
+
+    // Remove any previously bound listener to prevent duplicate submits
+    if (catCheckoutForm._boundSubmit) {
+      catCheckoutForm.removeEventListener('submit', catCheckoutForm._boundSubmit);
+    }
+
+    const handleSubmit = async (e) => {
       e.preventDefault();
-      const name = document.getElementById('orderCustName').value.trim();
-      const email = document.getElementById('orderCustEmail').value.trim();
-      const phone = document.getElementById('orderCustPhone').value.trim();
-      const address = document.getElementById('orderCustAddress').value.trim();
+
+      const nameInput = document.getElementById('orderCustName');
+      const emailInput = document.getElementById('orderCustEmail');
+      const phoneInput = document.getElementById('orderCustPhone');
+      const addressInput = document.getElementById('orderCustAddress');
+
+      const name = nameInput ? nameInput.value.trim() : '';
+      const email = emailInput ? emailInput.value.trim() : '';
+      const phone = phoneInput ? phoneInput.value.trim() : '';
+      const address = addressInput ? addressInput.value.trim() : '';
+
+      if (!name) {
+        if (nameInput) nameInput.focus();
+        alert('Please enter your full name for luxury delivery.');
+        return;
+      }
+      if (!email) {
+        if (emailInput) emailInput.focus();
+        alert('Please enter your email address for order confirmation.');
+        return;
+      }
+      if (!phone) {
+        if (phoneInput) phoneInput.focus();
+        alert('Please enter your contact phone number.');
+        return;
+      }
+      if (!address) {
+        if (addressInput) addressInput.focus();
+        alert('Please enter your complete delivery address.');
+        return;
+      }
+
       const paymentInput = document.querySelector('input[name="orderPayment"]:checked');
       const paymentMethod = paymentInput ? paymentInput.value : 'UPI / Card';
 
@@ -850,55 +1374,230 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000);
 
-      // Save to localStorage
-      try {
-        let adminOrders = JSON.parse(localStorage.getItem('nf_orders') || '[]');
-        adminOrders.unshift({
-          id: orderId,
-          customer: name,
-          email: email,
-          phone: phone,
-          city: address.split(',').pop().trim() || 'India',
-          address: address,
-          items: 'Category Order Items',
-          total: cleanTotal,
-          paymentMethod: paymentMethod,
-          paymentStatus: 'Paid',
-          status: 'Processing',
-          date: new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })
-        });
-        localStorage.setItem('nf_orders', JSON.stringify(adminOrders));
-      } catch(e) {}
-
-      // Clear cart
-      localStorage.setItem('glam_cart', JSON.stringify([]));
-      localStorage.removeItem('glam_applied_promo');
-      if (typeof renderCartDrawer === 'function') {
-        localCart = [];
-        renderCartDrawer();
+      const submitBtn = document.getElementById('confirmOrderBtn');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Processing Order...';
       }
 
-      // Show success
-      const formView = document.getElementById('checkoutFormView');
-      const successView = document.getElementById('checkoutSuccessView');
-      const sOrderId = document.getElementById('successOrderId');
-      const sOrderCust = document.getElementById('successOrderCust');
-      const sOrderAddress = document.getElementById('successOrderAddress');
-      const sOrderPayment = document.getElementById('successOrderPayment');
-      const sOrderTotal = document.getElementById('successOrderTotal');
+      try {
+        // Validate inventory for each item in the cart
+        let savedCart = localCart;
+        try {
+          const raw = localStorage.getItem('glam_cart');
+          if (raw) savedCart = JSON.parse(raw);
+        } catch(e) {}
 
-      if (sOrderId) sOrderId.textContent = orderId;
-      if (sOrderCust) sOrderCust.textContent = name;
-      if (sOrderAddress) sOrderAddress.textContent = address;
-      if (sOrderPayment) sOrderPayment.textContent = paymentMethod;
-      if (sOrderTotal) sOrderTotal.textContent = totalText;
+        if (!savedCart || savedCart.length === 0) {
+          alert('Your shopping bag is empty. Please select a luxury garment first.');
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="ri-check-double-line"></i> Place Luxury Order';
+          }
+          return;
+        }
+        
+        let allProds = [];
+        try {
+          if (typeof getStoredProducts === 'function') {
+            allProds = getStoredProducts();
+          } else {
+            allProds = JSON.parse(localStorage.getItem('nf_products') || '[]');
+          }
+        } catch(e) {
+          allProds = JSON.parse(localStorage.getItem('nf_products') || '[]');
+        }
 
-      if (formView) formView.style.display = 'none';
-      if (successView) successView.style.display = 'block';
-    });
+        for (const item of savedCart) {
+          const prod = allProds.find(p => String(p.id) === String(item.id));
+          const availableStock = prod && prod.stock !== undefined ? Number(prod.stock) : 15;
+          const requestedQty = Number(item.qty) || 1;
+          if (availableStock <= 0) {
+            alert(`Item "${item.title || item.name}" is OUT OF STOCK / SOLD OUT! Please remove it from your shopping bag before completing the order.`);
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="ri-check-double-line"></i> Place Luxury Order';
+            }
+            return;
+          }
+          if (requestedQty > availableStock) {
+            alert(`Only ${availableStock} pieces available in stock for "${item.title || item.name}". You ordered ${requestedQty}. Please reduce your quantity.`);
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="ri-check-double-line"></i> Place Luxury Order';
+            }
+            return;
+          }
+        }
+
+        const itemsDesc = savedCart.map(i => `${i.title || i.name} (Size: ${i.size || 'M'}) (x${i.qty || 1})`).join(', ') || 'Category Order Items';
+
+        // 1. Save to localStorage Admin Orders
+        try {
+          let adminOrders = JSON.parse(localStorage.getItem('nf_orders') || '[]');
+          adminOrders.unshift({
+            id: orderId,
+            customer: name,
+            email: email,
+            phone: phone,
+            city: address.split(',').pop().trim() || 'India',
+            address: address,
+            items: itemsDesc,
+            total: cleanTotal,
+            paymentMethod: paymentMethod,
+            paymentStatus: 'Paid',
+            status: 'Processing',
+            date: new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })
+          });
+          localStorage.setItem('nf_orders', JSON.stringify(adminOrders));
+        } catch(e) {
+          console.warn('Category local orders save notice:', e);
+        }
+
+        // 2. Deduct purchased quantities from product inventory (Local & Cloud)
+        try {
+          let localProds = JSON.parse(localStorage.getItem('nf_products') || '[]');
+          if (Array.isArray(localProds) && localProds.length > 0) {
+            for (const item of savedCart) {
+              const orderedQty = Number(item.qty) || 1;
+              const target = localProds.find(p => String(p.id) === String(item.id));
+              if (target) {
+                target.stock = Math.max(0, (Number(target.stock) || 0) - orderedQty);
+                if (target.stock <= 0) {
+                  target.status = 'out-of-stock';
+                } else if (target.stock <= 5) {
+                  target.status = 'low-stock';
+                }
+                target.sales = (Number(target.sales) || 0) + orderedQty;
+
+                // Also update Supabase Cloud in background
+                if (window.GlamProducts && typeof window.GlamProducts.update === 'function') {
+                  try {
+                    window.GlamProducts.update(target.id, {
+                      stock: target.stock,
+                      status: target.status,
+                      sales: target.sales
+                    });
+                  } catch(err) {}
+                }
+              }
+            }
+            localStorage.setItem('nf_products', JSON.stringify(localProds));
+          }
+        } catch(e) {
+          console.warn('Category inventory reduction warning:', e);
+        }
+
+        // 3. Save to Supabase Cloud Orders
+        if (window.GlamOrders && typeof window.GlamOrders.create === 'function') {
+          try {
+            await window.GlamOrders.create({
+              id: orderId,
+              customer_name: name,
+              customer_email: email,
+              customer_phone: phone,
+              shipping_address: address,
+              total: cleanTotal,
+              payment_method: paymentMethod,
+              payment_status: 'Paid',
+              status: 'Processing',
+              items_summary: itemsDesc
+            });
+          } catch(err) {
+            console.warn('Supabase cloud order create notice:', err);
+          }
+        }
+
+        // 4. Save customer profile
+        if (window.GlamCustomers && typeof window.GlamCustomers.upsert === 'function') {
+          try {
+            await window.GlamCustomers.upsert({
+              id: "CUST-" + Math.floor(100 + Math.random() * 900),
+              name: name,
+              email: email,
+              phone: phone,
+              orders_count: 1,
+              total_spend: cleanTotal,
+              status: 'Active'
+            });
+          } catch(e) {}
+        }
+
+        // 5. Clear cart
+        localStorage.setItem('glam_cart', JSON.stringify([]));
+        localStorage.removeItem('glam_applied_promo');
+        localCart = [];
+        if (typeof renderCartDrawer === 'function') {
+          renderCartDrawer();
+        }
+
+        // 6. Re-render category grid immediately so Sold Out appears
+        if (typeof renderCategoryProducts === 'function') {
+          renderCategoryProducts();
+        }
+
+        // 7. Show success confirmation screen
+        const formView = document.getElementById('checkoutFormView');
+        const successView = document.getElementById('checkoutSuccessView');
+        const sOrderId = document.getElementById('successOrderId');
+        const sOrderCust = document.getElementById('successOrderCust');
+        const sOrderAddress = document.getElementById('successOrderAddress');
+        const sOrderPayment = document.getElementById('successOrderPayment');
+        const sOrderTotal = document.getElementById('successOrderTotal');
+
+        if (sOrderId) sOrderId.textContent = orderId;
+        if (sOrderCust) sOrderCust.textContent = name;
+        if (sOrderAddress) sOrderAddress.textContent = address;
+        if (sOrderPayment) sOrderPayment.textContent = paymentMethod;
+        if (sOrderTotal) sOrderTotal.textContent = totalText;
+
+        const trackBtn = document.getElementById('trackInDashboardBtn');
+        if (trackBtn) {
+          trackBtn.href = 'dashboard.html?orderId=' + encodeURIComponent(orderId) + '&email=' + encodeURIComponent(email);
+        }
+
+        // Notify other windows/tabs
+        window.dispatchEvent(new CustomEvent('orders_updated', { detail: { orderId, email, customer: name } }));
+
+        // Dispatch Automated Real-Time Order Email to saconsultantandstaffing1@gmail.com
+        if (typeof window.sendAdminOrderNotificationEmail === 'function') {
+          window.sendAdminOrderNotificationEmail({
+            orderId: orderId,
+            customerName: name,
+            customerEmail: email,
+            customerPhone: phone,
+            shippingAddress: address,
+            itemsDesc: itemsDesc,
+            totalAmount: totalText,
+            paymentMethod: paymentMethod
+          }).catch(err => console.warn('Category order email notification notice:', err));
+        }
+
+        if (formView) formView.style.display = 'none';
+        if (successView) successView.style.display = 'block';
+
+      } catch(submitErr) {
+        console.error('Category checkout submit error:', submitErr);
+        alert('An unexpected error occurred during order submission: ' + (submitErr.message || submitErr));
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="ri-check-double-line"></i> Place Luxury Order';
+        }
+      }
+    };
+
+    window.handleCategoryOrderSubmit = handleSubmit;
+    catCheckoutForm._boundSubmit = handleSubmit;
+    catCheckoutForm.addEventListener('submit', handleSubmit);
   }
- } catch(e) {}
-  });
+
+  // Bind category checkout on script execution and on DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCategoryCheckout);
+  } else {
+    initCategoryCheckout();
+  }
   window.addEventListener('coupons_updated', () => {
     try { window.syncCategoryAnnouncementPromo(); } catch(e) {}
     try { renderCartDrawer(); } catch(e) {}
@@ -977,10 +1676,16 @@ function renderCartDrawer() {
         <img src="${item.image}" alt="${item.title}" style="width:55px; height:70px; object-fit:cover; border-radius:4px;" />
         <div style="flex:1;">
           <h4 style="font-size:0.85rem; margin:0 0 4px 0; font-family:var(--font-serif); color:#181412;">${item.title}</h4>
-          <div style="margin: 2px 0 5px 0;">
+          <div style="margin: 2px 0 5px 0; display:flex; flex-wrap:wrap; gap:6px;">
             <span style="display:inline-block; font-size:0.75rem; font-weight:700; color:#8c733e; background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.3); padding:2px 7px; border-radius:4px;">
               Size: ${item.size || 'M'}
             </span>
+            ${item.color ? `
+            <span style="display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; font-weight:700; color:#444; background:#f5f2eb; border:1px solid #e0dacb; padding:2px 7px; border-radius:4px;">
+              <span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:${item.colorHex || '#d4af37'}; border:1px solid rgba(0,0,0,0.15);"></span>
+              ${item.color}
+            </span>
+            ` : ''}
           </div>
           <span style="font-size:0.82rem; color:#b45309; font-weight:700;">₹${Number(item.price).toLocaleString('en-IN')}</span>
           <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
@@ -1059,11 +1764,23 @@ function renderCartDrawer() {
 
   window.changeCartQty = function(idx, delta) {
     if (localCart[idx]) {
+      const item = localCart[idx];
+      if (delta > 0) {
+        const availableStock = (typeof window.getCategoryProductStock === 'function') ? window.getCategoryProductStock(item.id) : (item.stock !== undefined ? Number(item.stock) : 15);
+        const totalInCart = localCart
+          .filter(i => String(i.id) === String(item.id))
+          .reduce((sum, i) => sum + (Number(i.qty) || 1), 0);
+
+        if (totalInCart + delta > availableStock) {
+          alert(`Cannot increase quantity! Only ${availableStock} pieces available in stock for "${item.title || item.name}".`);
+          return;
+        }
+      }
       localCart[idx].qty = (localCart[idx].qty || 1) + delta;
       if (localCart[idx].qty <= 0) localCart.splice(idx, 1);
       localStorage.setItem('glam_cart', JSON.stringify(localCart));
       updateBadges();
-  renderCartDrawer();
+      renderCartDrawer();
     }
   };
 
@@ -1079,10 +1796,30 @@ function renderCartDrawer() {
       const saved = localStorage.getItem('glam_cart');
       if (saved) localCart = JSON.parse(saved);
     } catch(e) {}
-    const chosenSize = product.size || (product.sizes && product.sizes.length > 0 ? (product.sizes.includes('M') ? 'M' : product.sizes[0]) : 'M');
-    const cartKey = String(product.id) + '_' + chosenSize;
 
-    const existing = localCart.find(i => (i.cartKey ? i.cartKey === cartKey : (String(i.id) === String(product.id) && i.size === chosenSize)));
+    const availableStock = (typeof window.getCategoryProductStock === 'function') ? window.getCategoryProductStock(product.id) : (product.stock !== undefined ? Number(product.stock) : 15);
+    if (availableStock <= 0) {
+      alert(`Sorry, "${product.title || product.name}" is completely SOLD OUT! No more orders can be placed for this item.`);
+      return;
+    }
+
+    const currentTotalInCart = localCart
+      .filter(i => String(i.id) === String(product.id))
+      .reduce((sum, i) => sum + (Number(i.qty) || 1), 0);
+
+    if (currentTotalInCart + 1 > availableStock) {
+      alert(`Cannot add more! There are only ${availableStock} pieces available in stock for "${product.title || product.name}". You already have ${currentTotalInCart} in your bag.`);
+      return;
+    }
+    const chosenSize = product.size || (product.sizes && product.sizes.length > 0 ? (product.sizes.includes('M') ? 'M' : product.sizes[0]) : 'M');
+    const chosenColor = product.color || (product.colors && product.colors.length > 0 ? (typeof product.colors[0] === 'object' ? product.colors[0].name : product.colors[0]) : null);
+    const chosenColorHex = product.colorHex || (product.colors && product.colors.length > 0 && typeof product.colors[0] === 'object' ? product.colors[0].hex : null);
+    
+    // Unique cart key by Dress ID + Size + Color
+    const cleanColorKey = chosenColor ? String(chosenColor).toLowerCase().replace(/\s+/g, '') : 'std';
+    const cartKey = String(product.id) + '_' + String(chosenSize) + '_' + cleanColorKey;
+
+    const existing = localCart.find(i => (i.cartKey ? i.cartKey === cartKey : (String(i.id) === String(product.id) && i.size === chosenSize && (!chosenColor || i.color === chosenColor))));
     if (existing) {
       existing.qty = (existing.qty || 1) + 1;
     } else {
@@ -1090,7 +1827,9 @@ function renderCartDrawer() {
         ...product,
         cartKey: cartKey,
         qty: 1,
-        size: chosenSize
+        size: chosenSize,
+        color: chosenColor,
+        colorHex: chosenColorHex
       });
     }
     localStorage.setItem('glam_cart', JSON.stringify(localCart));
@@ -1243,10 +1982,71 @@ function renderCartDrawer() {
     const qvCat = document.getElementById('qvCat');
     const qvBtn = document.getElementById('qvAddToCartBtn');
 
-    if (qvImg) qvImg.src = prod.image;
-    if (qvTitle) qvTitle.textContent = prod.title;
+    // Multi-Image Gallery Setup
+    window.currentQvImages = (prod.images && Array.isArray(prod.images) && prod.images.length > 0)
+      ? Array.from(new Set(prod.images.filter(Boolean)))
+      : (prod.image ? [prod.image] : []);
+    window.currentQvIndex = 0;
+
+    if (qvImg) qvImg.src = window.currentQvImages[0] || prod.image;
+    if (qvTitle) qvTitle.textContent = prod.title || prod.name;
     if (qvPrice) qvPrice.textContent = `₹${Number(prod.price).toLocaleString('en-IN')}`;
     if (qvCat) qvCat.textContent = (prod.category || currentMeta.name).toUpperCase();
+
+    // Multi-Image Slider Controls (Arrows & Counter)
+    const qvGalleryThumbs = document.getElementById('qvGalleryThumbs');
+    const qvPrevBtn = document.getElementById('qvPrevBtn');
+    const qvNextBtn = document.getElementById('qvNextBtn');
+    const qvCounter = document.getElementById('qvImgCounter');
+
+    if (window.currentQvImages.length > 1) {
+      if (qvPrevBtn) qvPrevBtn.style.display = 'flex';
+      if (qvNextBtn) qvNextBtn.style.display = 'flex';
+      if (qvCounter) {
+        qvCounter.style.display = 'block';
+        qvCounter.textContent = `1 / ${window.currentQvImages.length}`;
+      }
+      if (qvGalleryThumbs) {
+        qvGalleryThumbs.style.display = 'flex';
+        qvGalleryThumbs.innerHTML = window.currentQvImages.map((imgUrl, imgIdx) => `
+          <img src="${imgUrl}" alt="Gallery Angle ${imgIdx + 1}" 
+            onclick="window.setQvImage(${imgIdx})"
+            style="width:52px; height:62px; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid ${imgIdx === 0 ? 'var(--gold-accent, #b45309)' : 'transparent'}; transition:all 0.2s ease; flex-shrink:0;" />
+        `).join('');
+      }
+    } else {
+      if (qvPrevBtn) qvPrevBtn.style.display = 'none';
+      if (qvNextBtn) qvNextBtn.style.display = 'none';
+      if (qvCounter) qvCounter.style.display = 'none';
+      if (qvGalleryThumbs) {
+        qvGalleryThumbs.style.display = 'none';
+        qvGalleryThumbs.innerHTML = '';
+      }
+    }
+
+    // Dynamic Colors for this dress
+    const qvColorSection = document.getElementById('qvColorSection');
+    const qvColorSelector = document.getElementById('qvColorSelector');
+    const qvSelectedColorName = document.getElementById('qvSelectedColorName');
+    const availColors = prod.colors && prod.colors.length > 0 ? prod.colors.map(c => typeof c === 'string' ? { name: c, hex: '#D4AF37' } : c) : [];
+
+    if (availColors.length > 0) {
+      if (qvColorSection) qvColorSection.style.display = 'block';
+      window.selectedCategoryQvColor = availColors[0];
+      if (qvSelectedColorName) qvSelectedColorName.textContent = availColors[0].name;
+      if (qvColorSelector) {
+        qvColorSelector.innerHTML = availColors.map((c, i) => `
+          <button type="button" class="qv-color-btn ${i === 0 ? 'active' : ''}" 
+            title="${c.name}"
+            onclick="window.selectCategoryQvColor('${c.name}', '${c.hex}', this, '${c.image || ''}')"
+            style="width:24px; height:24px; border-radius:50%; background:${c.hex}; border:2.5px solid ${i === 0 ? 'var(--gold-accent, #b45309)' : '#e5e7eb'}; cursor:pointer; padding:0; outline:none; transition:all 0.15s ease; box-shadow:0 1px 3px rgba(0,0,0,0.15); transform:${i === 0 ? 'scale(1.25)' : 'scale(1)'};">
+          </button>
+        `).join('');
+      }
+    } else {
+      if (qvColorSection) qvColorSection.style.display = 'none';
+      window.selectedCategoryQvColor = null;
+    }
 
     // Populate dynamic size buttons in quickview
     const qvSizeSelector = document.getElementById('qvSizeSelector');
@@ -1257,11 +2057,34 @@ function renderCartDrawer() {
         <button type="button" class="size-btn ${s === window.selectedCategoryQvSize ? 'active' : ''}" onclick="window.selectCategoryQvSize('${s}', this)">${s}</button>
       `).join('');
     }
+
+    const availableStock = (typeof window.getCategoryProductStock === 'function') ? window.getCategoryProductStock(prod.id) : (prod.stock !== undefined ? Number(prod.stock) : 15);
+    const isOutOfStock = availableStock <= 0 || prod.status === 'out-of-stock';
+
     if (qvBtn) {
-      qvBtn.onclick = () => {
-        window.categoryAddToCart({ ...prod, size: window.selectedCategoryQvSize || 'M' });
-        window.closeAllDrawers();
-      };
+      if (isOutOfStock) {
+        qvBtn.disabled = true;
+        qvBtn.classList.add('disabled-stock');
+        qvBtn.innerHTML = 'Sold Out / Out of Stock <i class="ri-close-circle-line"></i>';
+        qvBtn.title = 'This item is sold out';
+        qvBtn.onclick = null;
+      } else {
+        qvBtn.disabled = false;
+        qvBtn.classList.remove('disabled-stock');
+        qvBtn.innerHTML = 'Add to Shopping Bag <i class="ri-shopping-bag-line"></i>';
+        qvBtn.title = '';
+        qvBtn.onclick = () => {
+          const chosenColor = window.selectedCategoryQvColor ? window.selectedCategoryQvColor.name : null;
+          const chosenColorHex = window.selectedCategoryQvColor ? window.selectedCategoryQvColor.hex : null;
+          window.categoryAddToCart({ 
+            ...prod, 
+            size: window.selectedCategoryQvSize || 'M',
+            color: chosenColor,
+            colorHex: chosenColorHex
+          });
+          window.closeAllDrawers();
+        };
+      }
     }
 
     const qv = document.getElementById('quickviewModal');
@@ -1308,20 +2131,27 @@ function renderCartDrawer() {
       if (cloudProds && cloudProds.length > 0) {
         let delIds = [];
         try { delIds = JSON.parse(localStorage.getItem('nf_deleted_products')) || []; } catch(e) {}
+        const existingLocal = getStoredProducts();
         const mapped = cloudProds
           .filter(p => !delIds.includes(String(p.id)))
-          .map(p => ({
-          id: p.id,
-          name: p.name,
-          category: p.category,
-          price: Number(p.price),
-          originalPrice: Number(p.original_price || p.price),
-          stock: Number(p.stock),
-          status: p.status,
-          image: p.image,
-          rating: Number(p.rating || 5.0),
-          sales: Number(p.sales || 0)
-        }));
+          .map(p => {
+            const localMatch = existingLocal.find(lp => String(lp.id) === String(p.id));
+            return {
+              id: p.id,
+              name: p.name,
+              category: p.category,
+              price: Number(p.price),
+              originalPrice: Number(p.original_price || p.price),
+              stock: Number(p.stock),
+              status: p.status,
+              image: p.image,
+              images: p.images || (localMatch && localMatch.images) || (p.image ? [p.image] : []),
+              colors: p.colors || (localMatch && localMatch.colors) || null,
+              sizes: p.sizes || (localMatch && localMatch.sizes) || (p.category === 'Saree' || p.category === 'Dupatta' ? ['Free Size'] : ['S', 'M', 'L', 'XL', 'XXL']),
+              rating: Number(p.rating || 5.0),
+              sales: Number(p.sales || 0)
+            };
+          });
         localStorage.setItem('nf_products', JSON.stringify(mapped));
         renderCategoryProducts();
       }

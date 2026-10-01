@@ -189,6 +189,116 @@
     margin: 8px 0 6px 0;
     align-items: center;
   }
+  .product-card:hover .product-img-primary {
+    opacity: 1 !important;
+  }
+  .product-img-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+  .card-slider-progress {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    gap: 4px;
+    z-index: 6;
+    pointer-events: none;
+  }
+  .card-slider-bar {
+    flex: 1;
+    height: 3.5px;
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 2px;
+    transition: all 0.25s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  }
+  .card-slider-bar.active {
+    background: #D4AF37;
+    box-shadow: 0 1px 6px rgba(212, 175, 55, 0.85);
+  }
+  .card-slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 6;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    font-size: 1.15rem;
+    padding: 0;
+  }
+  .product-card:hover .card-slider-arrow {
+    opacity: 1;
+  }
+  .card-slider-arrow:hover {
+    background: #D4AF37;
+    color: #ffffff;
+    border-color: #D4AF37;
+    transform: translateY(-50%) scale(1.12);
+  }
+  .card-slider-arrow.prev { left: 8px; }
+  .card-slider-arrow.next { right: 8px; }
+  .qv-img-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  .qv-slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(6px);
+    border: 1.5px solid rgba(212, 175, 55, 0.4);
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 1.35rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+  .qv-slider-arrow:hover {
+    background: #D4AF37;
+    color: #ffffff;
+    border-color: #D4AF37;
+    transform: translateY(-50%) scale(1.12);
+  }
+  .qv-slider-arrow.prev { left: 10px; }
+  .qv-slider-arrow.next { right: 10px; }
+  .qv-img-counter {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+    letter-spacing: 0.5px;
+    z-index: 9;
+  }
 </style>
 
 </head>
@@ -381,13 +491,32 @@
   <div class="quickview-modal" id="quickviewModal">
     <button class="modal-close-btn" onclick="window.closeAllDrawers()"><i class="ri-close-line"></i></button>
     <div class="qv-image-box">
-      <img src="" alt="Quick View Product" id="qvImg">
+      <div class="qv-img-wrapper">
+        <img src="" alt="Quick View Product" id="qvImg" style="width:100%; border-radius:8px; object-fit:cover; max-height:420px; transition:opacity 0.2s ease;">
+        <button type="button" class="qv-slider-arrow prev" id="qvPrevBtn" onclick="window.slideQvImage(-1, event)" title="Previous image">
+          <i class="ri-arrow-left-s-line"></i>
+        </button>
+        <button type="button" class="qv-slider-arrow next" id="qvNextBtn" onclick="window.slideQvImage(1, event)" title="Next image">
+          <i class="ri-arrow-right-s-line"></i>
+        </button>
+        <span class="qv-img-counter" id="qvImgCounter">1 / 1</span>
+      </div>
+      <!-- Multi-image gallery thumbnails -->
+      <div id="qvGalleryThumbs" style="display:flex; gap:8px; margin-top:10px; overflow-x:auto; padding:4px 0; max-width:100%;"></div>
     </div>
     <div class="qv-details-box">
       <span class="product-category-label" id="qvCat">LUXURY COLLECTION</span>
       <h2 class="qv-title" id="qvTitle"></h2>
       <div class="qv-price" id="qvPrice"></div>
       
+      <!-- Dynamic Color Selector for this specific dress -->
+      <div id="qvColorSection" style="margin-bottom:0.8rem;">
+        <div style="font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; color:#1C1917;">
+          Available Colors: <span id="qvSelectedColorName" style="color:var(--primary-pink, #b45309); font-weight:700;"></span>
+        </div>
+        <div class="color-selector" id="qvColorSelector" style="display:flex; gap:0.5rem; margin-top:0.4rem; flex-wrap:wrap;"></div>
+      </div>
+
       <div style="font-weight: 700; font-size: 0.82rem; text-transform: uppercase; margin-bottom: 0.45rem; color: #1C1917; letter-spacing: 0.5px;">
         Select Dress Size:
       </div>
@@ -570,8 +699,6 @@
   </div>
 
 
-  <!-- Category JavaScript Engine -->
-  <script src="category.js"></script>
 
   <!-- Real Checkout / Delivery Modal with Order Received Flow -->
   <div class="custom-modal-backdrop" id="checkoutOrderModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100vw; height:100vh; z-index:999999; background:rgba(0,0,0,0.78); backdrop-filter:blur(8px); align-items:center; justify-content:center; opacity:1 !important; visibility:visible !important; pointer-events:auto !important;">
@@ -589,7 +716,7 @@
           <p style="font-size:0.84rem; color:#6b7280; margin:4px 0 0;">Enter your delivery details to complete your order</p>
         </div>
 
-        <form id="checkoutOrderForm">
+        <form id="checkoutOrderForm" novalidate onsubmit="window.handleCategoryOrderSubmit && window.handleCategoryOrderSubmit(event)">
           <div style="margin-bottom:0.85rem;">
             <label style="display:block; font-size:0.8rem; font-weight:600; color:#374151; margin-bottom:0.25rem;">Recipient Full Name</label>
             <input type="text" id="orderCustName" required placeholder="e.g. Priya Sharma" style="width:100%; padding:0.65rem 0.8rem; border:1px solid #d1d5db; border-radius:6px; font-size:0.9rem; box-sizing:border-box;" />
@@ -636,7 +763,7 @@
             </div>
           </div>
 
-          <button type="submit" id="confirmOrderBtn" style="width:100%; padding:0.85rem; background:linear-gradient(135deg, #181412, #2a201c); color:#d4af37; border:1px solid #d4af37; border-radius:6px; font-weight:700; font-size:0.95rem; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <button type="submit" id="confirmOrderBtn" onclick="window.handleCategoryOrderSubmit && window.handleCategoryOrderSubmit(event)" style="width:100%; padding:0.85rem; background:linear-gradient(135deg, #181412, #2a201c); color:#d4af37; border:1px solid #d4af37; border-radius:6px; font-weight:700; font-size:0.95rem; cursor:pointer; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; gap:8px;">
             <i class="ri-check-double-line"></i> Place Luxury Order
           </button>
         </form>
@@ -674,6 +801,9 @@
           </div>
         </div>
 
+        <a href="dashboard.html" id="trackInDashboardBtn" style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:0.85rem; background:linear-gradient(135deg, #b48616 0%, #D4AF37 100%); color:#0f0d0b; border-radius:6px; font-weight:700; font-size:0.92rem; margin-bottom:0.75rem; text-decoration:none; text-align:center; box-sizing:border-box; box-shadow:0 4px 15px rgba(212,175,55,0.3);">
+          <i class="ri-truck-line"></i> Track Order in User Dashboard
+        </a>
         <button type="button" onclick="window.closeCheckoutModal && window.closeCheckoutModal(event)" style="width:100%; padding:0.85rem; background:#181412; color:#D4AF37; border:1px solid #D4AF37; border-radius:6px; font-weight:700; font-size:0.9rem; cursor:pointer; letter-spacing:0.5px;">
           <i class="ri-shopping-bag-line"></i> Continue Luxury Shopping
         </button>
@@ -681,5 +811,10 @@
 
     </div>
   </div>
+
+  <!-- Automated Admin Order Email Notification -->
+  <script src="./email-notification.js"></script>
+  <!-- Category JavaScript Engine -->
+  <script src="category.js"></script>
 </body>
 </html>

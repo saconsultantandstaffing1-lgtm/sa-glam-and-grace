@@ -474,6 +474,15 @@
                 </div>
               </div>
 
+              <div class="form-group" style="background:rgba(212,175,55,0.06); border:1px dashed rgba(212,175,55,0.4); border-radius:8px; padding:12px 14px; margin-bottom:1rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <label style="margin:0; font-weight:700; color:#b45309; font-size:0.85rem;"><i class="ri-mail-send-line"></i> Real-Time Order Alerts Recipient</label>
+                  <span style="font-size:0.75rem; background:#10b981; color:#fff; padding:2px 8px; border-radius:4px; font-weight:600;"><i class="ri-checkbox-circle-fill"></i> Connected & Active</span>
+                </div>
+                <input type="email" class="form-control" value="saconsultantandstaffing1@gmail.com" readonly style="background:#fff; font-weight:600;" />
+                <span style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; display:block;">Whenever a customer places an order on the storefront or category page, complete order details & customer info are automatically emailed to this address.</span>
+              </div>
+
               <div class="form-grid-2">
                 <div class="form-group">
                   <label>Default Currency</label>
@@ -593,6 +602,49 @@
               <i class="ri-information-line" style="color:var(--gold-accent);"></i> Clients will see and select from these sizes on the online boutique before adding to bag.
             </span>
           </div>
+          <!-- Available Dress Colors (Admin Selects Available Colors for this Specific Dress) -->
+          <div class="form-group" style="margin-top: 1rem; margin-bottom: 1.2rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <label style="margin:0; font-weight:700; font-size:0.84rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-main);">
+                Available Dress Colors <span style="color:var(--gold-accent);">*</span>
+              </label>
+              <div style="display:flex; gap:0.4rem;">
+                <button type="button" class="btn-luxury-outline" style="padding:2px 8px; font-size:0.72rem; cursor:pointer;" onclick="window.selectStandardEthnicPalette && window.selectStandardEthnicPalette()">+ Standard Palette</button>
+                <button type="button" class="btn-luxury-outline" style="padding:2px 8px; font-size:0.72rem; cursor:pointer;" onclick="window.clearAllAdminColors && window.clearAllAdminColors()">Clear All</button>
+              </div>
+            </div>
+
+            <!-- Standard Popular Ethnic Color Chips -->
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.4rem; font-weight:600;">
+              Quick-Select Colors:
+            </div>
+            <div id="adminStandardColorsList" style="display:flex; gap:0.45rem; flex-wrap:wrap; margin-bottom:0.75rem;">
+              <!-- Generated dynamically via JS -->
+            </div>
+
+            <!-- Selected Colors Container -->
+            <div style="background:var(--bg-card-alt); padding:0.75rem 0.9rem; border-radius:8px; border:1px solid var(--border-subtle); margin-bottom:0.75rem;">
+              <div style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--gold-accent); margin-bottom:0.4rem;">
+                Active Colors for this Dress (<span id="adminSelectedColorsCount">0</span> selected):
+              </div>
+              <div id="adminSelectedColorsContainer" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; min-height:32px;">
+                <span id="adminNoColorsNotice" style="font-size:0.78rem; color:var(--text-muted); font-style:italic;">No colors selected yet. Click quick colors above or add custom below.</span>
+              </div>
+            </div>
+
+            <!-- Custom Color Add Row -->
+            <div style="display:flex; gap:0.5rem; align-items:center;">
+              <input type="text" id="adminCustomColorName" placeholder="Add custom shade (e.g. Pista Green, Rose Gold)" class="form-control" style="flex:1; padding:0.35rem 0.65rem; font-size:0.82rem;" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.addAdminCustomColor && window.addAdminCustomColor();}" />
+              <input type="color" id="adminCustomColorHex" value="#B45309" title="Pick color tint" style="width:38px; height:34px; padding:2px; border:1px solid var(--border-subtle); border-radius:6px; cursor:pointer; background:var(--bg-card);" />
+              <button type="button" class="btn-luxury-outline" onclick="window.addAdminCustomColor && window.addAdminCustomColor()" style="padding:0.4rem 0.85rem; font-size:0.78rem; font-weight:700; cursor:pointer; white-space:nowrap;">
+                <i class="ri-add-line"></i> Add Color
+              </button>
+            </div>
+            <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-top:0.4rem;">
+              <i class="ri-information-line" style="color:var(--gold-accent);"></i> Only the colors you select here will be shown to customers when browsing this dress.
+            </span>
+          </div>
+
           <div class="form-grid-2">
             <div class="form-group">
               <label>Special Price (₹)</label>
@@ -605,7 +657,7 @@
           </div>
 
           <div class="form-group">
-            <label>Garment Image (Upload to Supabase Storage or enter URL)</label>
+            <label>Primary Garment Image (Cover View)</label>
             <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem;">
               <input type="file" id="prodImageFile" accept="image/*" class="form-control" style="padding:0.35rem 0.6rem; font-size:0.8rem;" />
               <span id="uploadSpinner" style="display:none; color:#c69214; font-size:0.8rem; white-space:nowrap;"><i class="ri-loader-4-line ri-spin"></i> Uploading...</span>
@@ -613,11 +665,34 @@
             <input type="text" class="form-control" id="prodImage" value="assets/images/about_anarkali.png" placeholder="Supabase CDN URL or assets/images/..." />
           </div>
 
-          <div style="display:flex; align-items:center; gap:1rem; padding:0.8rem; background:var(--bg-card-alt); border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
+          <div style="display:flex; align-items:center; gap:1rem; padding:0.8rem; background:var(--bg-card-alt); border-radius:var(--radius-md); border:1px solid var(--border-subtle); margin-bottom:1rem;">
             <img id="productImagePreview" src="assets/images/about_anarkali.png" alt="Preview" style="width:60px; height:70px; object-fit:cover; border-radius:var(--radius-sm); border:1px solid var(--border-subtle);" />
             <div>
-              <strong style="font-size:0.85rem; display:block;">Live Image Preview</strong>
-              <span style="font-size:0.75rem; color:var(--text-muted);">High-resolution garment rendering</span>
+              <strong style="font-size:0.85rem; display:block;">Primary Cover Preview</strong>
+              <span style="font-size:0.75rem; color:var(--text-muted);">Main storefront thumbnail view</span>
+            </div>
+          </div>
+
+          <!-- Multiple Gallery Images Section -->
+          <div class="form-group" style="margin-top: 0.5rem;">
+            <label style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-weight:700; font-size:0.84rem; text-transform:uppercase; letter-spacing:0.5px;">Additional Gallery Images (Multiple Angles & Views)</span>
+              <span style="font-size:0.72rem; color:var(--text-muted); font-weight:normal;">Front, Back, Close-up</span>
+            </label>
+            <!-- Direct file upload for multiple gallery angles -->
+            <div style="margin-bottom:0.5rem; display:flex; gap:0.5rem; align-items:center;">
+              <input type="file" id="adminGalleryFileInput" multiple accept="image/*" class="form-control" style="flex:1; padding:0.35rem 0.6rem; font-size:0.8rem;" />
+              <span id="galleryUploadSpinner" style="display:none; color:#c69214; font-size:0.8rem; white-space:nowrap;"><i class="ri-loader-4-line ri-spin"></i> Adding photos...</span>
+            </div>
+            <!-- Or URL input -->
+            <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem;">
+              <input type="text" id="adminGalleryInput" placeholder="Or enter image URL / path (e.g. assets/images/hero_2.png)" class="form-control" style="flex:1; padding:0.35rem 0.65rem; font-size:0.82rem;" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.addAdminGalleryImage && window.addAdminGalleryImage();}" />
+              <button type="button" class="btn-luxury-outline" onclick="window.addAdminGalleryImage && window.addAdminGalleryImage()" style="padding:0.4rem 0.85rem; font-size:0.78rem; font-weight:700; cursor:pointer; white-space:nowrap;">
+                <i class="ri-image-add-line"></i> Add URL
+              </button>
+            </div>
+            <div id="adminGalleryThumbnails" style="display:flex; gap:0.6rem; flex-wrap:wrap; padding:0.6rem; background:var(--bg-card-alt); border-radius:var(--radius-sm); border:1px solid var(--border-subtle); min-height:48px; align-items:center;">
+              <span id="adminNoGalleryNotice" style="font-size:0.75rem; color:var(--text-muted); font-style:italic;">No additional gallery images added yet.</span>
             </div>
           </div>
         </div>

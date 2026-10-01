@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+const PORT = 3000;
 const BASE_DIR = __dirname;
 
 const MIME_TYPES = {
@@ -16,13 +16,11 @@ const MIME_TYPES = {
   '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
   '.webp': 'image/webp',
-  '.ico': 'image/x-icon',
-  '.woff': 'font/woff',
-  '.woff2': 'font/woff2',
-  '.ttf': 'font/ttf'
+  '.ico': 'image/x-icon'
 };
 
 const server = http.createServer((req, res) => {
+  // CORS & headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
@@ -36,28 +34,19 @@ const server = http.createServer((req, res) => {
   let reqPath = decodeURI(req.url.split('?')[0]);
   if (reqPath === '/' || reqPath === '') {
     reqPath = '/index.html';
-  } else if (reqPath === '/admin' || reqPath === '/admin/') {
-    reqPath = '/admin.html';
-  } else if (reqPath === '/dashboard' || reqPath === '/dashboard/' || reqPath === '/orders' || reqPath === '/orders/') {
-    reqPath = '/dashboard.html';
   }
 
-  let safePath = path.normalize(path.join(BASE_DIR, reqPath));
-  if (!safePath.toLowerCase().startsWith(BASE_DIR.toLowerCase())) {
+  const safePath = path.normalize(path.join(BASE_DIR, reqPath));
+  if (!safePath.startsWith(BASE_DIR)) {
     res.writeHead(403, { 'Content-Type': 'text/plain' });
     res.end('403 Forbidden');
     return;
   }
 
-  // Automatic .html fallback if extension omitted
-  if (!fs.existsSync(safePath) && fs.existsSync(safePath + '.html')) {
-    safePath = safePath + '.html';
-  }
-
   fs.stat(safePath, (err, stats) => {
     if (err) {
       res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('404 Not Found: ' + reqPath);
+      res.end('404 Not Found');
       return;
     }
 
@@ -82,7 +71,6 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`SA Glam & Grace running at http://localhost:${PORT}/`);
-  console.log(`SA Glam & Grace User Dashboard at http://localhost:${PORT}/dashboard`);
-  console.log(`SA Glam & Grace Admin at http://localhost:${PORT}/admin`);
+  console.log(`Server running at http://localhost:${PORT}/`);
+  console.log(`Admin portal at http://localhost:${PORT}/admin.html`);
 });

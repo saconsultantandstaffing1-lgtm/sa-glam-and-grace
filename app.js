@@ -1,14 +1,120 @@
 
-  window.addCardProductToCart = function(prodId, prodObj) {
-    const chosenSize = window.cardSelectedSizes[prodId] || (prodObj.sizes && prodObj.sizes.length > 0 ? (prodObj.sizes.includes('M') ? 'M' : prodObj.sizes[0]) : 'M');
-    window.addToCart({
-      ...prodObj,
-      size: chosenSize
-    });
-  };
-  
-
   window.cardSelectedSizes = {};
+  window.cardSelectedColors = {};
+
+  // Card Image Slider & Hover Auto-Slide State
+  window.cardImageIndex = window.cardImageIndex || {};
+  window.cardImagesList = window.cardImagesList || {};
+  window.cardSlideTimers = window.cardSlideTimers || {};
+
+  window.registerCardImages = function(prodId, images) {
+    if (!images || !Array.isArray(images) || images.length === 0) return;
+    const cleanList = Array.from(new Set(images.filter(Boolean)));
+    window.cardImagesList[String(prodId)] = cleanList;
+    if (typeof window.cardImageIndex[String(prodId)] === 'undefined') {
+      window.cardImageIndex[String(prodId)] = 0;
+    }
+  };
+
+  window.goToCardImage = function(prodId, index, event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const pid = String(prodId);
+    const imgs = window.cardImagesList[pid];
+    if (!imgs || imgs.length <= 1) return;
+    const count = imgs.length;
+    window.cardImageIndex[pid] = ((index % count) + count) % count;
+    const currIdx = window.cardImageIndex[pid];
+
+    const imgEl = document.getElementById('cardImg_' + pid);
+    if (imgEl) {
+      imgEl.src = imgs[currIdx];
+    }
+
+    // Update Progress Bars
+    const prog = document.getElementById('cardProgress_' + pid);
+    if (prog) {
+      const bars = prog.querySelectorAll('.card-slider-bar');
+      bars.forEach((b, i) => {
+        if (i === currIdx) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+    }
+
+    // Update Bottom Thumbnail Dots
+    const thumbs = document.getElementById('cardThumbs_' + pid);
+    if (thumbs) {
+      const dots = thumbs.querySelectorAll('.card-thumb-dot');
+      dots.forEach((d, i) => {
+        d.style.borderColor = (i === currIdx) ? '#D4AF37' : 'transparent';
+      });
+    }
+  };
+
+  window.slideCardImage = function(prodId, delta, event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const pid = String(prodId);
+    const curr = window.cardImageIndex[pid] || 0;
+    window.goToCardImage(pid, curr + delta, event);
+  };
+
+  window.startCardAutoSlide = function(prodId) {
+    const pid = String(prodId);
+    const imgs = window.cardImagesList[pid];
+    if (!imgs || imgs.length <= 1) return;
+    window.stopCardAutoSlide(pid);
+    window.cardSlideTimers[pid] = setInterval(() => {
+      window.slideCardImage(pid, 1);
+    }, 1600);
+  };
+
+  window.stopCardAutoSlide = function(prodId) {
+    const pid = String(prodId);
+    if (window.cardSlideTimers[pid]) {
+      clearInterval(window.cardSlideTimers[pid]);
+      delete window.cardSlideTimers[pid];
+    }
+  };
+
+  // Quick View Image Slider Logic
+  window.currentQvImages = [];
+  window.currentQvIndex = 0;
+
+  window.slideQvImage = function(delta, event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    if (!window.currentQvImages || window.currentQvImages.length <= 1) return;
+    const count = window.currentQvImages.length;
+    window.currentQvIndex = ((window.currentQvIndex + delta) % count + count) % count;
+    window.setQvImage(window.currentQvIndex);
+  };
+
+  window.setQvImage = function(idx) {
+    if (!window.currentQvImages || !window.currentQvImages[idx]) return;
+    window.currentQvIndex = idx;
+    const qvImg = document.getElementById('qvImg');
+    if (qvImg) {
+      qvImg.src = window.currentQvImages[idx];
+    }
+    const counter = document.getElementById('qvImgCounter');
+    if (counter) {
+      counter.textContent = `${idx + 1} / ${window.currentQvImages.length}`;
+    }
+    const thumbs = document.getElementById('qvGalleryThumbs');
+    if (thumbs) {
+      thumbs.querySelectorAll('img').forEach((im, i) => {
+        im.style.borderColor = (i === idx) ? 'var(--gold-accent, #b45309)' : 'transparent';
+      });
+    }
+  };
+
   window.selectCardSize = function(prodId, size, btn, e) {
     if (e) {
       e.preventDefault();
@@ -21,9 +127,54 @@
     }
     btn.classList.add('active');
   };
-  
+
+  window.selectCardColor = function(prodId, colorName, colorHex, btn, e, imageOverride) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    window.cardSelectedColors[prodId] = { name: colorName, hex: colorHex };
+    const card = btn.closest('.product-card') || btn.closest('.fancy-product-card');
+    if (card) {
+      card.querySelectorAll('.card-color-swatch-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.borderColor = '#e5e7eb';
+        b.style.transform = 'scale(1)';
+      });
+      btn.classList.add('active');
+      btn.style.borderColor = 'var(--gold-accent, #b45309)';
+      btn.style.transform = 'scale(1.25)';
+      const label = card.querySelector('.card-color-label');
+      if (label) label.textContent = colorName;
+      if (imageOverride) {
+        const img = card.querySelector('.product-img-primary');
+        if (img) img.src = imageOverride;
+      }
+    }
+  };
+
+  window.addCardProductToCart = function(prodId, prodObj) {
+    const availableStock = (typeof window.getProductStock === 'function') ? window.getProductStock(prodId) : (prodObj && prodObj.stock !== undefined ? Number(prodObj.stock) : 15);
+    if (availableStock <= 0) {
+      alert(`Sorry, "${prodObj.title || prodObj.name}" is completely SOLD OUT! No more orders can be placed for this item.`);
+      return;
+    }
+    const chosenSize = window.cardSelectedSizes[prodId] || (prodObj.sizes && prodObj.sizes.length > 0 ? (prodObj.sizes.includes('M') ? 'M' : prodObj.sizes[0]) : 'M');
+    const chosenColorObj = window.cardSelectedColors[prodId] || (prodObj.colors && prodObj.colors.length > 0 ? (typeof prodObj.colors[0] === 'object' ? prodObj.colors[0] : { name: prodObj.colors[0], hex: '#D4AF37' }) : null);
+    const chosenColor = chosenColorObj ? chosenColorObj.name : null;
+    const chosenColorHex = chosenColorObj ? chosenColorObj.hex : null;
+
+    window.addToCart({
+      ...prodObj,
+      size: chosenSize,
+      color: chosenColor,
+      colorHex: chosenColorHex
+    });
+  };
 
   window.selectedQvSize = 'M';
+  window.selectedQvColor = null;
+
   window.selectQuickViewSize = function(size, btn) {
     window.selectedQvSize = size;
     const container = document.getElementById('qvSizeSelector');
@@ -31,6 +182,29 @@
       container.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
     }
     if (btn) btn.classList.add('active');
+  };
+
+  window.selectQuickViewColor = function(colorName, colorHex, btn, imageOverride) {
+    window.selectedQvColor = { name: colorName, hex: colorHex };
+    const label = document.getElementById('qvSelectedColorName');
+    if (label) label.textContent = colorName;
+    const container = document.getElementById('qvColorSelector');
+    if (container) {
+      container.querySelectorAll('.qv-color-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.borderColor = '#e5e7eb';
+        b.style.transform = 'scale(1)';
+      });
+    }
+    if (btn) {
+      btn.classList.add('active');
+      btn.style.borderColor = 'var(--gold-accent, #b45309)';
+      btn.style.transform = 'scale(1.25)';
+    }
+    if (imageOverride) {
+      const qvImg = document.getElementById('qvImg');
+      if (qvImg) qvImg.src = imageOverride;
+    }
   };
   
 // Global Customer Auth Triggers
@@ -147,11 +321,17 @@ document.addEventListener('DOMContentLoaded', () => {
       name: "Amber Chanderi Handloom Kurti Set",
       category: "Kurtis",
       sizes: ["S", "M", "L", "XL", "XXL"],
+      colors: [
+        { name: "Mustard Yellow", hex: "#E5A93C" },
+        { name: "Rani Pink", hex: "#E0218A" },
+        { name: "Emerald Green", hex: "#097969" }
+      ],
       price: 3499,
       originalPrice: 4999,
       stock: 28,
       status: "in-stock",
       image: "./assets/images/hero_1.png",
+      images: ["./assets/images/hero_1.png", "./assets/images/festive.png", "./assets/images/about_anarkali.png"],
       rating: 4.9,
       sales: 185
     },
@@ -160,11 +340,18 @@ document.addEventListener('DOMContentLoaded', () => {
       name: "Handcrafted Chikankari Anarkali Set",
       category: "Anarkali",
       sizes: ["S", "M", "L", "XL", "XXL"],
+      colors: [
+        { name: "Ivory White", hex: "#FDFBF7" },
+        { name: "Rani Pink", hex: "#E0218A" },
+        { name: "Emerald Green", hex: "#097969" },
+        { name: "Mustard Yellow", hex: "#E5A93C" }
+      ],
       price: 8499,
       originalPrice: 10999,
       stock: 24,
       status: "in-stock",
       image: "./assets/images/about_anarkali.png",
+      images: ["./assets/images/about_anarkali.png", "./assets/images/hero_1.png", "./assets/images/festive.png"],
       rating: 4.9,
       sales: 142
     },
@@ -173,11 +360,17 @@ document.addEventListener('DOMContentLoaded', () => {
       name: "Royal Crimson Zari Bridal Lehenga",
       category: "Lehenga",
       sizes: ["S", "M", "L", "XL", "XXL"],
+      colors: [
+        { name: "Maroon", hex: "#800020" },
+        { name: "Wine Plum", hex: "#58111A" },
+        { name: "Emerald Green", hex: "#097969" }
+      ],
       price: 24999,
       originalPrice: 32000,
       stock: 8,
       status: "low-stock",
       image: "./assets/images/about_lehenga.png",
+      images: ["./assets/images/about_lehenga.png", "./assets/images/featured_banner_wedding_1785416855384.png", "./assets/images/wedding.png"],
       rating: 5.0,
       sales: 89
     },
@@ -186,11 +379,17 @@ document.addEventListener('DOMContentLoaded', () => {
       name: "Pure Banarasi Katan Silk Saree",
       category: "Saree",
       sizes: ["Free Size"],
+      colors: [
+        { name: "Royal Blue", hex: "#2B4C7E" },
+        { name: "Rani Pink", hex: "#E0218A" },
+        { name: "Rust Brown", hex: "#8B4513" }
+      ],
       price: 14500,
       originalPrice: 18500,
       stock: 18,
       status: "in-stock",
       image: "./assets/images/about_saree.png",
+      images: ["./assets/images/about_saree.png", "./assets/images/saree.png", "./assets/images/saree_tn.png"],
       rating: 4.8,
       sales: 210
     },
@@ -199,11 +398,17 @@ document.addEventListener('DOMContentLoaded', () => {
       name: "Embroidered Georgette Peplum Top & Sharara",
       category: "Tops",
       sizes: ["S", "M", "L", "XL", "XXL"],
+      colors: [
+        { name: "Pista Green", hex: "#93C572" },
+        { name: "Coral Peach", hex: "#F88379" },
+        { name: "Midnight Black", hex: "#1A1A1A" }
+      ],
       price: 5299,
       originalPrice: 6999,
       stock: 35,
       status: "in-stock",
       image: "./assets/images/about_tops.png",
+      images: ["./assets/images/about_tops.png", "./assets/images/hero_2.png"],
       rating: 4.7,
       sales: 165
     },
@@ -212,11 +417,17 @@ document.addEventListener('DOMContentLoaded', () => {
       name: "Velvet Royal Churidar & Zardozi Kurti",
       category: "Churidar",
       sizes: ["S", "M", "L", "XL", "XXL"],
+      colors: [
+        { name: "Royal Blue", hex: "#2B4C7E" },
+        { name: "Maroon", hex: "#800020" },
+        { name: "Teal Blue", hex: "#008080" }
+      ],
       price: 7800,
       originalPrice: 9500,
       stock: 15,
       status: "in-stock",
       image: "./assets/images/chudidar.png",
+      images: ["./assets/images/chudidar.png", "./assets/images/hero_1.png"],
       rating: 4.9,
       sales: 115
     },
@@ -224,11 +435,18 @@ document.addEventListener('DOMContentLoaded', () => {
       id: "NF-106",
       name: "Heritage Organza Hand-Painted Dupatta",
       category: "Dupatta",
+      sizes: ["Free Size"],
+      colors: [
+        { name: "Ivory White", hex: "#FDFBF7" },
+        { name: "Coral Peach", hex: "#F88379" },
+        { name: "Mustard Yellow", hex: "#E5A93C" }
+      ],
       price: 3499,
       originalPrice: 4200,
       stock: 42,
       status: "in-stock",
       image: "./assets/images/dupatta.png",
+      images: ["./assets/images/dupatta.png", "./assets/images/festive.png"],
       rating: 4.9,
       sales: 310
     },
@@ -236,11 +454,18 @@ document.addEventListener('DOMContentLoaded', () => {
       id: "NF-107",
       name: "Kundan & Polki Bridal Jewellery Choker Set",
       category: "Jewellery",
+      sizes: ["Free Size"],
+      colors: [
+        { name: "Metallic Gold", hex: "#D4AF37" },
+        { name: "Wine Plum", hex: "#58111A" },
+        { name: "Emerald Green", hex: "#097969" }
+      ],
       price: 12999,
       originalPrice: 16000,
       stock: 12,
       status: "in-stock",
       image: "./assets/images/jewellery.png",
+      images: ["./assets/images/jewellery.png"],
       rating: 5.0,
       sales: 78
     },
@@ -248,11 +473,18 @@ document.addEventListener('DOMContentLoaded', () => {
       id: "NF-108",
       name: "Artisan Hand-Embroidered Potli Handbag",
       category: "Handbags",
+      sizes: ["Free Size"],
+      colors: [
+        { name: "Metallic Gold", hex: "#D4AF37" },
+        { name: "Maroon", hex: "#800020" },
+        { name: "Midnight Black", hex: "#1A1A1A" }
+      ],
       price: 2499,
       originalPrice: 3200,
       stock: 50,
       status: "in-stock",
       image: "./assets/images/handbag_modern.png",
+      images: ["./assets/images/handbag_modern.png", "./assets/images/handbag.png"],
       rating: 4.8,
       sales: 190
     }
@@ -273,6 +505,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? ['Free Size']
                 : ['S', 'M', 'L', 'XL', 'XXL'];
             }
+            if (!p.colors || !Array.isArray(p.colors) || p.colors.length === 0) {
+              const defaultMatch = DEFAULT_INITIAL_CATALOG.find(d => String(d.id) === String(p.id));
+              if (defaultMatch && defaultMatch.colors) {
+                p.colors = defaultMatch.colors;
+              }
+            }
+            if (!p.images || !Array.isArray(p.images) || p.images.length === 0) {
+              const defaultMatch = DEFAULT_INITIAL_CATALOG.find(d => String(d.id) === String(p.id));
+              if (defaultMatch && defaultMatch.images) {
+                p.images = defaultMatch.images;
+              } else if (p.image) {
+                p.images = [p.image];
+              }
+            }
           });
           prods = parsed.filter(p => !delIds.includes(String(p.id)));
         }
@@ -286,7 +532,22 @@ document.addEventListener('DOMContentLoaded', () => {
     return prods;
   }
 
+  window.getAllCatalogProducts = getAllCatalogProducts;
+
+  window.getProductStock = function(productId) {
+    try {
+      const all = getAllCatalogProducts();
+      const match = all.find(p => String(p.id) === String(productId));
+      if (match) {
+        if (match.status === 'out-of-stock') return 0;
+        return (match.stock !== undefined) ? Number(match.stock) : 15;
+      }
+    } catch(e) {}
+    return 15;
+  };
+
   function renderCategoryGrid(targetCategory = window.currentSelectedCategory) {
+    window.renderCategoryGrid = renderCategoryGrid;
     const mainGrid = document.querySelector('.products-grid');
     if (!mainGrid) return;
 
@@ -316,7 +577,27 @@ document.addEventListener('DOMContentLoaded', () => {
       const origPrice = Number(prod.originalPrice || prod.original_price || prod.price) || price;
       const image = prod.image || './assets/images/hero_1.png';
       const category = prod.category || 'Luxury Collection';
-      const badge = prod.status === 'low-stock' ? 'LOW STOCK' : (prod.status === 'out-of-stock' ? 'SOLD OUT' : (idx === 0 ? 'NEW' : (idx === 1 ? 'BESTSELLER' : 'EXCLUSIVE')));
+
+      const stockCount = (prod.stock !== undefined) ? Number(prod.stock) : 15;
+      const isOutOfStock = stockCount <= 0 || prod.status === 'out-of-stock';
+      const isLowStock = !isOutOfStock && (stockCount <= 5 || prod.status === 'low-stock');
+
+      let badge = '';
+      let badgeClass = '';
+      if (isOutOfStock) {
+        badge = 'SOLD OUT';
+        badgeClass = 'out-of-stock';
+      } else if (isLowStock) {
+        badge = `ONLY ${stockCount} LEFT`;
+        badgeClass = 'low-stock';
+      } else if (idx === 0) {
+        badge = 'NEW';
+      } else if (idx === 1) {
+        badge = 'BESTSELLER';
+      } else {
+        badge = 'EXCLUSIVE';
+      }
+
       const isWishlisted = (window.stateWishlist && (window.stateWishlist.includes(id) || window.stateWishlist.includes(Number(id)))) || (state.wishlist && state.wishlist.includes(id));
 
       if (typeof WISHLIST_CATALOG !== 'undefined') {
@@ -337,27 +618,83 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const activeSize = window.cardSelectedSizes[id] || defaultSize;
 
+      const availColors = prod.colors && prod.colors.length > 0 ? prod.colors.map(c => typeof c === 'string' ? { name: c, hex: '#D4AF37' } : c) : [];
+      const defaultColor = availColors.length > 0 ? availColors[0] : null;
+      if (defaultColor && !window.cardSelectedColors[id]) {
+        window.cardSelectedColors[id] = defaultColor;
+      }
+      const activeColor = window.cardSelectedColors[id] || defaultColor;
+
+      const rawImages = (prod.images && Array.isArray(prod.images) && prod.images.length > 0) ? prod.images : [image];
+      const imagesList = Array.from(new Set(rawImages.filter(Boolean)));
+      window.registerCardImages(id, imagesList);
+
       const safeProdObj = JSON.stringify({
         id: id,
         title: name,
         price: price,
         image: image,
-        sizes: availSizes
+        images: imagesList,
+        sizes: availSizes,
+        colors: availColors,
+        stock: stockCount,
+        status: prod.status || (isOutOfStock ? 'out-of-stock' : 'in-stock')
       }).replace(/"/g, '&quot;');
 
       return `
-        <div class="product-card" data-id="${id}" data-category="${category}">
-          <div class="product-img-wrapper">
-            <span class="product-badge">${badge}</span>
+        <div class="product-card ${isOutOfStock ? 'is-out-of-stock' : ''}" data-id="${id}" data-category="${category}"
+          onmouseenter="window.startCardAutoSlide('${id}')" 
+          onmouseleave="window.stopCardAutoSlide('${id}')">
+          <div class="product-img-wrapper" id="cardImgWrap_${id}">
+            <span class="product-badge ${badgeClass}">${badge}</span>
             <button class="wishlist-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist('${id}', this)">
               <i class="${isWishlisted ? 'ri-heart-fill' : 'ri-heart-line'}"></i>
             </button>
-            <img src="${image}" alt="${name}" class="product-img-primary" onerror="this.onerror=null; this.src='./assets/images/hero_1.png';" style="object-fit:cover; width:100%; height:100%;">
             
-            <div class="product-hover-actions">
-              <button class="btn-quick-add" onclick="window.addCardProductToCart('${id}', ${safeProdObj})">
-                Add to Cart
+            <!-- Top Slide Progress Indicator Bars for Multi-Images -->
+            ${imagesList.length > 1 ? `
+              <div class="card-slider-progress" id="cardProgress_${id}">
+                ${imagesList.map((_, i) => `<span class="card-slider-bar ${i === 0 ? 'active' : ''}"></span>`).join('')}
+              </div>
+            ` : ''}
+
+            <img src="${image}" alt="${name}" class="product-img-primary" id="cardImg_${id}" onerror="this.onerror=null; this.src='./assets/images/hero_1.png';" style="object-fit:cover; width:100%; height:100%; transition: opacity 0.2s ease;">
+            
+            <!-- Prev & Next Carousel Arrows for Sliding One by One -->
+            ${imagesList.length > 1 ? `
+              <button type="button" class="card-slider-arrow prev" onclick="window.slideCardImage('${id}', -1, event)" title="Previous image">
+                <i class="ri-arrow-left-s-line"></i>
               </button>
+              <button type="button" class="card-slider-arrow next" onclick="window.slideCardImage('${id}', 1, event)" title="Next image">
+                <i class="ri-arrow-right-s-line"></i>
+              </button>
+            ` : ''}
+
+            <!-- Bottom Angle Thumbnails -->
+            ${imagesList.length > 1 ? `
+              <div class="card-angle-thumbnails" id="cardThumbs_${id}" style="position:absolute; bottom:8px; left:8px; display:flex; gap:4px; z-index:4; background:rgba(0,0,0,0.65); padding:3px 5px; border-radius:6px; backdrop-filter:blur(3px);">
+                ${imagesList.slice(0, 4).map((imgUrl, imgIdx) => `
+                  <span class="card-thumb-dot ${imgIdx === 0 ? 'active' : ''}" 
+                    title="Angle ${imgIdx + 1}"
+                    onclick="window.goToCardImage('${id}', ${imgIdx}, event)"
+                    style="width:20px; height:24px; border-radius:3px; overflow:hidden; border:1.5px solid ${imgIdx === 0 ? '#D4AF37' : 'transparent'}; cursor:pointer; display:inline-block; transition:all 0.15s ease;">
+                    <img src="${imgUrl}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='./assets/images/hero_1.png';" />
+                  </span>
+                `).join('')}
+                ${imagesList.length > 4 ? `<span style="font-size:0.62rem; color:#fff; font-weight:700; align-self:center; margin-left:2px;">+${imagesList.length - 4}</span>` : ''}
+              </div>
+            ` : ''}
+
+            <div class="product-hover-actions">
+              ${isOutOfStock ? `
+                <button class="btn-quick-add disabled-stock" disabled title="This item is currently sold out / out of stock">
+                  <i class="ri-close-circle-line"></i> Sold Out
+                </button>
+              ` : `
+                <button class="btn-quick-add" onclick="window.addCardProductToCart('${id}', ${safeProdObj})">
+                  Add to Cart
+                </button>
+              `}
               <button class="btn-quick-view" onclick="openQuickView(${safeProdObj})" title="Quick View">
                 <i class="ri-eye-line"></i>
               </button>
@@ -377,19 +714,39 @@ document.addEventListener('DOMContentLoaded', () => {
               `).join('')}
             </div>
 
-            <div class="product-price-row">
+            <!-- Dynamic Color Swatches for this specific dress -->
+            ${availColors.length > 0 ? `
+              <div class="product-colors-selector-row" style="display:flex; align-items:center; gap:5px; margin: 4px 0 6px 0; flex-wrap:wrap;">
+                <span style="font-size:0.70rem; font-weight:700; text-transform:uppercase; color:#78716c; letter-spacing:0.5px;">Color:</span>
+                <span class="card-color-label" style="font-size:0.73rem; font-weight:700; color:#b45309; margin-right:4px;">${activeColor ? activeColor.name : ''}</span>
+                <div style="display:flex; gap:5px; align-items:center;">
+                  ${availColors.map(c => `
+                    <button type="button" class="card-color-swatch-btn ${activeColor && activeColor.name === c.name ? 'active' : ''}" 
+                      title="${c.name}"
+                      onclick="window.selectCardColor('${id}', '${c.name}', '${c.hex}', this, event, '${c.image || ''}')"
+                      style="width:16px; height:16px; border-radius:50%; background:${c.hex}; border:2px solid ${activeColor && activeColor.name === c.name ? 'var(--gold-accent, #b45309)' : '#e5e7eb'}; cursor:pointer; padding:0; outline:none; transition:all 0.15s ease; box-shadow:0 1px 2px rgba(0,0,0,0.15); transform:${activeColor && activeColor.name === c.name ? 'scale(1.25)' : 'scale(1)'};">
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="product-price-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
               <div class="price-box">
                 <span class="current-price">₹${price.toLocaleString('en-IN')}</span>
                 ${origPrice > price ? `<span class="original-price">₹${origPrice.toLocaleString('en-IN')}</span>` : ''}
               </div>
-              <div class="color-swatches">
-                <span class="swatch active" style="background: #F8C146;"></span>
-                <span class="swatch" style="background: #F43F7E;"></span>
-              </div>
+              ${isOutOfStock ? `
+                <span class="stock-counter-badge out-of-stock"><i class="ri-close-circle-fill"></i> Sold Out</span>
+              ` : (isLowStock ? `
+                <span class="stock-counter-badge low-stock"><i class="ri-time-line"></i> Only ${stockCount} left</span>
+              ` : `
+                <span class="stock-counter-badge in-stock"><i class="ri-checkbox-circle-fill"></i> In Stock (${stockCount})</span>
+              `)}
             </div>
           </div>
         </div>
-      `;;
+      `;
     }).join('');
   }
 
@@ -442,18 +799,25 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.GlamProducts) {
     window.GlamProducts.getAll().then(cloudProducts => {
       if (cloudProducts && cloudProducts.length > 0) {
-        const mapped = cloudProducts.map(p => ({
-          id: p.id,
-          name: p.name,
-          category: p.category,
-          price: Number(p.price),
-          originalPrice: Number(p.original_price || p.price),
-          stock: Number(p.stock),
-          status: p.status,
-          image: p.image,
-          rating: Number(p.rating || 5.0),
-          sales: Number(p.sales || 0)
-        }));
+        const existingLocal = getAllCatalogProducts();
+        const mapped = cloudProducts.map(p => {
+          const localMatch = existingLocal.find(lp => String(lp.id) === String(p.id));
+          return {
+            id: p.id,
+            name: p.name,
+            category: p.category,
+            price: Number(p.price),
+            originalPrice: Number(p.original_price || p.price),
+            stock: Number(p.stock),
+            status: p.status,
+            image: p.image,
+            images: p.images || (localMatch && localMatch.images) || (p.image ? [p.image] : []),
+            colors: p.colors || (localMatch && localMatch.colors) || null,
+            sizes: p.sizes || (localMatch && localMatch.sizes) || (p.category === 'Saree' || p.category === 'Dupatta' ? ['Free Size'] : ['S', 'M', 'L', 'XL', 'XXL']),
+            rating: Number(p.rating || 5.0),
+            sales: Number(p.sales || 0)
+          };
+        });
         localStorage.setItem('nf_products', JSON.stringify(mapped));
         renderCategoryGrid(window.currentSelectedCategory);
       }
@@ -682,27 +1046,33 @@ document.addEventListener('DOMContentLoaded', () => {
     if (promoSection) promoSection.style.display = 'block';
 
     let subtotal = 0;
-    cartItemsList.innerHTML = state.cart.map(item => {
-      const itemSubtotal = item.price * item.qty;
+    cartItemsList.innerHTML = state.cart.map((item, idx) => {
+      const itemSubtotal = item.price * (item.qty || 1);
       subtotal += itemSubtotal;
       return `
-        <div class="cart-item" data-id="${item.id}">
+        <div class="cart-item" data-id="${item.id}" data-key="${item.cartKey || idx}">
           <img src="${item.image}" alt="${item.title}">
           <div class="cart-item-details">
             <h4 class="cart-item-title">${item.title}</h4>
-            <div style="margin: 3px 0;">
+            <div style="margin: 3px 0; display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
               <span style="display:inline-block; font-size:0.75rem; font-weight:700; color:#8c733e; background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.3); padding:2px 7px; border-radius:4px;">
                 Size: ${item.size || 'M'}
               </span>
+              ${item.color ? `
+                <span style="display:inline-flex; align-items:center; gap:4px; font-size:0.75rem; font-weight:700; color:#9d174d; background:#fdf2f8; border:1px solid #fbcfe8; padding:2px 7px; border-radius:4px;">
+                  ${item.colorHex ? `<span style="width:8px; height:8px; border-radius:50%; background:${item.colorHex}; display:inline-block; border:1px solid rgba(0,0,0,0.2);"></span>` : ''}
+                  ${item.color}
+                </span>
+              ` : ''}
             </div>
             <div class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</div>
             <div class="qty-btn-group">
-              <button type="button" onclick="window.changeCartQty('${item.id}', -1)">-</button>
-              <span>${item.qty}</span>
-              <button type="button" onclick="window.changeCartQty('${item.id}', 1)">+</button>
+              <button type="button" onclick="window.changeCartQty(${idx}, -1)">-</button>
+              <span>${item.qty || 1}</span>
+              <button type="button" onclick="window.changeCartQty(${idx}, 1)">+</button>
             </div>
           </div>
-          <button type="button" onclick="window.removeFromCart('${item.id}')" style="color: #999; font-size: 1.2rem; align-self: flex-start;">
+          <button type="button" onclick="window.removeFromCart(${idx})" style="color: #999; font-size: 1.2rem; align-self: flex-start; cursor:pointer;" title="Remove from bag">
             <i class="ri-close-line"></i>
           </button>
         </div>
@@ -775,17 +1145,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  window.changeCartQty = function(id, delta) {
+  window.changeCartQty = function(target, delta) {
     if (!state.cart || !Array.isArray(state.cart)) return;
-    const item = state.cart.find(i => String(i.id) === String(id));
-    if (!item) {
-      console.warn('changeCartQty item not found for id:', id);
-      return;
+    let idx = -1;
+    if (typeof target === 'number') {
+      idx = target;
+    } else {
+      idx = state.cart.findIndex(i => i.cartKey === target || String(i.id) === String(target));
     }
-    const currentQty = Number(item.qty) || 1;
-    const newQty = currentQty + Number(delta);
+    if (idx < 0 || idx >= state.cart.length) return;
+    const item = state.cart[idx];
+    const newQty = (Number(item.qty) || 1) + Number(delta);
+
+    // Stock verification on quantity increase
+    if (delta > 0) {
+      const availableStock = (typeof window.getProductStock === 'function') ? window.getProductStock(item.id) : (item.stock !== undefined ? Number(item.stock) : 15);
+      const totalForProductInCart = state.cart
+        .filter(i => String(i.id) === String(item.id))
+        .reduce((sum, i) => sum + (Number(i.qty) || 1), 0);
+
+      if (totalForProductInCart + delta > availableStock) {
+        alert(`Cannot increase quantity! Only ${availableStock} pieces available in stock for "${item.title || item.name}".`);
+        return;
+      }
+    }
+
     if (newQty <= 0) {
-      state.cart = state.cart.filter(i => String(i.id) !== String(id));
+      state.cart.splice(idx, 1);
       if (typeof showToast === 'function') showToast('Item removed from bag');
     } else {
       item.qty = newQty;
@@ -796,9 +1182,13 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartUI();
   };
 
-  window.removeFromCart = function(id) {
+  window.removeFromCart = function(target) {
     if (!state.cart || !Array.isArray(state.cart)) return;
-    state.cart = state.cart.filter(i => String(i.id) !== String(id));
+    if (typeof target === 'number') {
+      state.cart.splice(target, 1);
+    } else {
+      state.cart = state.cart.filter(i => i.cartKey !== target && String(i.id) !== String(target));
+    }
     try {
       localStorage.setItem('glam_cart', JSON.stringify(state.cart));
     } catch(e) {}
@@ -806,26 +1196,49 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof showToast === 'function') showToast('Item removed from bag');
   };
 
-  // Actual execution to append item to bag
+  // Actual execution to append item to bag - distinct per Size AND Color!
   window.executeAddToCart = function(product) {
-    const chosenSize = product.size || (product.sizes && product.sizes.length > 0 ? (product.sizes.includes('M') ? 'M' : product.sizes[0]) : 'M');
-    const cartKey = String(product.id) + '_' + chosenSize;
+    const availableStock = (typeof window.getProductStock === 'function') ? window.getProductStock(product.id) : (product.stock !== undefined ? Number(product.stock) : 15);
+    if (availableStock <= 0) {
+      alert(`Sorry, "${product.title || product.name}" is completely SOLD OUT! No more orders can be placed for this item.`);
+      return;
+    }
 
-    const existing = state.cart.find(i => (i.cartKey ? i.cartKey === cartKey : (String(i.id) === String(product.id) && i.size === chosenSize)));
+    const currentTotalInCart = (state.cart || [])
+      .filter(i => String(i.id) === String(product.id))
+      .reduce((sum, i) => sum + (Number(i.qty) || 1), 0);
+
+    if (currentTotalInCart + 1 > availableStock) {
+      alert(`Cannot add more! There are only ${availableStock} pieces available in stock for "${product.title || product.name}". You already have ${currentTotalInCart} in your bag.`);
+      return;
+    }
+
+    const chosenSize = product.size || (product.sizes && product.sizes.length > 0 ? (product.sizes.includes('M') ? 'M' : product.sizes[0]) : 'M');
+    const chosenColor = product.color || (product.colors && product.colors.length > 0 ? (typeof product.colors[0] === 'object' ? product.colors[0].name : product.colors[0]) : null);
+    const chosenColorHex = product.colorHex || (product.colors && product.colors.length > 0 && typeof product.colors[0] === 'object' ? product.colors[0].hex : null);
+    
+    // Unique cart key by Dress ID + Size + Color
+    const cleanColorKey = chosenColor ? String(chosenColor).toLowerCase().replace(/\s+/g, '') : 'std';
+    const cartKey = String(product.id) + '_' + String(chosenSize) + '_' + cleanColorKey;
+
+    const existing = state.cart.find(i => (i.cartKey ? i.cartKey === cartKey : (String(i.id) === String(product.id) && i.size === chosenSize && (!chosenColor || i.color === chosenColor))));
     if (existing) {
-      existing.qty += 1;
+      existing.qty = (Number(existing.qty) || 1) + 1;
     } else {
       state.cart.push({
         ...product,
         cartKey: cartKey,
         qty: 1,
-        size: chosenSize
+        size: chosenSize,
+        color: chosenColor,
+        colorHex: chosenColorHex
       });
     }
     localStorage.setItem('glam_cart', JSON.stringify(state.cart));
     updateCartUI();
     openCart();
-    showToast(`Added "${product.title || product.name}" (Size: ${chosenSize}) to bag! 🛍️`);
+    const colorBadge = chosenColor ? ` (${chosenColor})` : '';
+    showToast(`Added "${product.title || product.name}" - ${chosenSize}${colorBadge} to bag! 🛍️`);
   };
 
   // Add to Cart with Mandatory Sign In Guard
@@ -898,15 +1311,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Quick View Modal Logic ---
   window.openQuickView = (product) => {
-    qvImg.src = product.image;
+    // Multi-Image Gallery Setup
+    window.currentQvImages = (product.images && Array.isArray(product.images) && product.images.length > 0)
+      ? Array.from(new Set(product.images.filter(Boolean)))
+      : [product.image];
+    window.currentQvIndex = 0;
+
+    qvImg.src = window.currentQvImages[0] || product.image;
     qvTitle.textContent = product.title;
-    qvPrice.textContent = `₹${product.price.toLocaleString('en-IN')}`;
+    qvPrice.textContent = `₹${Number(product.price).toLocaleString('en-IN')}`;
     
     // Store active product for quick add
     quickviewModal.dataset.productId = product.id;
     quickviewModal.dataset.productTitle = product.title;
     quickviewModal.dataset.productPrice = product.price;
     quickviewModal.dataset.productImage = product.image;
+
+    // Multi-Image Slider Controls (Arrows & Counter)
+    const qvGalleryThumbs = document.getElementById('qvGalleryThumbs');
+    const qvPrevBtn = document.getElementById('qvPrevBtn');
+    const qvNextBtn = document.getElementById('qvNextBtn');
+    const qvCounter = document.getElementById('qvImgCounter');
+
+    if (window.currentQvImages.length > 1) {
+      if (qvPrevBtn) qvPrevBtn.style.display = 'flex';
+      if (qvNextBtn) qvNextBtn.style.display = 'flex';
+      if (qvCounter) {
+        qvCounter.style.display = 'block';
+        qvCounter.textContent = `1 / ${window.currentQvImages.length}`;
+      }
+      if (qvGalleryThumbs) {
+        qvGalleryThumbs.style.display = 'flex';
+        qvGalleryThumbs.innerHTML = window.currentQvImages.map((imgUrl, imgIdx) => `
+          <img src="${imgUrl}" alt="Gallery Angle ${imgIdx + 1}" 
+            onclick="window.setQvImage(${imgIdx})"
+            style="width:52px; height:62px; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid ${imgIdx === 0 ? 'var(--gold-accent, #b45309)' : 'transparent'}; transition:all 0.2s ease; flex-shrink:0;" />
+        `).join('');
+      }
+    } else {
+      if (qvPrevBtn) qvPrevBtn.style.display = 'none';
+      if (qvNextBtn) qvNextBtn.style.display = 'none';
+      if (qvCounter) qvCounter.style.display = 'none';
+      if (qvGalleryThumbs) {
+        qvGalleryThumbs.style.display = 'none';
+        qvGalleryThumbs.innerHTML = '';
+      }
+    }
+
+    // Dynamic Colors for this dress
+    const qvColorSection = document.getElementById('qvColorSection');
+    const qvColorSelector = document.getElementById('qvColorSelector');
+    const qvSelectedColorName = document.getElementById('qvSelectedColorName');
+    const availColors = product.colors && product.colors.length > 0 ? product.colors.map(c => typeof c === 'string' ? { name: c, hex: '#D4AF37' } : c) : [];
+
+    if (availColors.length > 0) {
+      if (qvColorSection) qvColorSection.style.display = 'block';
+      window.selectedQvColor = availColors[0];
+      if (qvSelectedColorName) qvSelectedColorName.textContent = availColors[0].name;
+      if (qvColorSelector) {
+        qvColorSelector.innerHTML = availColors.map((c, i) => `
+          <button type="button" class="qv-color-btn ${i === 0 ? 'active' : ''}" 
+            title="${c.name}"
+            onclick="window.selectQuickViewColor('${c.name}', '${c.hex}', this, '${c.image || ''}')"
+            style="width:24px; height:24px; border-radius:50%; background:${c.hex}; border:2.5px solid ${i === 0 ? 'var(--gold-accent, #b45309)' : '#e5e7eb'}; cursor:pointer; padding:0; outline:none; transition:all 0.15s ease; box-shadow:0 1px 3px rgba(0,0,0,0.15); transform:${i === 0 ? 'scale(1.25)' : 'scale(1)'};">
+          </button>
+        `).join('');
+      }
+    } else {
+      if (qvColorSection) qvColorSection.style.display = 'none';
+      window.selectedQvColor = null;
+    }
 
     // Populate dynamic size buttons
     const qvSizeSelector = document.getElementById('qvSizeSelector');
@@ -916,6 +1390,26 @@ document.addEventListener('DOMContentLoaded', () => {
       qvSizeSelector.innerHTML = availSizes.map(s => `
         <button type="button" class="size-btn ${s === window.selectedQvSize ? 'active' : ''}" onclick="window.selectQuickViewSize('${s}', this)">${s}</button>
       `).join('');
+    }
+
+    // Check stock status for Quick View button
+    const availableStock = (typeof window.getProductStock === 'function') ? window.getProductStock(product.id) : (product.stock !== undefined ? Number(product.stock) : 15);
+    const isOutOfStock = availableStock <= 0 || product.status === 'out-of-stock';
+    const isLowStock = !isOutOfStock && (availableStock <= 5 || product.status === 'low-stock');
+
+    const qvAddToCartBtn = document.getElementById('qvAddToCartBtn');
+    if (qvAddToCartBtn) {
+      if (isOutOfStock) {
+        qvAddToCartBtn.disabled = true;
+        qvAddToCartBtn.classList.add('disabled-stock');
+        qvAddToCartBtn.innerHTML = 'Sold Out / Out of Stock <i class="ri-close-circle-line"></i>';
+        qvAddToCartBtn.title = 'This item is sold out';
+      } else {
+        qvAddToCartBtn.disabled = false;
+        qvAddToCartBtn.classList.remove('disabled-stock');
+        qvAddToCartBtn.innerHTML = 'Add to Shopping Bag <i class="ri-shopping-bag-line"></i>';
+        qvAddToCartBtn.title = '';
+      }
     }
 
     quickviewModal.classList.add('active');
@@ -928,12 +1422,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const qvAddToCartBtn = document.getElementById('qvAddToCartBtn');
   if (qvAddToCartBtn) {
     qvAddToCartBtn.addEventListener('click', () => {
-      const id = parseInt(quickviewModal.dataset.productId);
+      const id = quickviewModal.dataset.productId;
       const title = quickviewModal.dataset.productTitle;
-      const price = parseInt(quickviewModal.dataset.productPrice);
+      const price = Number(quickviewModal.dataset.productPrice) || 0;
       const image = quickviewModal.dataset.productImage;
+      const chosenColor = window.selectedQvColor ? window.selectedQvColor.name : null;
+      const chosenColorHex = window.selectedQvColor ? window.selectedQvColor.hex : null;
 
-      addToCart({ id, title, price, image, size: window.selectedQvSize || 'M' });
+      const availableStock = (typeof window.getProductStock === 'function') ? window.getProductStock(id) : 15;
+      if (availableStock <= 0) {
+        alert(`Sorry, "${title}" is completely SOLD OUT! No more orders can be placed for this item.`);
+        return;
+      }
+
+      addToCart({ 
+        id, 
+        title, 
+        price, 
+        image, 
+        size: window.selectedQvSize || 'M',
+        color: chosenColor,
+        colorHex: chosenColorHex
+      });
       closeAllOverlays();
     });
   }
@@ -1837,9 +2347,11 @@ window.openCheckoutModal = function(e) {
   try {
     const cust = JSON.parse(localStorage.getItem('glam_customer_user') || 'null');
     if (cust) {
-      if (document.getElementById('orderCustName') && cust.name) document.getElementById('orderCustName').value = cust.name;
+      const nameVal = cust.fullName || cust.name || '';
+      if (document.getElementById('orderCustName') && nameVal) document.getElementById('orderCustName').value = nameVal;
       if (document.getElementById('orderCustEmail') && cust.email) document.getElementById('orderCustEmail').value = cust.email;
       if (document.getElementById('orderCustPhone') && cust.phone) document.getElementById('orderCustPhone').value = cust.phone;
+      if (document.getElementById('orderCustAddress') && cust.address) document.getElementById('orderCustAddress').value = cust.address;
     }
   } catch(e) {}
 
@@ -1856,6 +2368,9 @@ window.openCheckoutModal = function(e) {
     modal.style.setProperty('opacity', '1', 'important');
     modal.style.setProperty('visibility', 'visible', 'important');
   }
+
+  // Ensure checkout engine is initialized and event listeners are active
+  initSupabaseCheckout();
 };
 
 window.closeCheckoutModal = function(e) {
@@ -1863,6 +2378,265 @@ window.closeCheckoutModal = function(e) {
   const modal = document.getElementById('checkoutOrderModal');
   if (modal) {
     modal.style.setProperty('display', 'none', 'important');
+  }
+};
+
+window.handleStorefrontOrderSubmit = async function(e) {
+  if (e && e.preventDefault) e.preventDefault();
+
+  const nameInput = document.getElementById('orderCustName');
+  const emailInput = document.getElementById('orderCustEmail');
+  const phoneInput = document.getElementById('orderCustPhone');
+  const addressInput = document.getElementById('orderCustAddress');
+
+  const name = nameInput ? nameInput.value.trim() : '';
+  const email = emailInput ? emailInput.value.trim() : '';
+  const phone = phoneInput ? phoneInput.value.trim() : '';
+  const address = addressInput ? addressInput.value.trim() : '';
+
+  if (!name) {
+    if (nameInput) nameInput.focus();
+    alert('Please enter your full name for luxury delivery.');
+    return;
+  }
+  if (!email) {
+    if (emailInput) emailInput.focus();
+    alert('Please enter your email address for order confirmation.');
+    return;
+  }
+  if (!phone) {
+    if (phoneInput) phoneInput.focus();
+    alert('Please enter your contact phone number.');
+    return;
+  }
+  if (!address) {
+    if (addressInput) addressInput.focus();
+    alert('Please enter your complete delivery address.');
+    return;
+  }
+
+  const paymentInput = document.querySelector('input[name="orderPayment"]:checked');
+  const paymentMethod = paymentInput ? paymentInput.value : 'UPI / Card';
+
+  const totalDisplay = document.getElementById('checkoutTotalDisplay');
+  const totalText = totalDisplay ? totalDisplay.textContent : '₹3,499';
+  const cleanTotal = Number(totalText.replace(/[^0-9]/g, '')) || 3499;
+
+  const orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000);
+
+  const submitBtn = document.getElementById('confirmOrderBtn');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Processing Order...';
+  }
+
+  try {
+    // 1. Build order item summary & validate inventory
+    const cartItems = (window.state && window.state.cart && window.state.cart.length > 0)
+      ? window.state.cart
+      : (JSON.parse(localStorage.getItem('glam_cart') || '[]'));
+
+    if (!cartItems || cartItems.length === 0) {
+      alert('Your shopping bag is empty. Please select a luxury garment first.');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="ri-check-double-line"></i> Place Luxury Order';
+      }
+      return;
+    }
+
+    // Safely resolve catalog
+    let allCatalog = [];
+    try {
+      if (typeof getAllCatalogProducts === 'function') {
+        allCatalog = getAllCatalogProducts();
+      } else if (typeof window.getAllCatalogProducts === 'function') {
+        allCatalog = window.getAllCatalogProducts();
+      } else {
+        allCatalog = JSON.parse(localStorage.getItem('nf_products') || '[]');
+      }
+    } catch(catErr) {
+      allCatalog = JSON.parse(localStorage.getItem('nf_products') || '[]');
+    }
+
+    for (const item of cartItems) {
+      const prod = allCatalog.find(p => String(p.id) === String(item.id));
+      const availableStock = prod && prod.stock !== undefined ? Number(prod.stock) : 15;
+      const requestedQty = Number(item.qty) || 1;
+      if (availableStock <= 0) {
+        alert(`Item "${item.title || item.name}" is OUT OF STOCK / SOLD OUT! Please remove it from your shopping bag before completing the order.`);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="ri-check-double-line"></i> Place Luxury Order';
+        }
+        return;
+      }
+      if (requestedQty > availableStock) {
+        alert(`Only ${availableStock} pieces available in stock for "${item.title || item.name}". You ordered ${requestedQty}. Please reduce quantity.`);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="ri-check-double-line"></i> Place Luxury Order';
+        }
+        return;
+      }
+    }
+
+    const itemsDesc = cartItems.map(i => `${i.title || i.name} (Size: ${i.size || 'M'}) (x${i.qty || 1})`).join(', ') || 'Luxury Ethnic Couture';
+
+    // 2. Save order to Admin Portal orders in localStorage
+    try {
+      let adminOrders = JSON.parse(localStorage.getItem('nf_orders') || '[]');
+      adminOrders.unshift({
+        id: orderId,
+        customer: name,
+        email: email,
+        phone: phone,
+        city: address.split(',').pop().trim() || 'India',
+        address: address,
+        items: itemsDesc,
+        total: cleanTotal,
+        paymentMethod: paymentMethod,
+        paymentStatus: 'Paid',
+        status: 'Processing',
+        date: new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })
+      });
+      localStorage.setItem('nf_orders', JSON.stringify(adminOrders));
+    } catch(err) {
+      console.warn('Admin local orders save notice:', err);
+    }
+
+    // 3. Deduct purchased quantities from product inventory (Local & Cloud)
+    try {
+      let localProds = JSON.parse(localStorage.getItem('nf_products') || '[]');
+      if (Array.isArray(localProds) && localProds.length > 0) {
+        for (const item of cartItems) {
+          const orderedQty = Number(item.qty) || 1;
+          const target = localProds.find(p => String(p.id) === String(item.id));
+          if (target) {
+            target.stock = Math.max(0, (Number(target.stock) || 0) - orderedQty);
+            if (target.stock <= 0) {
+              target.status = 'out-of-stock';
+            } else if (target.stock <= 5) {
+              target.status = 'low-stock';
+            }
+            target.sales = (Number(target.sales) || 0) + orderedQty;
+
+            // Also update Supabase Cloud in background
+            if (window.GlamProducts && typeof window.GlamProducts.update === 'function') {
+              try {
+                window.GlamProducts.update(target.id, {
+                  stock: target.stock,
+                  status: target.status,
+                  sales: target.sales
+                });
+              } catch(err) {}
+            }
+          }
+        }
+        localStorage.setItem('nf_products', JSON.stringify(localProds));
+      }
+    } catch(e) {
+      console.warn('Inventory reduction warning:', e);
+    }
+
+    // 4. Save to Supabase Cloud Orders
+    if (window.GlamOrders && typeof window.GlamOrders.create === 'function') {
+      try {
+        await window.GlamOrders.create({
+          id: orderId,
+          customer_name: name,
+          customer_email: email,
+          customer_phone: phone,
+          shipping_address: address,
+          total: cleanTotal,
+          payment_method: paymentMethod,
+          payment_status: 'Paid',
+          status: 'Processing',
+          items_summary: itemsDesc
+        });
+      } catch(err) {
+        console.warn('Supabase cloud order create notice:', err);
+      }
+    }
+
+    // 5. Save Customer profile
+    if (window.GlamCustomers && typeof window.GlamCustomers.upsert === 'function') {
+      try {
+        await window.GlamCustomers.upsert({
+          id: "CUST-" + Math.floor(100 + Math.random() * 900),
+          name: name,
+          email: email,
+          phone: phone,
+          orders_count: 1,
+          total_spend: cleanTotal,
+          status: 'Active'
+        });
+      } catch(e) {}
+    }
+
+    // 6. Empty Shopping Bag & Clear Applied Promo
+    if (window.state) window.state.cart = [];
+    localStorage.setItem('glam_cart', JSON.stringify([]));
+    localStorage.removeItem('glam_applied_promo');
+    if (typeof updateCartUI === 'function') updateCartUI();
+
+    // 7. Instantly re-render product grid so Sold Out appears immediately
+    try {
+      if (typeof renderCategoryGrid === 'function') {
+        renderCategoryGrid();
+      } else if (typeof window.renderCategoryGrid === 'function') {
+        window.renderCategoryGrid();
+      }
+    } catch(e) {}
+
+    // 8. Transition to "Order Received!" Confirmation Screen
+    const formView = document.getElementById('checkoutFormView');
+    const successView = document.getElementById('checkoutSuccessView');
+    const sOrderId = document.getElementById('successOrderId');
+    const sOrderCust = document.getElementById('successOrderCust');
+    const sOrderAddress = document.getElementById('successOrderAddress');
+    const sOrderPayment = document.getElementById('successOrderPayment');
+    const sOrderTotal = document.getElementById('successOrderTotal');
+
+    if (sOrderId) sOrderId.textContent = orderId;
+    if (sOrderCust) sOrderCust.textContent = name;
+    if (sOrderAddress) sOrderAddress.textContent = address;
+    if (sOrderPayment) sOrderPayment.textContent = paymentMethod;
+    if (sOrderTotal) sOrderTotal.textContent = totalText;
+
+    const trackBtn = document.getElementById('trackInDashboardBtn');
+    if (trackBtn) {
+      trackBtn.href = 'dashboard.html?orderId=' + encodeURIComponent(orderId) + '&email=' + encodeURIComponent(email);
+    }
+
+    // Notify any active user dashboard tabs of newly placed order
+    window.dispatchEvent(new CustomEvent('orders_updated', { detail: { orderId, email, customer: name } }));
+
+    // 9. Dispatch Automated Real-Time Order Email to saconsultantandstaffing1@gmail.com
+    if (typeof window.sendAdminOrderNotificationEmail === 'function') {
+      window.sendAdminOrderNotificationEmail({
+        orderId: orderId,
+        customerName: name,
+        customerEmail: email,
+        customerPhone: phone,
+        shippingAddress: address,
+        itemsDesc: itemsDesc,
+        totalAmount: totalText,
+        paymentMethod: paymentMethod
+      }).catch(err => console.warn('Order email notification notice:', err));
+    }
+
+    if (formView) formView.style.display = 'none';
+    if (successView) successView.style.display = 'block';
+
+  } catch(submitErr) {
+    console.error('Checkout submit error:', submitErr);
+    alert('An unexpected error occurred during order submission: ' + (submitErr.message || submitErr));
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="ri-check-double-line"></i> Place Luxury Order';
+    }
   }
 };
 
@@ -1877,125 +2651,11 @@ function initSupabaseCheckout() {
   }
 
   if (checkoutForm) {
-    checkoutForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('orderCustName').value.trim();
-      const email = document.getElementById('orderCustEmail').value.trim();
-      const phone = document.getElementById('orderCustPhone').value.trim();
-      const address = document.getElementById('orderCustAddress').value.trim();
-      const paymentInput = document.querySelector('input[name="orderPayment"]:checked');
-      const paymentMethod = paymentInput ? paymentInput.value : 'UPI / Card';
-
-      const totalDisplay = document.getElementById('checkoutTotalDisplay');
-      const totalText = totalDisplay ? totalDisplay.textContent : '₹3,499';
-      const cleanTotal = Number(totalText.replace(/[^0-9]/g, '')) || 3499;
-
-      const orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000);
-
-      const submitBtn = document.getElementById('confirmOrderBtn');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Processing Order...';
-      }
-
-      // 1. Build order item summary
-      const cartItems = (window.state && window.state.cart) ? window.state.cart : (JSON.parse(localStorage.getItem('glam_cart') || '[]'));
-      const itemsDesc = cartItems.map(i => `${i.title || i.name} (Size: ${i.size || 'M'}) (x${i.qty || 1})`).join(', ') || 'Luxury Ethnic Couture';
-
-      // 2. Save order to Admin Portal orders in localStorage
-      try {
-        let adminOrders = JSON.parse(localStorage.getItem('nf_orders') || '[]');
-        adminOrders.unshift({
-          id: orderId,
-          customer: name,
-          email: email,
-          phone: phone,
-          city: address.split(',').pop().trim() || 'India',
-          address: address,
-          items: itemsDesc,
-          total: cleanTotal,
-          paymentMethod: paymentMethod,
-          paymentStatus: 'Paid',
-          status: 'Processing',
-          date: new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })
-        });
-        localStorage.setItem('nf_orders', JSON.stringify(adminOrders));
-      } catch(err) {
-        console.warn('Admin local orders save:', err);
-      }
-
-      // 3. Save to Supabase Cloud
-      if (window.GlamOrders) {
-        try {
-          await window.GlamOrders.create({
-            id: orderId,
-            customer_name: name,
-            customer_email: email,
-            customer_phone: phone,
-            shipping_address: address,
-            total: cleanTotal,
-            payment_method: paymentMethod,
-            payment_status: 'Paid',
-            status: 'Processing',
-            items_summary: itemsDesc
-          });
-        } catch(err) {
-          console.warn('Supabase cloud order create notice:', err);
-        }
-      }
-
-      // 4. Save Customer profile
-      if (window.GlamCustomers) {
-        try {
-          await window.GlamCustomers.upsert({
-            id: "CUST-" + Math.floor(100 + Math.random() * 900),
-            name: name,
-            email: email,
-            phone: phone,
-            orders_count: 1,
-            total_spend: cleanTotal,
-            status: 'Active'
-          });
-        } catch(e) {}
-      }
-
-      // 5. Empty Shopping Bag & Clear Applied Promo
-      if (window.state) window.state.cart = [];
-      localStorage.setItem('glam_cart', JSON.stringify([]));
-      localStorage.removeItem('glam_applied_promo');
-      if (typeof updateCartUI === 'function') updateCartUI();
-
-      // 6. Transition to "Order Received!" Confirmation Screen
-      const formView = document.getElementById('checkoutFormView');
-      const successView = document.getElementById('checkoutSuccessView');
-      const sOrderId = document.getElementById('successOrderId');
-      const sOrderCust = document.getElementById('successOrderCust');
-      const sOrderAddress = document.getElementById('successOrderAddress');
-      const sOrderPayment = document.getElementById('successOrderPayment');
-      const sOrderTotal = document.getElementById('successOrderTotal');
-
-      if (sOrderId) sOrderId.textContent = orderId;
-      if (sOrderCust) sOrderCust.textContent = name;
-      if (sOrderAddress) sOrderAddress.textContent = address;
-      if (sOrderPayment) sOrderPayment.textContent = paymentMethod;
-      if (sOrderTotal) sOrderTotal.textContent = totalText;
-
-      const trackBtn = document.getElementById('trackInDashboardBtn');
-      if (trackBtn) {
-        trackBtn.href = 'dashboard.html?orderId=' + encodeURIComponent(orderId) + '&email=' + encodeURIComponent(email);
-      }
-
-      // Notify any active user dashboard tabs of newly placed order
-      window.dispatchEvent(new CustomEvent('orders_updated', { detail: { orderId, email, customer: name } }));
-
-      if (formView) formView.style.display = 'none';
-      if (successView) successView.style.display = 'block';
-
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="ri-check-double-line"></i> Place Luxury Order';
-      }
-    });
+    if (checkoutForm._boundSubmit) {
+      checkoutForm.removeEventListener('submit', checkoutForm._boundSubmit);
+    }
+    checkoutForm._boundSubmit = window.handleStorefrontOrderSubmit;
+    checkoutForm.addEventListener('submit', window.handleStorefrontOrderSubmit);
   }
 }
 

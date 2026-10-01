@@ -63,6 +63,14 @@ window.deleteProduct = function(id) {
   }
 };
 
+window.openEditProduct = function(id) {
+  if (window.app && typeof window.app.openEditProduct === 'function') {
+    window.app.openEditProduct(id);
+  } else {
+    console.warn('Admin app not ready for openEditProduct');
+  }
+};
+
 window.deleteCoupon = function(code) {
   if (window.app && typeof window.app.deleteCoupon === 'function') {
     window.app.deleteCoupon(code);
@@ -131,6 +139,196 @@ window.closeProductModal = function(e) {
     modal.style.setProperty('display', 'none', 'important');
   }
 };
+
+// ═════════════════════════════════════════════════════════════════════
+// ADMIN PRODUCT COLOR & MULTI-IMAGE GALLERY MANAGEMENT
+// ═════════════════════════════════════════════════════════════════════
+const STANDARD_ETHNIC_COLORS = [
+  { name: 'Maroon', hex: '#800020' },
+  { name: 'Emerald Green', hex: '#097969' },
+  { name: 'Royal Blue', hex: '#2B4C7E' },
+  { name: 'Rani Pink', hex: '#E0218A' },
+  { name: 'Mustard Yellow', hex: '#E5A93C' },
+  { name: 'Rust Brown', hex: '#8B4513' },
+  { name: 'Midnight Black', hex: '#1A1A1A' },
+  { name: 'Ivory White', hex: '#FDFBF7' },
+  { name: 'Wine Plum', hex: '#58111A' },
+  { name: 'Coral Peach', hex: '#F88379' },
+  { name: 'Olive Green', hex: '#556B2F' },
+  { name: 'Metallic Gold', hex: '#D4AF37' },
+  { name: 'Teal Blue', hex: '#008080' },
+  { name: 'Lavender', hex: '#BDB0D0' }
+];
+window.STANDARD_ETHNIC_COLORS = STANDARD_ETHNIC_COLORS;
+
+window.adminSelectedColors = [];
+window.adminGalleryImages = [];
+
+window.renderAdminColorsUI = function() {
+  const stdContainer = document.getElementById('adminStandardColorsList');
+  const selContainer = document.getElementById('adminSelectedColorsContainer');
+  const countEl = document.getElementById('adminSelectedColorsCount');
+
+  if (countEl) countEl.textContent = window.adminSelectedColors.length;
+
+  if (stdContainer) {
+    stdContainer.innerHTML = STANDARD_ETHNIC_COLORS.map(c => {
+      const isSelected = window.adminSelectedColors.some(sc => sc.name.toLowerCase() === c.name.toLowerCase());
+      return `
+        <button type="button" class="admin-color-chip ${isSelected ? 'active' : ''}" 
+          onclick="window.toggleAdminColor('${c.name}', '${c.hex}')"
+          style="display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:20px; border:1.5px solid ${isSelected ? 'var(--gold-accent)' : 'var(--border-subtle)'}; background:${isSelected ? 'rgba(212,175,55,0.18)' : 'var(--bg-card)'}; font-size:0.75rem; font-weight:600; color:var(--text-main); cursor:pointer; transition:all 0.15s ease;">
+          <span style="width:12px; height:12px; border-radius:50%; background:${c.hex}; display:inline-block; border:1px solid rgba(0,0,0,0.25);"></span>
+          <span>${c.name}</span>
+          ${isSelected ? '<i class="ri-check-line" style="color:var(--gold-accent); font-weight:bold;"></i>' : ''}
+        </button>
+      `;
+    }).join('');
+  }
+
+  if (selContainer) {
+    if (window.adminSelectedColors.length === 0) {
+      selContainer.innerHTML = '<span id="adminNoColorsNotice" style="font-size:0.78rem; color:var(--text-muted); font-style:italic;">No colors selected yet. Click quick colors above or add custom below.</span>';
+    } else {
+      selContainer.innerHTML = window.adminSelectedColors.map((c, idx) => `
+        <span style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:16px; background:var(--bg-card); border:1.5px solid var(--gold-accent); font-size:0.75rem; font-weight:700; color:var(--text-main); box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+          <span style="width:11px; height:11px; border-radius:50%; background:${c.hex}; display:inline-block; border:1px solid rgba(0,0,0,0.25);"></span>
+          ${c.name}
+          <button type="button" onclick="window.removeAdminColor(${idx})" style="background:none; border:none; color:#ef4444; font-size:0.95rem; cursor:pointer; padding:0 2px; line-height:1;" title="Remove color">&times;</button>
+        </span>
+      `).join('');
+    }
+  }
+};
+
+window.toggleAdminColor = function(name, hex) {
+  if (!window.adminSelectedColors) window.adminSelectedColors = [];
+  const existingIdx = window.adminSelectedColors.findIndex(c => c.name.toLowerCase() === name.toLowerCase());
+  if (existingIdx > -1) {
+    window.adminSelectedColors.splice(existingIdx, 1);
+  } else {
+    window.adminSelectedColors.push({ name, hex });
+  }
+  window.renderAdminColorsUI();
+};
+
+window.addAdminCustomColor = function() {
+  const nameInput = document.getElementById('adminCustomColorName');
+  const hexInput = document.getElementById('adminCustomColorHex');
+  const hex = hexInput ? hexInput.value : '#B45309';
+  let name = nameInput ? nameInput.value.trim() : '';
+
+  if (!name) {
+    const matched = STANDARD_ETHNIC_COLORS.find(c => c.hex.toLowerCase() === hex.toLowerCase());
+    name = matched ? matched.name : ('Custom (' + hex.toUpperCase() + ')');
+  }
+
+  if (!window.adminSelectedColors) window.adminSelectedColors = [];
+  if (!window.adminSelectedColors.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+    window.adminSelectedColors.push({ name, hex });
+  }
+  if (nameInput) nameInput.value = '';
+  window.renderAdminColorsUI();
+};
+
+window.selectStandardEthnicPalette = function() {
+  if (!window.adminSelectedColors) window.adminSelectedColors = [];
+  STANDARD_ETHNIC_COLORS.forEach(c => {
+    if (!window.adminSelectedColors.some(sc => sc.name.toLowerCase() === c.name.toLowerCase())) {
+      window.adminSelectedColors.push({ name: c.name, hex: c.hex });
+    }
+  });
+  window.renderAdminColorsUI();
+};
+
+window.removeAdminColor = function(idx) {
+  if (window.adminSelectedColors) {
+    window.adminSelectedColors.splice(idx, 1);
+    window.renderAdminColorsUI();
+  }
+};
+
+window.clearAllAdminColors = function() {
+  window.adminSelectedColors = [];
+  window.renderAdminColorsUI();
+};
+
+window.renderAdminGalleryUI = function() {
+  const container = document.getElementById('adminGalleryThumbnails');
+  if (!container) return;
+  if (!window.adminGalleryImages || window.adminGalleryImages.length === 0) {
+    container.innerHTML = '<span id="adminNoGalleryNotice" style="font-size:0.75rem; color:var(--text-muted); font-style:italic;">No additional gallery images added yet.</span>';
+    return;
+  }
+  container.innerHTML = window.adminGalleryImages.map((img, idx) => `
+    <div style="position:relative; width:52px; height:64px; border-radius:4px; overflow:hidden; border:1px solid var(--border-subtle); background:#000;">
+      <img src="${img}" alt="View ${idx+1}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='assets/images/about_anarkali.png'" />
+      <button type="button" onclick="window.removeAdminGalleryImage(${idx})" style="position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.75); color:#fff; border:none; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; line-height:1;" title="Remove view">&times;</button>
+    </div>
+  `).join('');
+};
+
+window.addAdminGalleryImage = function(urlOverride) {
+  const input = document.getElementById('adminGalleryInput');
+  const url = (urlOverride || (input ? input.value : '')).trim();
+  if (!url) return;
+  if (!window.adminGalleryImages) window.adminGalleryImages = [];
+  if (!window.adminGalleryImages.includes(url)) {
+    window.adminGalleryImages.push(url);
+    if (input) input.value = '';
+    window.renderAdminGalleryUI();
+  }
+};
+
+window.removeAdminGalleryImage = function(idx) {
+  if (window.adminGalleryImages) {
+    window.adminGalleryImages.splice(idx, 1);
+    window.renderAdminGalleryUI();
+  }
+};
+
+window.initAdminGalleryFileUpload = function() {
+  const fileInput = document.getElementById('adminGalleryFileInput');
+  const spinner = document.getElementById('galleryUploadSpinner');
+  if (!fileInput || fileInput.dataset.bound === 'true') return;
+  fileInput.dataset.bound = 'true';
+
+  fileInput.addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    if (spinner) spinner.style.display = 'inline-block';
+
+    for (const file of files) {
+      // 1. Instant base64 Data URL for offline & immediate display
+      const dataUrl = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve(ev.target.result);
+        reader.readAsDataURL(file);
+      });
+
+      let finalUrl = dataUrl;
+
+      // 2. Upload to Supabase Storage if available
+      if (window.GlamStorage) {
+        try {
+          const publicUrl = await window.GlamStorage.uploadProductImage(file);
+          if (publicUrl) finalUrl = publicUrl;
+        } catch(err) {
+          console.warn('Gallery upload to Supabase note:', err);
+        }
+      }
+
+      if (!window.adminGalleryImages) window.adminGalleryImages = [];
+      if (!window.adminGalleryImages.includes(finalUrl)) {
+        window.adminGalleryImages.push(finalUrl);
+      }
+    }
+
+    if (spinner) spinner.style.display = 'none';
+    fileInput.value = '';
+    window.renderAdminGalleryUI();
+  });
+};
 ﻿// Global Admin Auth Modal Triggers
 window.openAdminAuth = function(e) {
   if (e && e.preventDefault) e.preventDefault();
@@ -157,17 +355,27 @@ window.closeAdminAuth = function() {
    ════════════════════════════════════════════════════════════════════ */
 
 // Initial Seed Data for Luxury Fashion Store
+// Standard Ethnic Color Palette already initialized globally on window.STANDARD_ETHNIC_COLORS
+
+// Initial Seed Data for Luxury Fashion Store (with colors and multiple images)
 const INITIAL_PRODUCTS = [
   {
     id: "NF-101",
     name: "Handcrafted Chikankari Anarkali Set",
     category: "Anarkali",
     sizes: ["S", "M", "L", "XL", "XXL"],
+    colors: [
+      { name: "Ivory White", hex: "#FDFBF7" },
+      { name: "Rani Pink", hex: "#E0218A" },
+      { name: "Emerald Green", hex: "#097969" },
+      { name: "Mustard Yellow", hex: "#E5A93C" }
+    ],
     price: 8499,
     originalPrice: 10999,
     stock: 24,
     status: "in-stock",
     image: "assets/images/about_anarkali.png",
+    images: ["assets/images/about_anarkali.png", "assets/images/hero_1.png", "assets/images/festive.png"],
     rating: 4.9,
     sales: 142
   },
@@ -176,11 +384,17 @@ const INITIAL_PRODUCTS = [
     name: "Royal Crimson Zari Bridal Lehenga",
     category: "Lehenga",
     sizes: ["S", "M", "L", "XL", "XXL"],
+    colors: [
+      { name: "Maroon", hex: "#800020" },
+      { name: "Wine Plum", hex: "#58111A" },
+      { name: "Emerald Green", hex: "#097969" }
+    ],
     price: 24999,
     originalPrice: 32000,
     stock: 8,
     status: "low-stock",
     image: "assets/images/about_lehenga.png",
+    images: ["assets/images/about_lehenga.png", "assets/images/featured_banner_wedding_1785416855384.png", "assets/images/wedding.png"],
     rating: 5.0,
     sales: 89
   },
@@ -189,11 +403,17 @@ const INITIAL_PRODUCTS = [
     name: "Pure Banarasi Katan Silk Saree",
     category: "Saree",
     sizes: ["Free Size"],
+    colors: [
+      { name: "Royal Blue", hex: "#2B4C7E" },
+      { name: "Rani Pink", hex: "#E0218A" },
+      { name: "Rust Brown", hex: "#8B4513" }
+    ],
     price: 14500,
     originalPrice: 18500,
     stock: 18,
     status: "in-stock",
     image: "assets/images/about_saree.png",
+    images: ["assets/images/about_saree.png", "assets/images/saree.png", "assets/images/saree_tn.png"],
     rating: 4.8,
     sales: 210
   },
@@ -202,11 +422,17 @@ const INITIAL_PRODUCTS = [
     name: "Embroidered Georgette Peplum Top & Sharara",
     category: "Tops",
     sizes: ["S", "M", "L", "XL", "XXL"],
+    colors: [
+      { name: "Pista Green", hex: "#93C572" },
+      { name: "Coral Peach", hex: "#F88379" },
+      { name: "Midnight Black", hex: "#1A1A1A" }
+    ],
     price: 5299,
     originalPrice: 6999,
     stock: 35,
     status: "in-stock",
     image: "assets/images/about_tops.png",
+    images: ["assets/images/about_tops.png", "assets/images/hero_2.png"],
     rating: 4.7,
     sales: 165
   },
@@ -215,11 +441,17 @@ const INITIAL_PRODUCTS = [
     name: "Velvet Royal Churidar & Zardozi Kurti",
     category: "Churidar",
     sizes: ["S", "M", "L", "XL", "XXL"],
+    colors: [
+      { name: "Royal Blue", hex: "#2B4C7E" },
+      { name: "Maroon", hex: "#800020" },
+      { name: "Teal Blue", hex: "#008080" }
+    ],
     price: 7800,
     originalPrice: 9500,
     stock: 0,
     status: "out-of-stock",
     image: "assets/images/chudidar.png",
+    images: ["assets/images/chudidar.png", "assets/images/hero_1.png"],
     rating: 4.9,
     sales: 115
   },
@@ -227,11 +459,18 @@ const INITIAL_PRODUCTS = [
     id: "NF-106",
     name: "Heritage Organza Hand-Painted Dupatta",
     category: "Dupatta",
+    sizes: ["Free Size"],
+    colors: [
+      { name: "Ivory White", hex: "#FDFBF7" },
+      { name: "Coral Peach", hex: "#F88379" },
+      { name: "Mustard Yellow", hex: "#E5A93C" }
+    ],
     price: 3499,
     originalPrice: 4200,
     stock: 42,
     status: "in-stock",
     image: "assets/images/dupatta.png",
+    images: ["assets/images/dupatta.png", "assets/images/festive.png"],
     rating: 4.9,
     sales: 310
   },
@@ -239,11 +478,18 @@ const INITIAL_PRODUCTS = [
     id: "NF-107",
     name: "Kundan & Polki Bridal Jewellery Choker Set",
     category: "Jewellery",
+    sizes: ["Free Size"],
+    colors: [
+      { name: "Metallic Gold", hex: "#D4AF37" },
+      { name: "Wine Plum", hex: "#58111A" },
+      { name: "Emerald Green", hex: "#097969" }
+    ],
     price: 12999,
     originalPrice: 16000,
     stock: 12,
     status: "in-stock",
     image: "assets/images/jewellery.png",
+    images: ["assets/images/jewellery.png"],
     rating: 5.0,
     sales: 78
   },
@@ -251,11 +497,18 @@ const INITIAL_PRODUCTS = [
     id: "NF-108",
     name: "Artisan Hand-Embroidered Potli Handbag",
     category: "Accessories",
+    sizes: ["Free Size"],
+    colors: [
+      { name: "Metallic Gold", hex: "#D4AF37" },
+      { name: "Maroon", hex: "#800020" },
+      { name: "Midnight Black", hex: "#1A1A1A" }
+    ],
     price: 2899,
     originalPrice: 3500,
     stock: 28,
     status: "in-stock",
     image: "assets/images/handbag_modern.png",
+    images: ["assets/images/handbag_modern.png", "assets/images/handbag.png"],
     rating: 4.8,
     sales: 195
   }
@@ -494,18 +747,25 @@ class AdminApp {
           } catch(e) {}
           this.products = cloudProducts
             .filter(p => !deletedIds.includes(String(p.id)))
-            .map(p => ({
-            id: p.id,
-            name: p.name,
-            category: p.category,
-            price: Number(p.price),
-            originalPrice: Number(p.original_price || p.price),
-            stock: Number(p.stock),
-            status: p.status,
-            image: p.image,
-            rating: Number(p.rating || 5.0),
-            sales: Number(p.sales || 0)
-          }));
+            .map(p => {
+              const localExisting = (this.products || []).find(lp => String(lp.id) === String(p.id));
+              return {
+                id: p.id,
+                name: p.name,
+                category: p.category,
+                price: Number(p.price),
+                originalPrice: Number(p.original_price || p.price),
+                stock: Number(p.stock),
+                status: p.status,
+                image: p.image,
+                images: p.images || (localExisting && localExisting.images) || [p.image],
+                colors: p.colors || (localExisting && localExisting.colors) || null,
+                sizes: p.sizes || (localExisting && localExisting.sizes) || (p.category === 'Saree' ? ['Free Size'] : ['S', 'M', 'L', 'XL', 'XXL']),
+                rating: Number(p.rating || 5.0),
+                sales: Number(p.sales || 0)
+              };
+            });
+          this.save();
           this.renderProductsTable();
           this.renderDashboard();
         }
@@ -1116,28 +1376,63 @@ class AdminApp {
     tbody.innerHTML = items.map(p => `
       <tr>
         <td>
-          <div class="product-row-flex">
-            <img src="${p.image}" alt="${p.name}" class="product-thumb-img" onerror="this.src='assets/images/about_anarkali.png'" />
+          <div class="product-row-flex" style="align-items:flex-start;">
+            <div style="position:relative;">
+              <img src="${p.image}" alt="${p.name}" class="product-thumb-img" onerror="this.src='assets/images/about_anarkali.png'" />
+              ${p.images && p.images.length > 1 ? `
+                <span style="position:absolute; bottom:2px; right:2px; background:rgba(0,0,0,0.75); color:#fff; font-size:0.65rem; font-weight:700; padding:1px 4px; border-radius:3px; line-height:1.2;">
+                  <i class="ri-image-line" style="font-size:0.6rem;"></i> ${p.images.length}
+                </span>
+              ` : ''}
+            </div>
             <div class="product-info-text">
               <strong>${p.name}</strong>
-              <span>SKU: ${p.id}</span>
+              <span style="display:flex; align-items:center; gap:6px;">
+                SKU: ${p.id}
+                ${p.images && p.images.length > 1 ? `<span style="color:var(--gold-accent); font-size:0.7rem; font-weight:600;">(${p.images.length} angles)</span>` : ''}
+              </span>
+              ${p.images && p.images.length > 1 ? `
+                <div style="display:flex; gap:3px; margin-top:4px; align-items:center;">
+                  ${p.images.slice(0, 4).map(imgUrl => `
+                    <img src="${imgUrl}" style="width:18px; height:22px; object-fit:cover; border-radius:2px; border:1px solid var(--border-subtle);" onerror="this.src='assets/images/about_anarkali.png';" />
+                  `).join('')}
+                  ${p.images.length > 4 ? `<span style="font-size:0.65rem; color:var(--text-muted); font-weight:700;">+${p.images.length - 4}</span>` : ''}
+                </div>
+              ` : ''}
             </div>
           </div>
         </td>
         <td><span style="font-weight:600; color:var(--gold-accent);">${p.category}</span></td>
         <td>
-          <div style="display:flex; gap:3px; flex-wrap:wrap; max-width:160px;">
-            ${(p.sizes && p.sizes.length > 0 ? p.sizes : ['S','M','L','XL','XXL']).map(s => `
-              <span style="font-size:0.72rem; font-weight:700; color:var(--gold-accent); background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.3); padding:1px 6px; border-radius:4px;">${s}</span>
-            `).join('')}
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <div style="display:flex; gap:3px; flex-wrap:wrap; max-width:160px;">
+              ${(p.sizes && p.sizes.length > 0 ? p.sizes : ['S','M','L','XL','XXL']).map(s => `
+                <span style="font-size:0.72rem; font-weight:700; color:var(--gold-accent); background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.3); padding:1px 6px; border-radius:4px;">${s}</span>
+              `).join('')}
+            </div>
+            ${p.colors && p.colors.length > 0 ? `
+              <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap; margin-top:2px;">
+                ${p.colors.map(c => `
+                  <span title="${c.name || c}" style="width:12px; height:12px; border-radius:50%; background:${c.hex || '#d4af37'}; display:inline-block; border:1px solid rgba(0,0,0,0.3); box-shadow:0 1px 2px rgba(0,0,0,0.15);"></span>
+                `).join('')}
+                <span style="font-size:0.68rem; font-weight:600; color:var(--text-muted);">${p.colors.length} col</span>
+              </div>
+            ` : ''}
           </div>
         </td>
         <td>
           <strong>₹${p.price.toLocaleString('en-IN')}</strong>
           ${p.originalPrice ? `<span style="text-decoration:line-through; font-size:0.75rem; color:var(--text-muted); margin-left:4px;">₹${p.originalPrice.toLocaleString('en-IN')}</span>` : ''}
         </td>
-        <td>${p.stock} units</td>
-        <td><span class="status-badge ${p.status}">${p.status.replace('-', ' ')}</span></td>
+        <td>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <strong style="color:${Number(p.stock) <= 0 ? '#dc2626' : (Number(p.stock) <= 5 ? '#d97706' : 'inherit')};">${p.stock} units</strong>
+            <button type="button" class="btn-icon-table" onclick="window.openEditProduct('${p.id}')" title="Edit Stock & Details" style="width:24px; height:24px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; border:1px solid var(--border-subtle); background:var(--bg-card); cursor:pointer;">
+              <i class="ri-edit-line" style="color:var(--gold-accent); font-size:0.85rem;"></i>
+            </button>
+          </div>
+        </td>
+        <td><span class="status-badge ${Number(p.stock) <= 0 ? 'out-of-stock' : (Number(p.stock) <= 5 ? 'low-stock' : 'in-stock')}">${Number(p.stock) <= 0 ? 'out of stock' : (Number(p.stock) <= 5 ? 'low stock' : 'in stock')}</span></td>
         <td>
           <div style="display:flex; align-items:center; gap:3px; color:var(--gold-accent); font-weight:600;">
             <i class="ri-star-fill"></i> ${p.rating} <span style="color:var(--text-muted); font-size:0.75rem; font-weight:normal;">(${p.sales})</span>
@@ -1145,7 +1440,7 @@ class AdminApp {
         </td>
         <td>
           <div class="table-action-btns">
-            <button class="btn-icon-table" onclick="window.app.openEditProduct('${p.id}')" title="Edit Product"><i class="ri-edit-line"></i></button>
+            <button class="btn-icon-table" onclick="window.openEditProduct('${p.id}')" title="Edit Product"><i class="ri-edit-line"></i></button>
             <button class="btn-icon-table delete" onclick="window.deleteProduct('${p.id}')" title="Delete Product"><i class="ri-delete-bin-line"></i></button>
           </div>
         </td>
@@ -1162,7 +1457,7 @@ class AdminApp {
     this.renderProductsTable(filtered);
   }
 
-    openAddProductModal() {
+  openAddProductModal() {
     this.editingProductId = null;
     const title = document.getElementById('modalProductTitle');
     if (title) title.textContent = 'Add New Luxury Couture';
@@ -1175,6 +1470,16 @@ class AdminApp {
     const preview = document.getElementById('productImagePreview');
     if (preview) preview.src = 'assets/images/about_anarkali.png';
 
+    // Reset colors and gallery
+    window.adminSelectedColors = [
+      { name: 'Maroon', hex: '#800020' },
+      { name: 'Emerald Green', hex: '#097969' }
+    ];
+    window.adminGalleryImages = [];
+    if (typeof window.renderAdminColorsUI === 'function') window.renderAdminColorsUI();
+    if (typeof window.renderAdminGalleryUI === 'function') window.renderAdminGalleryUI();
+    if (typeof window.initAdminGalleryFileUpload === 'function') window.initAdminGalleryFileUpload();
+
     const modal = document.getElementById('productModal');
     if (modal) {
       modal.classList.add('show');
@@ -1186,17 +1491,29 @@ class AdminApp {
   }
 
   openEditProduct(id) {
-    const prod = this.products.find(p => p.id === id);
-    if (!prod) return;
-    this.editingProductId = id;
-    document.getElementById('modalProductTitle').textContent = `Edit Product: ${prod.name}`;
-    document.getElementById('prodName').value = prod.name;
-    document.getElementById('prodCategory').value = prod.category;
-    document.getElementById('prodPrice').value = prod.price;
-    document.getElementById('prodOriginalPrice').value = prod.originalPrice || '';
-    document.getElementById('prodStock').value = prod.stock;
-    document.getElementById('prodImage').value = prod.image;
-    document.getElementById('productImagePreview').src = prod.image;
+    const prod = this.products.find(p => String(p.id) === String(id));
+    if (!prod) {
+      console.warn('Product not found for edit ID:', id);
+      return;
+    }
+    this.editingProductId = prod.id;
+    const modalTitle = document.getElementById('modalProductTitle');
+    if (modalTitle) modalTitle.textContent = `Edit Product: ${prod.name}`;
+
+    const nameEl = document.getElementById('prodName');
+    if (nameEl) nameEl.value = prod.name || '';
+    const catEl = document.getElementById('prodCategory');
+    if (catEl) catEl.value = prod.category || 'Kurtis';
+    const priceEl = document.getElementById('prodPrice');
+    if (priceEl) priceEl.value = prod.price || '';
+    const origPriceEl = document.getElementById('prodOriginalPrice');
+    if (origPriceEl) origPriceEl.value = prod.originalPrice || '';
+    const stockEl = document.getElementById('prodStock');
+    if (stockEl) stockEl.value = (prod.stock !== undefined ? prod.stock : 15);
+    const imgEl = document.getElementById('prodImage');
+    if (imgEl) imgEl.value = prod.image || 'assets/images/about_anarkali.png';
+    const previewEl = document.getElementById('productImagePreview');
+    if (previewEl) previewEl.src = prod.image || 'assets/images/about_anarkali.png';
     
     // Populate sizes checkboxes
     const targetSizes = prod.sizes || (prod.category === 'Saree' ? ['Free Size'] : ['S', 'M', 'L', 'XL', 'XXL']);
@@ -1205,7 +1522,41 @@ class AdminApp {
       cb.checked = targetSizes.includes(cb.value);
     });
 
-    document.getElementById('productModal').classList.add('show');
+    // Populate colors
+    if (prod.colors && Array.isArray(prod.colors) && prod.colors.length > 0) {
+      window.adminSelectedColors = prod.colors.map(c => {
+        if (typeof c === 'string') {
+          const found = STANDARD_ETHNIC_COLORS.find(sc => sc.name.toLowerCase() === c.toLowerCase());
+          return { name: c, hex: found ? found.hex : '#D4AF37' };
+        }
+        return c;
+      });
+    } else {
+      window.adminSelectedColors = [
+        { name: 'Maroon', hex: '#800020' },
+        { name: 'Emerald Green', hex: '#097969' }
+      ];
+    }
+
+    // Populate gallery images (exclude primary image if duplicate)
+    if (prod.images && Array.isArray(prod.images)) {
+      window.adminGalleryImages = prod.images.filter(img => img && img !== prod.image);
+    } else {
+      window.adminGalleryImages = [];
+    }
+
+    if (typeof window.renderAdminColorsUI === 'function') window.renderAdminColorsUI();
+    if (typeof window.renderAdminGalleryUI === 'function') window.renderAdminGalleryUI();
+    if (typeof window.initAdminGalleryFileUpload === 'function') window.initAdminGalleryFileUpload();
+
+    const modal = document.getElementById('productModal');
+    if (modal) {
+      modal.classList.add('show');
+      modal.style.setProperty('display', 'flex', 'important');
+      modal.style.setProperty('opacity', '1', 'important');
+      modal.style.setProperty('visibility', 'visible', 'important');
+      modal.style.setProperty('z-index', '99999', 'important');
+    }
   }
 
   saveProduct(e) {
@@ -1218,7 +1569,14 @@ class AdminApp {
     // Read selected sizes
     const selectedSizes = Array.from(document.querySelectorAll('#adminProductSizesSelector input[name="prodSize"]:checked')).map(cb => cb.value);
     const sizes = selectedSizes.length > 0 ? selectedSizes : ['S', 'M', 'L', 'XL', 'XXL'];
+    
+    // Read selected colors
+    const colors = window.adminSelectedColors && window.adminSelectedColors.length > 0 
+      ? [...window.adminSelectedColors] 
+      : [{ name: "Standard", hex: "#D4AF37" }];
+
     const image = document.getElementById('prodImage').value.trim() || 'assets/images/about_anarkali.png';
+    const images = [image, ...(window.adminGalleryImages || [])];
 
     let status = 'in-stock';
     if (stock <= 0) status = 'out-of-stock';
@@ -1227,7 +1585,7 @@ class AdminApp {
     if (this.editingProductId) {
       const idx = this.products.findIndex(p => p.id === this.editingProductId);
       if (idx !== -1) {
-        this.products[idx] = { ...this.products[idx], name, category, sizes, price, originalPrice, stock, image, status };
+        this.products[idx] = { ...this.products[idx], name, category, sizes, colors, images, price, originalPrice, stock, image, status };
         this.showToast(`Product "${name}" updated successfully!`);
       }
     } else {
@@ -1239,7 +1597,9 @@ class AdminApp {
         originalPrice,
         stock,
         image,
+        images,
         sizes,
+        colors,
         status,
         rating: 5.0,
         sales: 0
@@ -1248,8 +1608,16 @@ class AdminApp {
       this.showToast(`New couture "${name}" added to catalog!`);
     }
 
-        this.save();
+    this.save();
     window.dispatchEvent(new CustomEvent('products_updated', { detail: this.products }));
+    try { window.dispatchEvent(new Event('storage')); } catch(e) {}
+    this.renderProductsTable();
+    
+    const modal = document.getElementById('productModal');
+    if (modal) {
+      modal.classList.remove('show');
+      modal.style.setProperty('display', 'none', 'important');
+    }
     
     // Sync with Supabase Cloud
     if (window.GlamProducts) {
@@ -1816,6 +2184,10 @@ class AdminApp {
           if (uploadSpinner) uploadSpinner.style.display = 'none';
         }
       });
+    }
+
+    if (typeof window.initAdminGalleryFileUpload === 'function') {
+      window.initAdminGalleryFileUpload();
     }
   }
 
