@@ -1166,7 +1166,8 @@ class AdminApp {
 
         const customAdminPass = localStorage.getItem('glam_admin_custom_password');
         const isCustomMatch = customAdminPass && password === customAdminPass;
-        const isDefaultMatch = password === 'admin123' || isCustomMatch;
+        const isDefaultMatch = password === 'admin123';
+        const isAuthorizedPassword = isCustomMatch || (!customAdminPass && isDefaultMatch);
 
         try {
           let adminAuthenticated = false;
@@ -1175,13 +1176,13 @@ class AdminApp {
               await window.GlamAuth.signIn(email, password);
               adminAuthenticated = true;
             } catch(authErr) {
-              if (isCustomMatch || isDefaultMatch) {
+              if (isAuthorizedPassword) {
                 adminAuthenticated = true;
               } else {
                 throw new Error('Invalid administrator credentials. Incorrect password.');
               }
             }
-          } else if (isCustomMatch || isDefaultMatch) {
+          } else if (isAuthorizedPassword) {
             adminAuthenticated = true;
           }
 
@@ -1195,6 +1196,10 @@ class AdminApp {
           if (gateError) {
             gateError.textContent = err.message || 'Invalid administrator credentials. Incorrect password.';
             gateError.style.display = 'block';
+          }
+          if (gatePass) {
+            gatePass.value = '';
+            gatePass.focus();
           }
         }
       });

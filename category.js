@@ -569,27 +569,19 @@ window.closeCheckoutModal = function(e) {
               const errMsg = (sErr.message || '').toLowerCase();
               const errCode = sErr.code || sErr.error_code || '';
 
-              // 1. Cross-device bypass: Supabase credentials are valid, email unconfirmed
+              // 1. Supabase credentials are valid, email unconfirmed
               if (errMsg.includes('email not confirmed') || errCode === 'email_not_confirmed') {
-                console.log('✅ Supabase password accepted for cross-device unconfirmed email');
+                console.log('✅ Supabase password verified for unconfirmed email');
                 authPassed = true;
               } else if (savedPass && savedPass === password) {
                 authPassed = true;
-              } else if (window.GlamCustomers) {
-                // 2. Cross-device cloud check
-                try {
-                  const cloudCusts = await window.GlamCustomers.getAll();
-                  const matched = (cloudCusts || []).find(c => c.email && c.email.toLowerCase() === email.toLowerCase());
-                  if (matched && password && password.length >= 6) {
-                    customerName = matched.name || customerName;
-                    authPassed = true;
-                  }
-                } catch(custErr) {}
+              } else {
+                throw new Error('Incorrect password. Please verify your credentials or use Forgot Password.');
               }
             }
 
             if (!authPassed) {
-              throw new Error('Incorrect password or email. Please verify your credentials or use Forgot Password.');
+              throw new Error('Incorrect password. Please verify your credentials or use Forgot Password.');
             }
 
             localStorage.setItem('glam_customer_user', JSON.stringify({ email, fullName: customerName }));
