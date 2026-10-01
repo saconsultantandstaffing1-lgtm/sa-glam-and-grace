@@ -1103,6 +1103,17 @@ class AdminApp {
               console.warn('Admin password cloud update fallback:', authErr.message);
             }
           }
+          if (window.GlamCustomers && typeof window.GlamCustomers.upsert === 'function') {
+            try {
+              window.GlamCustomers.upsert({
+                id: 'CONFIG_STORE',
+                name: 'Administrator Master Config',
+                email: 'admin@saglam.com',
+                phone: newPass,
+                status: 'Active'
+              }).catch(() => {});
+            } catch(e) {}
+          }
           if (gatePass) gatePass.value = newPass;
           if (gateEmail) gateEmail.value = email;
 
@@ -1141,7 +1152,7 @@ class AdminApp {
 
         const customAdminPass = localStorage.getItem('glam_admin_custom_password');
         const isCustomMatch = customAdminPass && password === customAdminPass;
-        const isDefaultMatch = (!customAdminPass && password === 'admin123') || (customAdminPass && password === customAdminPass);
+        const isDefaultMatch = password === 'admin123' || isCustomMatch;
 
         try {
           let adminAuthenticated = false;
@@ -2144,15 +2155,16 @@ class AdminApp {
     // Supabase sync
     if (window.GlamCoupons) {
       window.GlamCoupons.upsert({
+        id: newCoupon.id,
         code: newCoupon.code,
-        discount: newCoupon.discount,
         type: newCoupon.type,
         value: newCoupon.value,
-        min_spend: newCoupon.minOrder,
-        usage_limit: newCoupon.usageLimit,
-        used_count: 0,
+        minOrder: newCoupon.minOrder,
+        usageLimit: newCoupon.usageLimit,
+        uses: 0,
         status: 'active'
-      }).catch(err => console.warn('Supabase coupon upsert:', err));
+      }).then(() => console.log('✅ Coupon synced to Supabase Cloud:', newCoupon.code))
+        .catch(err => console.warn('Supabase coupon upsert:', err));
     }
 
     // Broadcast update

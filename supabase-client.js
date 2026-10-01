@@ -354,12 +354,29 @@ window.GlamCoupons = {
     const sb = getSb();
     if (!sb) throw new Error('Supabase client not initialized');
 
+    const cleanCode = (coupon.code || '').trim().toUpperCase();
+    if (!cleanCode) throw new Error('Coupon code is required');
+
+    const cleanPayload = {
+      id: coupon.id || ('cp_' + cleanCode.toLowerCase().replace(/[^a-z0-9]/g, '')),
+      code: cleanCode,
+      type: coupon.type || 'percentage',
+      value: Number(coupon.value) || 0,
+      min_spend: Number(coupon.min_spend != null ? coupon.min_spend : (coupon.minOrder != null ? coupon.minOrder : 0)) || 0,
+      usage_limit: Number(coupon.usage_limit != null ? coupon.usage_limit : (coupon.usageLimit != null ? coupon.usageLimit : 500)) || 500,
+      used_count: Number(coupon.used_count != null ? coupon.used_count : (coupon.uses != null ? coupon.uses : 0)) || 0,
+      status: (coupon.status || 'active').toLowerCase()
+    };
+
     const { data, error } = await sb
       .from('coupons')
-      .upsert(coupon, { onConflict: 'id' })
+      .upsert(cleanPayload, { onConflict: 'code' })
       .select();
 
-    if (error) throw error;
+    if (error) {
+      console.warn('Supabase coupon upsert error:', error.message);
+      throw error;
+    }
     return data;
   },
 
