@@ -239,25 +239,15 @@ document.addEventListener('DOMContentLoaded', () => {
     cart: (() => {
       try {
         const saved = localStorage.getItem('glam_cart');
-        return saved ? JSON.parse(saved) : [
-          {
-            id: 1,
-            title: 'Amber Chanderi Silk Kurti Set',
-            price: 3499,
-            size: 'M',
-            color: 'Yellow',
-            image: './assets/images/hero_1.png',
-            qty: 1
-          }
-        ];
+        return saved ? JSON.parse(saved) : [];
       } catch(e) { return []; }
     })(),
     wishlist: (function() {
       try {
         const saved = localStorage.getItem('glam_wishlist');
-        window.stateWishlist = saved ? JSON.parse(saved) : [1, 3];
+        window.stateWishlist = saved ? JSON.parse(saved) : [];
       } catch(e) {
-        window.stateWishlist = [1, 3];
+        window.stateWishlist = [];
       }
       return window.stateWishlist;
     })(),
@@ -994,14 +984,17 @@ document.addEventListener('DOMContentLoaded', () => {
             expiry: cp.expiry || '2026-12-31'
           }));
 
-        // Sort so BRIDALVIP is always top featured promo across all devices
-        mapped.sort((a, b) => {
+        // Prioritize custom newly created coupons first, then default promotional vouchers
+        const customCoupons = mapped.filter(c => !['BRIDALVIP', 'ROYALFESTIVE', 'WELCOME10'].includes(c.code));
+        const defaultCoupons = mapped.filter(c => ['BRIDALVIP', 'ROYALFESTIVE', 'WELCOME10'].includes(c.code));
+        defaultCoupons.sort((a, b) => {
           if (a.code === 'BRIDALVIP') return -1;
           if (b.code === 'BRIDALVIP') return 1;
           return Number(b.minOrder || 0) - Number(a.minOrder || 0);
         });
+        const sorted = [...customCoupons, ...defaultCoupons];
 
-        localStorage.setItem('nf_coupons', JSON.stringify(mapped));
+        localStorage.setItem('nf_coupons', JSON.stringify(sorted));
         try { window.syncAnnouncementPromo(); } catch(e) {}
         try { if (typeof updateCartUI === 'function') updateCartUI(); } catch(e) {}
       }
@@ -1017,7 +1010,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try { updateCartUI(); } catch(e) {}
   });
 
-  window.applyCartPromo = function(codeOverride) {
+  window.applyCartPromo = async function(codeOverride) {
     const input = document.getElementById('cartPromoInput');
     const feedback = document.getElementById('cartPromoFeedback');
     const code = (codeOverride || (input ? input.value : '')).trim().toUpperCase();
@@ -1031,8 +1024,48 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const activeList = getActiveCoupons();
-    const found = activeList.find(c => c.code === code);
+    let activeList = getActiveCoupons();
+    let found = activeList.find(c => c.code === code);
+
+    // If not found in local cache, query Supabase Cloud in real-time
+    if (!found && window.GlamCoupons && typeof window.GlamCoupons.getAll === 'function') {
+      if (feedback) {
+        feedback.style.display = 'block';
+        feedback.style.color = '#b45309';
+        feedback.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Checking live discount...';
+      }
+      try {
+        const cloudCoupons = await window.GlamCoupons.getAll();
+        if (cloudCoupons && cloudCoupons.length > 0) {
+          const mapped = cloudCoupons.map(cp => ({
+            id: cp.id,
+            code: cp.code,
+            type: cp.type || 'percentage',
+            value: Number(cp.value),
+            discount: cp.discount || (cp.type === 'fixed' ? '₹' + Number(cp.value).toLocaleString('en-IN') + ' OFF' : cp.value + '% OFF'),
+            minOrder: Number(cp.min_spend != null ? cp.min_spend : (cp.minOrder || 0)),
+            minSpend: Number(cp.min_spend != null ? cp.min_spend : (cp.minOrder || 0)),
+            usageLimit: Number(cp.usage_limit || 100),
+            uses: Number(cp.used_count || 0),
+            status: cp.status || 'Active',
+            expiry: cp.expiry || '2026-12-31'
+          }));
+          const customCoupons = mapped.filter(c => !['BRIDALVIP', 'ROYALFESTIVE', 'WELCOME10'].includes(c.code));
+          const defaultCoupons = mapped.filter(c => ['BRIDALVIP', 'ROYALFESTIVE', 'WELCOME10'].includes(c.code));
+          defaultCoupons.sort((a, b) => {
+            if (a.code === 'BRIDALVIP') return -1;
+            if (b.code === 'BRIDALVIP') return 1;
+            return Number(b.minOrder || 0) - Number(a.minOrder || 0);
+          });
+          const sorted = [...customCoupons, ...defaultCoupons];
+          localStorage.setItem('nf_coupons', JSON.stringify(sorted));
+          found = sorted.find(c => c.code === code);
+          try { window.syncAnnouncementPromo(); } catch(e) {}
+        }
+      } catch(err) {
+        console.warn('Real-time coupon lookup notice:', err);
+      }
+    }
 
     if (!found) {
       if (feedback) {
@@ -1041,6 +1074,10 @@ document.addEventListener('DOMContentLoaded', () => {
         feedback.textContent = 'Coupon "' + code + '" is invalid or expired.';
       }
       return;
+    }
+
+    if (feedback) {
+      feedback.style.display = 'none';
     }
 
     localStorage.setItem('glam_applied_promo', JSON.stringify(found));
@@ -1997,32 +2034,53 @@ function initCustomerAuth() {
   // Update Auth Modal Views
   async function refreshAuthUI() {
     window.refreshCustomerAuthUI = refreshAuthUI;
-    if (!window.GlamAuth) return;
+    const accountBtn = document.getElementById('accountBtn');
+    let user = null;
+    let localCust = null;
     try {
-      const user = await window.GlamAuth.getCurrentUser();
-      if (user) {
-        if (loggedOutView) loggedOutView.style.display = 'none';
-        if (loggedInView) loggedInView.style.display = 'block';
-        const nameEl = document.getElementById('loggedInUserName');
-        const emailEl = document.getElementById('loggedInUserEmail');
-        const roleEl = document.getElementById('loggedInUserRole');
-        if (nameEl) nameEl.textContent = user.profile?.full_name || user.email.split('@')[0];
-        if (emailEl) emailEl.textContent = user.email;
-        if (roleEl) roleEl.textContent = user.profile?.role === 'admin' ? 'Store Administrator' : 'Luxury VIP Member';
-        
-        // Auto-fill checkout fields if empty
-        const orderName = document.getElementById('orderCustName');
-        const orderEmail = document.getElementById('orderCustEmail');
-        const orderPhone = document.getElementById('orderCustPhone');
-        if (orderName && !orderName.value) orderName.value = user.profile?.full_name || '';
-        if (orderEmail && !orderEmail.value) orderEmail.value = user.email;
-        if (orderPhone && !orderPhone.value) orderPhone.value = user.profile?.phone || '';
-      } else {
-        if (loggedOutView) loggedOutView.style.display = 'block';
-        if (loggedInView) loggedInView.style.display = 'none';
+      localCust = JSON.parse(localStorage.getItem('glam_customer_user'));
+    } catch(e) {}
+
+    if (window.GlamAuth && typeof window.GlamAuth.getCurrentUser === 'function') {
+      try {
+        user = await window.GlamAuth.getCurrentUser();
+      } catch (e) {
+        console.warn('Auth UI update notice:', e);
       }
-    } catch (e) {
-      console.warn('Auth UI update:', e);
+    }
+
+    const email = user?.email || localCust?.email;
+    const displayName = user?.profile?.full_name || localCust?.fullName || (email ? email.split('@')[0] : '');
+
+    if (email) {
+      if (loggedOutView) loggedOutView.style.display = 'none';
+      if (loggedInView) loggedInView.style.display = 'block';
+      const nameEl = document.getElementById('loggedInUserName');
+      const emailEl = document.getElementById('loggedInUserEmail');
+      const roleEl = document.getElementById('loggedInUserRole');
+      if (nameEl) nameEl.textContent = displayName;
+      if (emailEl) emailEl.textContent = email;
+      if (roleEl) roleEl.textContent = user?.profile?.role === 'admin' ? 'Store Administrator' : 'Luxury VIP Member';
+
+      if (accountBtn) {
+        accountBtn.innerHTML = '<i class="ri-user-star-fill" style="color: #FFD700; font-size: 1.15rem;"></i>';
+        accountBtn.title = `My Account (${displayName})`;
+      }
+      
+      // Auto-fill checkout fields if empty
+      const orderName = document.getElementById('orderCustName');
+      const orderEmail = document.getElementById('orderCustEmail');
+      const orderPhone = document.getElementById('orderCustPhone');
+      if (orderName && !orderName.value) orderName.value = displayName;
+      if (orderEmail && !orderEmail.value) orderEmail.value = email;
+      if (orderPhone && !orderPhone.value) orderPhone.value = user?.profile?.phone || localCust?.phone || '';
+    } else {
+      if (loggedOutView) loggedOutView.style.display = 'block';
+      if (loggedInView) loggedInView.style.display = 'none';
+      if (accountBtn) {
+        accountBtn.innerHTML = '<i class="ri-user-3-line"></i>';
+        accountBtn.title = 'My Account (Sign In / Register)';
+      }
     }
   }
 
@@ -2367,13 +2425,20 @@ function initCustomerAuth() {
 
   if (signOutBtn) {
     signOutBtn.addEventListener('click', async () => {
-      if (window.GlamAuth) {
-        await window.GlamAuth.signOut();
-        localStorage.removeItem('glam_customer_user');
-        refreshAuthUI();
-      }
+      try {
+        if (window.GlamAuth && typeof window.GlamAuth.signOut === 'function') {
+          await window.GlamAuth.signOut();
+        }
+      } catch(e) {}
+      localStorage.removeItem('glam_customer_user');
+      refreshAuthUI();
+      try { window.dispatchEvent(new Event('storage')); } catch(e) {}
     });
   }
+
+  window.addEventListener('storage', () => {
+    try { refreshAuthUI(); } catch(e) {}
+  });
 
   refreshAuthUI();
 }
@@ -2784,9 +2849,9 @@ const WISHLIST_CATALOG = [
 (function initWishlist() {
   try {
     const saved = localStorage.getItem('glam_wishlist');
-    window.stateWishlist = saved ? JSON.parse(saved) : [1, 3];
+    window.stateWishlist = saved ? JSON.parse(saved) : [];
   } catch (e) {
-    window.stateWishlist = [1, 3];
+    window.stateWishlist = [];
   }
   if (window.glamState) {
     window.glamState.wishlist = window.stateWishlist;

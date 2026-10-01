@@ -1,4 +1,79 @@
 
+function parseOrderItemsDetailed(items, orderTotal = 0) {
+  if (!items) return [{ name: 'Haute Couture Ensemble', qty: 1, rate: orderTotal, amount: orderTotal }];
+  
+  let rawList = [];
+  if (Array.isArray(items)) {
+    rawList = items;
+  } else if (typeof items === 'string') {
+    if (items.includes('\n')) {
+      rawList = items.split('\n');
+    } else if (items.includes(' • ')) {
+      rawList = items.split(' • ');
+    } else if (items.includes('+')) {
+      rawList = items.split('+');
+    } else if (/\d+[\.\,]\s+/.test(items)) {
+      rawList = items.split(/(?:^|\s+)\d+[\.\,]\s+/).filter(Boolean);
+    } else if (items.includes(', ')) {
+      rawList = items.split(', ');
+    } else {
+      rawList = [items];
+    }
+  }
+
+  const parsed = rawList.map(raw => {
+    if (!raw) return null;
+    if (typeof raw === 'object') {
+      const q = Number(raw.qty || raw.quantity || raw.count) || 1;
+      const n = (raw.name || raw.title || 'Haute Couture Item').replace(/^(\d+[\.\,\-\)]\s*)+/i, '').trim();
+      const p = Number(raw.price || raw.rate) || 0;
+      return { name: n, qty: q, price: p };
+    }
+    const str = String(raw).trim();
+    if (!str) return null;
+
+    let qty = 1;
+    // Check for patterns like (x15), x15, (Qty: 15), 15x
+    const matchX = str.match(/\(?(?:x\s*|qty[:\s]*|quantity[:\s]*)(\d+)\)?/i);
+    const matchFrontX = str.match(/^(\d+)\s*x\s+/i);
+    if (matchX && matchX[1]) {
+      qty = parseInt(matchX[1], 10);
+    } else if (matchFrontX && matchFrontX[1]) {
+      qty = parseInt(matchFrontX[1], 10);
+    }
+
+    let cleanName = str
+      .replace(/^(\d+[\.\,\-\)]\s*)+/i, '') // strip leading "1. "
+      .replace(/^(\d+)\s*x\s+/i, '')       // strip leading "15x "
+      .replace(/\(?(?:x\s*|qty[:\s]*|quantity[:\s]*)(\d+)\)?/i, '') // strip "(x15)"
+      .trim();
+
+    cleanName = cleanName.replace(/[\,\-\s]+$/, '').trim();
+    if (!cleanName) cleanName = 'Haute Couture Ensemble';
+
+    return { name: cleanName, qty: qty, price: 0 };
+  }).filter(Boolean);
+
+  if (parsed.length === 0) {
+    return [{ name: 'Haute Couture Ensemble', qty: 1, rate: orderTotal, amount: orderTotal }];
+  }
+
+  const totalUnits = parsed.reduce((sum, it) => sum + (it.qty || 1), 0);
+  const totalVal = Number(orderTotal) || 0;
+  const unitRate = Math.round(totalVal / (totalUnits || 1));
+
+  return parsed.map(it => {
+    const rate = it.price > 0 ? it.price : unitRate;
+    const amount = rate * (it.qty || 1);
+    return {
+      name: it.name,
+      qty: it.qty || 1,
+      rate: rate,
+      amount: amount
+    };
+  });
+}
+
 function parseOrderItemsList(items) {
   if (!items) return ['Chudi', 'Saree'];
   if (Array.isArray(items)) {
@@ -881,18 +956,21 @@ class AdminApp {
             expiry: cp.expiry || '2026-12-31'
           }));
 
-          // Sort so BRIDALVIP, ROYALFESTIVE, WELCOME10 are in consistent order
-          cloudMapped.sort((a, b) => {
+          // Prioritize custom newly created coupons first, then default promotional vouchers
+          const customCoupons = cloudMapped.filter(c => !['BRIDALVIP', 'ROYALFESTIVE', 'WELCOME10'].includes(c.code));
+          const defaultCoupons = cloudMapped.filter(c => ['BRIDALVIP', 'ROYALFESTIVE', 'WELCOME10'].includes(c.code));
+          defaultCoupons.sort((a, b) => {
             if (a.code === 'BRIDALVIP') return -1;
             if (b.code === 'BRIDALVIP') return 1;
             return Number(b.minOrder || 0) - Number(a.minOrder || 0);
           });
+          const sorted = [...customCoupons, ...defaultCoupons];
 
-          // Adopt cloud coupons as source of truth, retaining any locally created vouchers
-          const merged = [...cloudMapped];
+          // Adopt cloud coupons as source of truth, retaining any locally created vouchers at the front
+          const merged = [...sorted];
           (this.coupons || []).forEach(lc => {
             if (!merged.some(mc => mc.code === lc.code)) {
-              merged.push(lc);
+              merged.unshift(lc);
             }
           });
           this.coupons = merged;
@@ -1933,6 +2011,9 @@ class AdminApp {
     const cleanId = String(ord.id).startsWith('#') ? String(ord.id).substring(1) : ord.id;
     const awbCode = 'BD-' + (cleanId.replace(/[^0-9]/g, '') || '9822') + '-IN';
 
+    const detailedItems = parseOrderItemsDetailed(ord.items, ord.total);
+    const totalUnits = detailedItems.reduce((acc, it) => acc + it.qty, 0);
+
     body.innerHTML = `
       <!-- Header -->
       <div style="text-align: center; border-bottom: 1.5px solid #D4AF37; padding-bottom: 1.25rem; margin-bottom: 1.4rem;">
@@ -1954,6 +2035,7 @@ class AdminApp {
           <span style="color: #78716C; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">Invoice Information:</span><br>
           <strong style="color: #B48616; font-size: 0.95rem; font-family: monospace;">INV-${cleanId}</strong><br>
           <span style="color: #57534E;">Date: <strong>${ord.date || 'Recent'}</strong></span><br>
+          <span style="color: #57534E;">Quantity: <strong>${totalUnits} Items</strong></span><br>
           <span style="color: #57534E;">Status: <strong style="text-transform: uppercase; color: #B48616;">${ord.status}</strong></span><br>
           <span style="color: #78716C; font-size: 0.8rem;">AWB: <strong>${awbCode}</strong></span>
         </div>
@@ -1971,23 +2053,22 @@ class AdminApp {
             </tr>
           </thead>
           <tbody>
-            ${parseOrderItemsList(ord.items).map((item, idx) => {
+            ${detailedItems.map((item, idx) => {
               const num = (idx + 1) + '.';
-              const itemCount = parseOrderItemsList(ord.items).length || 1;
-              const itemTotal = Math.round(Number(ord.total || 0) / itemCount);
-              const formattedItemTotal = '₹' + itemTotal.toLocaleString('en-IN');
+              const rateFormatted = '₹' + Number(item.rate || 0).toLocaleString('en-IN');
+              const amountFormatted = '₹' + Number(item.amount || 0).toLocaleString('en-IN');
               return `
                 <tr style="border-bottom: 1px solid #EAE5DE; background: #FFFFFF;">
                   <td style="padding: 0.75rem 0.9rem; color: #1C1917; font-weight: 600;">
                     <div style="display: flex; align-items: baseline; gap: 6px;">
                       <span style="font-weight: 700; color: #B48616; font-size: 0.88rem; min-width: 20px;">${num}</span>
-                      <span style="font-weight: 600; color: #1C1917; font-size: 0.88rem;">${item}</span>
+                      <span style="font-weight: 600; color: #1C1917; font-size: 0.88rem;">${item.name}</span>
                     </div>
                     <div style="font-size: 0.73rem; color: #78716C; font-weight: normal; margin-top: 2px; padding-left: 26px;">Handcrafted Atelier Finish • Custom Sizing Verified</div>
                   </td>
-                  <td style="padding: 0.75rem 0.9rem; text-align: center; color: #44403C; font-weight: 600; vertical-align: top;">1</td>
-                  <td style="padding: 0.75rem 0.9rem; text-align: right; color: #44403C; vertical-align: top;">${formattedItemTotal}</td>
-                  <td style="padding: 0.75rem 0.9rem; text-align: right; color: #1C1917; font-weight: 700; vertical-align: top;">${formattedItemTotal}</td>
+                  <td style="padding: 0.75rem 0.9rem; text-align: center; color: #1C1917; font-weight: 700; font-size: 0.92rem; vertical-align: top;">${item.qty}</td>
+                  <td style="padding: 0.75rem 0.9rem; text-align: right; color: #44403C; vertical-align: top;">${rateFormatted}</td>
+                  <td style="padding: 0.75rem 0.9rem; text-align: right; color: #1C1917; font-weight: 700; vertical-align: top;">${amountFormatted}</td>
                 </tr>
               `;
             }).join('')}
@@ -2106,7 +2187,7 @@ class AdminApp {
     window.openCouponModal();
   }
 
-  saveCoupon(e) {
+  async saveCoupon(e) {
     if (e && e.preventDefault) e.preventDefault();
     const codeInput = document.getElementById('couponCode');
     const typeInput = document.getElementById('couponType');
@@ -2149,26 +2230,30 @@ class AdminApp {
     // Check if code already exists
     const existingIdx = this.coupons.findIndex(c => c.code === code);
     if (existingIdx >= 0) {
-      this.coupons[existingIdx] = newCoupon;
-    } else {
-      this.coupons.unshift(newCoupon);
+      this.coupons.splice(existingIdx, 1);
     }
+    // Always put new/edited coupon at index 0 so it immediately shows everywhere
+    this.coupons.unshift(newCoupon);
 
     this.save();
 
     // Supabase sync
     if (window.GlamCoupons) {
-      window.GlamCoupons.upsert({
-        id: newCoupon.id,
-        code: newCoupon.code,
-        type: newCoupon.type,
-        value: newCoupon.value,
-        minOrder: newCoupon.minOrder,
-        usageLimit: newCoupon.usageLimit,
-        uses: 0,
-        status: 'active'
-      }).then(() => console.log('✅ Coupon synced to Supabase Cloud:', newCoupon.code))
-        .catch(err => console.warn('Supabase coupon upsert:', err));
+      try {
+        await window.GlamCoupons.upsert({
+          id: newCoupon.id,
+          code: newCoupon.code,
+          type: newCoupon.type,
+          value: newCoupon.value,
+          minOrder: newCoupon.minOrder,
+          usageLimit: newCoupon.usageLimit,
+          uses: 0,
+          status: 'active'
+        });
+        console.log('✅ Coupon synced to Supabase Cloud:', newCoupon.code);
+      } catch(err) {
+        console.warn('Supabase coupon upsert:', err);
+      }
     }
 
     // Broadcast update

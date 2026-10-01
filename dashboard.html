@@ -1414,6 +1414,80 @@
 
   <script>
 
+function parseOrderItemsDetailed(items, orderTotal = 0) {
+  if (!items) return [{ name: 'Haute Couture Ensemble', qty: 1, rate: orderTotal, amount: orderTotal }];
+  
+  let rawList = [];
+  if (Array.isArray(items)) {
+    rawList = items;
+  } else if (typeof items === 'string') {
+    if (items.includes('\n')) {
+      rawList = items.split('\n');
+    } else if (items.includes(' • ')) {
+      rawList = items.split(' • ');
+    } else if (items.includes('+')) {
+      rawList = items.split('+');
+    } else if (/\d+[\.\,]\s+/.test(items)) {
+      rawList = items.split(/(?:^|\s+)\d+[\.\,]\s+/).filter(Boolean);
+    } else if (items.includes(', ')) {
+      rawList = items.split(', ');
+    } else {
+      rawList = [items];
+    }
+  }
+
+  const parsed = rawList.map(raw => {
+    if (!raw) return null;
+    if (typeof raw === 'object') {
+      const q = Number(raw.qty || raw.quantity || raw.count) || 1;
+      const n = (raw.name || raw.title || 'Haute Couture Item').replace(/^(\d+[\.\,\-\)]\s*)+/i, '').trim();
+      const p = Number(raw.price || raw.rate) || 0;
+      return { name: n, qty: q, price: p };
+    }
+    const str = String(raw).trim();
+    if (!str) return null;
+
+    let qty = 1;
+    const matchX = str.match(/\(?(?:x\s*|qty[:\s]*|quantity[:\s]*)(\d+)\)?/i);
+    const matchFrontX = str.match(/^(\d+)\s*x\s+/i);
+    if (matchX && matchX[1]) {
+      qty = parseInt(matchX[1], 10);
+    } else if (matchFrontX && matchFrontX[1]) {
+      qty = parseInt(matchFrontX[1], 10);
+    }
+
+    let cleanName = str
+      .replace(/^(\d+[\.\,\-\)]\s*)+/i, '')
+      .replace(/^(\d+)\s*x\s+/i, '')
+      .replace(/\(?(?:x\s*|qty[:\s]*|quantity[:\s]*)(\d+)\)?/i, '')
+      .trim();
+
+    cleanName = cleanName.replace(/[\,\-\s]+$/, '').trim();
+    if (!cleanName) cleanName = 'Haute Couture Ensemble';
+
+    return { name: cleanName, qty: qty, price: 0 };
+  }).filter(Boolean);
+
+  if (parsed.length === 0) {
+    return [{ name: 'Haute Couture Ensemble', qty: 1, rate: orderTotal, amount: orderTotal }];
+  }
+
+  const totalUnits = parsed.reduce((sum, it) => sum + (it.qty || 1), 0);
+  const totalVal = Number(orderTotal) || 0;
+  const unitRate = Math.round(totalVal / (totalUnits || 1));
+
+  return parsed.map(it => {
+    const rate = it.price > 0 ? it.price : unitRate;
+    const amount = rate * (it.qty || 1);
+    return {
+      name: it.name,
+      qty: it.qty || 1,
+      rate: rate,
+      amount: amount
+    };
+  });
+}
+
 function parseOrderItemsList(items) {
   if (!items) return ['Chudi', 'Saree'];
   if (Array.isArray(items)) {
@@ -2098,8 +2172,8 @@ function formatOrderItemsHTML(items, options = {}) {
       const content = document.getElementById('invoiceModalContent');
       if (!modal || !content) return;
 
-      const totalFormatted = '₹' + Number(order.total || 0).toLocaleString('en-IN');
-      const awbCode = 'BD-' + (order.id.replace(/[^0-9]/g, '') || '9822') + '-IN';
+      const detailedItems = parseOrderItemsDetailed(order.items, order.total);
+      const totalUnits = detailedItems.reduce((acc, it) => acc + it.qty, 0);
 
       content.innerHTML = `
         <div style="text-align:center; border-bottom:1.5px solid var(--gold-border); padding-bottom:1.25rem; margin-bottom:1.5rem;">
@@ -2120,6 +2194,7 @@ function formatOrderItemsHTML(items, options = {}) {
             <span style="color:var(--text-muted); font-weight:600;">Invoice No:</span><br>
             <strong style="color:var(--gold-primary); font-size:0.95rem;">INV-` + order.id + `</strong><br>
             Date: ` + (order.date || 'Recent') + `<br>
+            Quantity: <strong>` + totalUnits + ` Items</strong><br>
             Status: <strong style="text-transform:uppercase; color:var(--gold-primary);">` + order.status + `</strong><br>
             Tracking: ` + awbCode + `
           </div>
@@ -2127,16 +2202,21 @@ function formatOrderItemsHTML(items, options = {}) {
 
         <div style="border-top:1px solid #EAE5DE; border-bottom:1px solid #EAE5DE; padding:1rem 0; margin-bottom:1.5rem;">
           <div style="display:flex; justify-content:space-between; font-weight:700; font-size:0.88rem; color:var(--text-heading); margin-bottom:0.5rem;">
-            <span>Description</span>
+            <span>Item & Quantity</span>
             <span>Amount</span>
           </div>
-          <div style="display:flex; justify-content:space-between; font-size:0.84rem; color:var(--text-body);">
-            <span>` + (order.items || 'Luxury Garment') + ` (x1) - Atelier Handcrafted</span>
-            <span style="color:var(--text-heading); font-weight:700;">` + totalFormatted + `</span>
-          </div>
+          ` + detailedItems.map(it => {
+            const itemAmt = '₹' + Number(it.amount || 0).toLocaleString('en-IN');
+            return `
+              <div style="display:flex; justify-content:space-between; font-size:0.84rem; color:var(--text-body); margin-bottom:0.35rem;">
+                <span>` + it.name + ` <strong style="color:var(--gold-primary);">(x` + it.qty + `)</strong></span>
+                <span style="color:var(--text-heading); font-weight:700;">` + itemAmt + `</span>
+              </div>
+            `;
+          }).join('') + `
           <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-muted); margin-top:0.4rem;">
             <span>Luxury Gift Packaging & Courier Insurance</span>
-            <span style="color:#059669; font-weight:600;">COMPLIMENTARY</span>
+            <span style="#059669; font-weight:600;">COMPLIMENTARY</span>
           </div>
         </div>
 

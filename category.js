@@ -278,6 +278,9 @@ window.closeCheckoutModal = function(e) {
       modal.style.setProperty('visibility', 'visible', 'important');
       modal.style.setProperty('pointer-events', 'auto', 'important');
     }
+    if (typeof window.refreshCustomerAuthUI === 'function') {
+      window.refreshCustomerAuthUI();
+    }
   };
 
   window.closeCustomerAuth = function() {
@@ -301,6 +304,50 @@ window.closeCheckoutModal = function(e) {
     const signOutBtn = document.getElementById('custSignOutBtn');
 
     let mode = 'signin';
+
+    async function refreshAuthUI() {
+      window.refreshCustomerAuthUI = refreshAuthUI;
+      const accountBtn = document.getElementById('accountBtn');
+      let user = null;
+      let localCust = null;
+      try {
+        localCust = JSON.parse(localStorage.getItem('glam_customer_user'));
+      } catch(e) {}
+
+      if (window.GlamAuth && typeof window.GlamAuth.getCurrentUser === 'function') {
+        try {
+          user = await window.GlamAuth.getCurrentUser();
+        } catch (e) {
+          console.warn('Category auth UI update notice:', e);
+        }
+      }
+
+      const email = user?.email || localCust?.email;
+      const displayName = user?.profile?.full_name || localCust?.fullName || (email ? email.split('@')[0] : '');
+
+      if (email) {
+        if (loggedOutView) loggedOutView.style.display = 'none';
+        if (loggedInView) loggedInView.style.display = 'block';
+        const nameEl = document.getElementById('loggedInUserName');
+        const emailEl = document.getElementById('loggedInUserEmail');
+        const roleEl = document.getElementById('loggedInUserRole');
+        if (nameEl) nameEl.textContent = displayName;
+        if (emailEl) emailEl.textContent = email;
+        if (roleEl) roleEl.textContent = user?.profile?.role === 'admin' ? 'Store Administrator' : 'Luxury VIP Member';
+
+        if (accountBtn) {
+          accountBtn.innerHTML = '<i class="ri-user-star-fill" style="color: #FFD700; font-size: 1.15rem;"></i>';
+          accountBtn.title = `My Account (${displayName})`;
+        }
+      } else {
+        if (loggedOutView) loggedOutView.style.display = 'block';
+        if (loggedInView) loggedInView.style.display = 'none';
+        if (accountBtn) {
+          accountBtn.innerHTML = '<i class="ri-user-3-line"></i>';
+          accountBtn.title = 'My Account (Sign In / Register)';
+        }
+      }
+    }
 
     const forgotPassBtn = document.getElementById('custForgotPassBtn');
     const forgotPassView = document.getElementById('authForgotPassView');
@@ -594,6 +641,7 @@ window.closeCheckoutModal = function(e) {
           }
 
           setTimeout(() => {
+            refreshAuthUI();
             window.closeCustomerAuth();
             if (window.pendingCategoryAddToCart) {
               const pending = window.pendingCategoryAddToCart;
@@ -622,6 +670,7 @@ window.closeCheckoutModal = function(e) {
           email: 'vip.member@saglam.com',
           fullName: 'VIP Royalty Member'
         }));
+        refreshAuthUI();
         window.closeCustomerAuth();
         if (window.pendingCategoryAddToCart) {
           const prod = window.pendingCategoryAddToCart;
@@ -635,11 +684,23 @@ window.closeCheckoutModal = function(e) {
 
     if (signOutBtn) {
       signOutBtn.addEventListener('click', async () => {
-        if (window.GlamAuth) await window.GlamAuth.signOut();
+        try {
+          if (window.GlamAuth && typeof window.GlamAuth.signOut === 'function') {
+            await window.GlamAuth.signOut();
+          }
+        } catch(e) {}
         localStorage.removeItem('glam_customer_user');
+        refreshAuthUI();
         window.closeCustomerAuth();
+        try { window.dispatchEvent(new Event('storage')); } catch(e) {}
       });
     }
+
+    window.addEventListener('storage', () => {
+      try { refreshAuthUI(); } catch(e) {}
+    });
+
+    refreshAuthUI();
   }
 
 /* 
@@ -1369,14 +1430,17 @@ document.addEventListener('DOMContentLoaded', () => {
             expiry: cp.expiry || '2026-12-31'
           }));
 
-        // Sort so BRIDALVIP is always top featured promo across all devices
-        mapped.sort((a, b) => {
+        // Prioritize custom newly created coupons first, then default promotional vouchers
+        const customCoupons = mapped.filter(c => !['BRIDALVIP', 'ROYALFESTIVE', 'WELCOME10'].includes(c.code));
+        const defaultCoupons = mapped.filter(c => ['BRIDALVIP', 'ROYALFESTIVE', 'WELCOME10'].includes(c.code));
+        defaultCoupons.sort((a, b) => {
           if (a.code === 'BRIDALVIP') return -1;
           if (b.code === 'BRIDALVIP') return 1;
           return Number(b.minOrder || 0) - Number(a.minOrder || 0);
         });
+        const sorted = [...customCoupons, ...defaultCoupons];
 
-        localStorage.setItem('nf_coupons', JSON.stringify(mapped));
+        localStorage.setItem('nf_coupons', JSON.stringify(sorted));
         try { window.syncCategoryAnnouncementPromo(); } catch(e) {}
         try { if (typeof renderCartDrawer === 'function') renderCartDrawer(); } catch(e) {}
       }
@@ -1698,7 +1762,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try { renderCartDrawer(); } catch(e) {}
   });
 
-  window.applyCategoryCartPromo = function(codeOverride) {
+  window.applyCategoryCartPromo = async function(codeOverride) {
     const input = document.getElementById('cartPromoInput');
     const feedback = document.getElementById('cartPromoFeedback');
     const code = (codeOverride || (input ? input.value : '')).trim().toUpperCase();
@@ -1712,8 +1776,48 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const activeList = getActiveCategoryCoupons();
-    const found = activeList.find(c => c.code === code);
+    let activeList = getActiveCategoryCoupons();
+    let found = activeList.find(c => c.code === code);
+
+    // If not found in local cache, query Supabase Cloud in real-time
+    if (!found && window.GlamCoupons && typeof window.GlamCoupons.getAll === 'function') {
+      if (feedback) {
+        feedback.style.display = 'block';
+        feedback.style.color = '#b45309';
+        feedback.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Checking live discount...';
+      }
+      try {
+        const cloudCoupons = await window.GlamCoupons.getAll();
+        if (cloudCoupons && cloudCoupons.length > 0) {
+          const mapped = cloudCoupons.map(cp => ({
+            id: cp.id,
+            code: cp.code,
+            type: cp.type || 'percentage',
+            value: Number(cp.value),
+            discount: cp.discount || (cp.type === 'fixed' ? '₹' + Number(cp.value).toLocaleString('en-IN') + ' OFF' : cp.value + '% OFF'),
+            minOrder: Number(cp.min_spend != null ? cp.min_spend : (cp.minOrder || 0)),
+            minSpend: Number(cp.min_spend != null ? cp.min_spend : (cp.minOrder || 0)),
+            usageLimit: Number(cp.usage_limit || 100),
+            uses: Number(cp.used_count || 0),
+            status: cp.status || 'Active',
+            expiry: cp.expiry || '2026-12-31'
+          }));
+          const customCoupons = mapped.filter(c => !['BRIDALVIP', 'ROYALFESTIVE', 'WELCOME10'].includes(c.code));
+          const defaultCoupons = mapped.filter(c => ['BRIDALVIP', 'ROYALFESTIVE', 'WELCOME10'].includes(c.code));
+          defaultCoupons.sort((a, b) => {
+            if (a.code === 'BRIDALVIP') return -1;
+            if (b.code === 'BRIDALVIP') return 1;
+            return Number(b.minOrder || 0) - Number(a.minOrder || 0);
+          });
+          const sorted = [...customCoupons, ...defaultCoupons];
+          localStorage.setItem('nf_coupons', JSON.stringify(sorted));
+          found = sorted.find(c => c.code === code);
+          try { window.syncCategoryAnnouncementPromo(); } catch(e) {}
+        }
+      } catch(err) {
+        console.warn('Real-time category coupon lookup notice:', err);
+      }
+    }
 
     if (!found) {
       if (feedback) {
@@ -1722,6 +1826,10 @@ document.addEventListener('DOMContentLoaded', () => {
         feedback.textContent = 'Coupon "' + code + '" is invalid or expired.';
       }
       return;
+    }
+
+    if (feedback) {
+      feedback.style.display = 'none';
     }
 
     localStorage.setItem('glam_applied_promo', JSON.stringify(found));
