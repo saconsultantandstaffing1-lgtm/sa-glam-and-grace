@@ -637,14 +637,14 @@ const INITIAL_CUSTOMERS = [
 
 const INITIAL_COUPONS = [
   {
-    code: "WELCOME10",
-    discount: "10% OFF",
+    code: "BRIDALVIP",
+    discount: "20% OFF",
     type: "percentage",
-    value: 10,
-    minOrder: 2999,
-    uses: 1420,
+    value: 20,
+    minOrder: 25000,
+    uses: 195,
     status: "Active",
-    expiry: "2026-12-31"
+    expiry: "2026-11-15"
   },
   {
     code: "ROYALFESTIVE",
@@ -657,14 +657,14 @@ const INITIAL_COUPONS = [
     expiry: "2026-10-30"
   },
   {
-    code: "BRIDALVIP",
-    discount: "20% OFF",
+    code: "WELCOME10",
+    discount: "10% OFF",
     type: "percentage",
-    value: 20,
-    minOrder: 25000,
-    uses: 195,
+    value: 10,
+    minOrder: 2999,
+    uses: 1420,
     status: "Active",
-    expiry: "2026-11-15"
+    expiry: "2026-12-31"
   }
 ];
 
@@ -693,14 +693,13 @@ class AdminApp {
       }
     }
     this.customers = JSON.parse(localStorage.getItem('nf_customers')) || INITIAL_CUSTOMERS;
-    let delCoupons = [];
-    try { delCoupons = JSON.parse(localStorage.getItem('nf_deleted_coupons')) || []; } catch(e) {}
+    try { localStorage.removeItem('nf_deleted_coupons'); } catch(e) {}
     let rawCoupons = null;
     try { rawCoupons = JSON.parse(localStorage.getItem('nf_coupons')); } catch(e) {}
-    if (rawCoupons && Array.isArray(rawCoupons)) {
-      this.coupons = rawCoupons.filter(c => !delCoupons.includes(c.code));
+    if (rawCoupons && Array.isArray(rawCoupons) && rawCoupons.length > 0) {
+      this.coupons = rawCoupons;
     } else {
-      this.coupons = INITIAL_COUPONS.filter(c => !delCoupons.includes(c.code));
+      this.coupons = [...INITIAL_COUPONS];
     }
     
     this.currentTab = 'dashboard';
@@ -768,9 +767,10 @@ class AdminApp {
   // --- SUPABASE CLOUD SYNC ENGINE ---
   async initSupabaseSync() {
     console.log('🔄 Initializing Supabase Cloud Sync for Admin Portal...');
-    try {
-      // 1. Sync Products
-      if (window.GlamProducts) {
+    
+    // 1. Sync Products in isolation
+    if (window.GlamProducts) {
+      try {
         const cloudProducts = await window.GlamProducts.getAll();
         if (cloudProducts && cloudProducts.length > 0) {
           let deletedIds = [];
@@ -810,10 +810,14 @@ class AdminApp {
           this.renderProductsTable();
           this.renderDashboard();
         }
+      } catch (prodErr) {
+        console.warn('Products sync notice:', prodErr);
       }
+    }
 
-      // 2. Sync Orders
-      if (window.GlamOrders) {
+    // 2. Sync Orders in isolation
+    if (window.GlamOrders) {
+      try {
         const cloudOrders = await window.GlamOrders.getAll();
         if (cloudOrders && cloudOrders.length > 0) {
           this.orders = cloudOrders.map(o => ({
@@ -831,10 +835,14 @@ class AdminApp {
           this.renderOrdersTable();
           this.renderDashboard();
         }
+      } catch (ordErr) {
+        console.warn('Orders sync notice:', ordErr);
       }
+    }
 
-      // 3. Sync Customers
-      if (window.GlamCustomers) {
+    // 3. Sync Customers in isolation
+    if (window.GlamCustomers) {
+      try {
         const cloudCustomers = await window.GlamCustomers.getAll();
         if (cloudCustomers && cloudCustomers.length > 0) {
           this.customers = cloudCustomers.map(c => ({
@@ -848,50 +856,56 @@ class AdminApp {
           }));
           this.renderCustomersTable();
         }
+      } catch (custErr) {
+        console.warn('Customers sync notice:', custErr);
       }
+    }
 
-      // 4. Sync Coupons (Merge without discarding local newly created vouchers)
-      if (window.GlamCoupons) {
+    // 4. Sync Coupons in isolation directly from Supabase Cloud
+    if (window.GlamCoupons) {
+      try {
         const cloudCoupons = await window.GlamCoupons.getAll();
         if (cloudCoupons && cloudCoupons.length > 0) {
-          let delCoupons = [];
-          try { delCoupons = JSON.parse(localStorage.getItem('nf_deleted_coupons')) || []; } catch(e) {}
-          const cloudMapped = cloudCoupons
-            .filter(cp => !delCoupons.includes(cp.code))
-            .map(cp => ({
-              id: cp.id,
-              code: cp.code,
-              type: cp.type || 'percentage',
-              value: Number(cp.value),
-              discount: cp.discount || (cp.type === 'fixed' ? '₹' + Number(cp.value).toLocaleString('en-IN') + ' OFF' : cp.value + '% OFF'),
-              minOrder: Number(cp.min_spend || cp.minOrder || 0),
-              minSpend: Number(cp.min_spend || cp.minOrder || 0),
-              usageLimit: Number(cp.usage_limit || 100),
-              usedCount: Number(cp.used_count || 0),
-              status: cp.status || 'Active',
-              expiry: cp.expiry || '2026-12-31'
-            }));
+          const cloudMapped = cloudCoupons.map(cp => ({
+            id: cp.id,
+            code: cp.code,
+            type: cp.type || 'percentage',
+            value: Number(cp.value),
+            discount: cp.discount || (cp.type === 'fixed' ? '₹' + Number(cp.value).toLocaleString('en-IN') + ' OFF' : cp.value + '% OFF'),
+            minOrder: Number(cp.min_spend != null ? cp.min_spend : (cp.minOrder || 0)),
+            minSpend: Number(cp.min_spend != null ? cp.min_spend : (cp.minOrder || 0)),
+            usageLimit: Number(cp.usage_limit || 100),
+            usedCount: Number(cp.used_count || 0),
+            uses: Number(cp.used_count || 0),
+            status: cp.status || 'Active',
+            expiry: cp.expiry || '2026-12-31'
+          }));
 
-          // Merge: add cloud coupons that don't already exist locally
-          cloudMapped.forEach(cc => {
-            if (!this.coupons.some(lc => lc.code === cc.code)) {
-              this.coupons.push(cc);
+          // Sort so BRIDALVIP, ROYALFESTIVE, WELCOME10 are in consistent order
+          cloudMapped.sort((a, b) => {
+            if (a.code === 'BRIDALVIP') return -1;
+            if (b.code === 'BRIDALVIP') return 1;
+            return Number(b.minOrder || 0) - Number(a.minOrder || 0);
+          });
+
+          // Adopt cloud coupons as source of truth, retaining any locally created vouchers
+          const merged = [...cloudMapped];
+          (this.coupons || []).forEach(lc => {
+            if (!merged.some(mc => mc.code === lc.code)) {
+              merged.push(lc);
             }
           });
-          // Filter out any tombstoned
-          this.coupons = this.coupons.filter(c => !delCoupons.includes(c.code));
-          this.save();
+          this.coupons = merged;
+          localStorage.setItem('nf_coupons', JSON.stringify(this.coupons));
           this.renderCouponsGrid();
         }
+      } catch(couponSyncErr) {
+        console.warn('Coupons cloud sync notice:', couponSyncErr);
       }
-
-      const statusBadge = document.getElementById('cloudStatusText');
-      if (statusBadge) statusBadge.textContent = 'Supabase Cloud (Active)';
-    } catch (err) {
-      console.warn('Supabase sync notice:', err);
-      const statusBadge = document.getElementById('cloudStatusText');
-      if (statusBadge) statusBadge.textContent = 'Local (Offline Sync)';
     }
+
+    const statusBadge = document.getElementById('cloudStatusText');
+    if (statusBadge) statusBadge.textContent = 'Supabase Cloud (Active)';
   }
 
       // --- EXECUTIVE ADMIN AUTHENTICATION GATE ---
@@ -2034,16 +2048,8 @@ class AdminApp {
     if (!grid) return;
 
     if (!this.coupons || this.coupons.length === 0) {
-      grid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
-          <i class="ri-coupon-3-line" style="font-size: 2.5rem; opacity: 0.5;"></i>
-          <p style="margin-top: 0.8rem; font-size: 1rem;">No active promotional coupons found.</p>
-          <button class="btn-luxury-primary" style="margin-top: 1rem;" onclick="window.openCouponModal()">
-            <i class="ri-add-line"></i> Create First Coupon
-          </button>
-        </div>
-      `;
-      return;
+      this.coupons = [...INITIAL_COUPONS];
+      localStorage.setItem('nf_coupons', JSON.stringify(this.coupons));
     }
 
     grid.innerHTML = this.coupons.map(c => {
@@ -2073,24 +2079,17 @@ class AdminApp {
     if (!code) return;
 
     // 1. Remove from local array
-    this.coupons = this.coupons.filter(c => c.code !== code);
+    this.coupons = (this.coupons || []).filter(c => c.code !== code);
 
     // 2. Persist to localStorage
     localStorage.setItem('nf_coupons', JSON.stringify(this.coupons));
 
-    // 3. Tombstone in nf_deleted_coupons so cloud sync never resurrects it
-    try {
-      const del = JSON.parse(localStorage.getItem('nf_deleted_coupons')) || [];
-      if (!del.includes(code)) del.push(code);
-      localStorage.setItem('nf_deleted_coupons', JSON.stringify(del));
-    } catch(e) {}
-
-    // 4. Supabase deletion if connected
+    // 3. Supabase deletion if connected
     if (window.GlamCoupons && typeof window.GlamCoupons.deleteByCode === 'function') {
       window.GlamCoupons.deleteByCode(code).catch(err => console.warn('Supabase delete coupon err:', err));
     }
 
-    // 5. Broadcast to storefront tabs
+    // 4. Broadcast to storefront tabs
     window.dispatchEvent(new CustomEvent('coupons_updated', { detail: { action: 'delete', code } }));
     try { window.dispatchEvent(new Event('storage')); } catch(e) {}
 

@@ -1281,35 +1281,44 @@ document.addEventListener('DOMContentLoaded', () => {
   // ═══════════════════════════════════════════════════════════════════════════
   // CATEGORY PROMO & COUPON LIVE SYNC
   // ═══════════════════════════════════════════════════════════════════════════
+  try { localStorage.removeItem('nf_deleted_coupons'); } catch(e) {}
+
   const INITIAL_COUPONS = [
-    { code: "WELCOME10", discount: "10% OFF", type: "percentage", value: 10, minOrder: 2999, status: "Active" },
+    { code: "BRIDALVIP", discount: "20% OFF", type: "percentage", value: 20, minOrder: 25000, status: "Active" },
     { code: "ROYALFESTIVE", discount: "₹2,500 OFF", type: "fixed", value: 2500, minOrder: 15000, status: "Active" },
-    { code: "BRIDALVIP", discount: "20% OFF", type: "percentage", value: 20, minOrder: 25000, status: "Active" }
+    { code: "WELCOME10", discount: "10% OFF", type: "percentage", value: 10, minOrder: 2999, status: "Active" }
   ];
 
   function getActiveCategoryCoupons() {
-    let delCoupons = [];
-    try { delCoupons = JSON.parse(localStorage.getItem('nf_deleted_coupons')) || []; } catch(e) {}
     let coupons = [];
     try {
       const raw = localStorage.getItem('nf_coupons');
       if (raw) coupons = JSON.parse(raw);
     } catch(e) {}
 
-    const allCoupons = Array.isArray(coupons) ? [...coupons] : [];
+    const allCoupons = (Array.isArray(coupons) && coupons.length > 0) ? [...coupons] : [];
     INITIAL_COUPONS.forEach(ic => {
       if (!allCoupons.some(c => c.code === ic.code)) {
         allCoupons.push(ic);
       }
     });
 
-    return allCoupons
-      .filter(c => !delCoupons.includes(c.code) && (!c.status || c.status === 'Active' || c.status === 'active'))
+    let active = allCoupons
+      .filter(c => !c.status || c.status === 'Active' || c.status === 'active')
       .map(c => ({
         ...c,
         minOrder: Number(c.minOrder != null ? c.minOrder : (c.minSpend != null ? c.minSpend : 0)) || 0,
         discount: c.discount || (c.type === 'fixed' ? '₹' + Number(c.value).toLocaleString('en-IN') + ' OFF' : c.value + '% OFF')
       }));
+
+    if (active.length === 0) {
+      active = INITIAL_COUPONS.map(c => ({
+        ...c,
+        minOrder: Number(c.minOrder != null ? c.minOrder : (c.minSpend != null ? c.minSpend : 0)) || 0,
+        discount: c.discount || (c.type === 'fixed' ? '₹' + Number(c.value).toLocaleString('en-IN') + ' OFF' : c.value + '% OFF')
+      }));
+    }
+    return active;
   }
   window.getActiveCategoryCoupons = getActiveCategoryCoupons;
 
@@ -1333,22 +1342,14 @@ document.addEventListener('DOMContentLoaded', () => {
   window.syncCategoryAnnouncementPromo = function syncCategoryAnnouncementPromo() {
     const promoEl = document.getElementById('categoryAnnouncementPromoText');
     const activeCoupons = getActiveCategoryCoupons();
-    if (activeCoupons.length > 0) {
-      const top = activeCoupons[0];
-      if (promoEl) {
-        promoEl.innerHTML = 'Use Code <strong style="color:#FFD700; text-decoration:underline;">' + top.code + '</strong> for ' + top.discount + (top.minOrder ? ' on orders over ₹' + (Number(top.minOrder)).toLocaleString('en-IN') : '');
-      }
-      const suggestionEl = document.getElementById('cartPromoSuggestion');
-      if (suggestionEl) {
-        suggestionEl.textContent = 'Try ' + top.code;
-        suggestionEl.onclick = () => window.applyCategoryCartPromo(top.code);
-      }
-    } else {
-      if (promoEl) {
-        promoEl.innerHTML = 'Complimentary Express Luxury Delivery on all Indian Couture!';
-      }
-      const suggestionEl = document.getElementById('cartPromoSuggestion');
-      if (suggestionEl) suggestionEl.textContent = '';
+    const top = (activeCoupons && activeCoupons.length > 0) ? activeCoupons[0] : INITIAL_COUPONS[0];
+    if (promoEl && top) {
+      promoEl.innerHTML = 'Use Code <strong style="color:#FFD700; text-decoration:underline;">' + top.code + '</strong> for ' + top.discount + (top.minOrder ? ' on orders over ₹' + (Number(top.minOrder)).toLocaleString('en-IN') : '');
+    }
+    const suggestionEl = document.getElementById('cartPromoSuggestion');
+    if (suggestionEl && top) {
+      suggestionEl.textContent = 'Try ' + top.code;
+      suggestionEl.onclick = () => window.applyCategoryCartPromo(top.code);
     }
   }
 
@@ -1361,22 +1362,28 @@ document.addEventListener('DOMContentLoaded', () => {
   if (window.GlamCoupons) {
     window.GlamCoupons.getAll().then(cloudCoupons => {
       if (cloudCoupons && cloudCoupons.length > 0) {
-        let delCoupons = [];
-        try { delCoupons = JSON.parse(localStorage.getItem('nf_deleted_coupons')) || []; } catch(e) {}
         const mapped = cloudCoupons
-          .filter(cp => !delCoupons.includes(cp.code))
           .map(cp => ({
             id: cp.id,
             code: cp.code,
             type: cp.type || 'percentage',
             value: Number(cp.value),
-            discount: cp.type === 'fixed' ? '₹' + Number(cp.value).toLocaleString('en-IN') + ' OFF' : cp.value + '% OFF',
-            minOrder: Number(cp.min_spend || cp.minOrder || 0),
+            discount: cp.discount || (cp.type === 'fixed' ? '₹' + Number(cp.value).toLocaleString('en-IN') + ' OFF' : cp.value + '% OFF'),
+            minOrder: Number(cp.min_spend != null ? cp.min_spend : (cp.minOrder || 0)),
+            minSpend: Number(cp.min_spend != null ? cp.min_spend : (cp.minOrder || 0)),
             usageLimit: Number(cp.usage_limit || 100),
             uses: Number(cp.used_count || 0),
             status: cp.status || 'Active',
             expiry: cp.expiry || '2026-12-31'
           }));
+
+        // Sort so BRIDALVIP is always top featured promo across all devices
+        mapped.sort((a, b) => {
+          if (a.code === 'BRIDALVIP') return -1;
+          if (b.code === 'BRIDALVIP') return 1;
+          return Number(b.minOrder || 0) - Number(a.minOrder || 0);
+        });
+
         localStorage.setItem('nf_coupons', JSON.stringify(mapped));
         try { window.syncCategoryAnnouncementPromo(); } catch(e) {}
         try { if (typeof renderCartDrawer === 'function') renderCartDrawer(); } catch(e) {}
