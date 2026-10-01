@@ -187,6 +187,28 @@ window.GlamProducts = {
     return data;
   },
 
+  async update(productId, updates) {
+    const sb = getSb();
+    if (!sb) return null;
+
+    try {
+      const { data, error } = await sb
+        .from('products')
+        .update(updates)
+        .eq('id', String(productId))
+        .select();
+
+      if (error) {
+        console.warn('Supabase product update error:', error.message);
+        return null;
+      }
+      return data;
+    } catch (err) {
+      console.warn('Supabase product update network exception:', err);
+      return null;
+    }
+  },
+
   async delete(productId) {
     const sb = getSb();
     if (!sb) throw new Error('Supabase client not initialized');

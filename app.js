@@ -802,14 +802,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const existingLocal = getAllCatalogProducts();
         const mapped = cloudProducts.map(p => {
           const localMatch = existingLocal.find(lp => String(lp.id) === String(p.id));
+          const cloudStock = Number(p.stock !== undefined ? p.stock : 15);
+          const isLocallyOutOfStock = localMatch && (Number(localMatch.stock) <= 0 || localMatch.status === 'out-of-stock');
+          const finalStock = isLocallyOutOfStock ? 0 : cloudStock;
+          const finalStatus = (finalStock <= 0) ? 'out-of-stock' : (finalStock <= 5 ? 'low-stock' : (p.status || 'in-stock'));
+          if (isLocallyOutOfStock && cloudStock > 0 && window.GlamProducts && typeof window.GlamProducts.update === 'function') {
+            window.GlamProducts.update(p.id, { stock: 0, status: 'out-of-stock' }).catch(() => {});
+          }
           return {
             id: p.id,
             name: p.name,
             category: p.category,
             price: Number(p.price),
             originalPrice: Number(p.original_price || p.price),
-            stock: Number(p.stock),
-            status: p.status,
+            stock: finalStock,
+            status: finalStatus,
             image: p.image,
             images: p.images || (localMatch && localMatch.images) || (p.image ? [p.image] : []),
             colors: p.colors || (localMatch && localMatch.colors) || null,
@@ -2507,33 +2514,66 @@ window.handleStorefrontOrderSubmit = async function(e) {
 
     // 3. Deduct purchased quantities from product inventory (Local & Cloud)
     try {
-      let localProds = JSON.parse(localStorage.getItem('nf_products') || '[]');
+      let localProds = [];
+      try {
+        localProds = JSON.parse(localStorage.getItem('nf_products') || '[]');
+      } catch(e) {}
+
+      if (!Array.isArray(localProds) || localProds.length === 0) {
+        if (typeof getAllCatalogProducts === 'function') {
+          localProds = getAllCatalogProducts();
+        } else if (typeof window.getAllCatalogProducts === 'function') {
+          localProds = window.getAllCatalogProducts();
+        }
+      }
+
       if (Array.isArray(localProds) && localProds.length > 0) {
         for (const item of cartItems) {
           const orderedQty = Number(item.qty) || 1;
-          const target = localProds.find(p => String(p.id) === String(item.id));
+          let target = localProds.find(p => String(p.id) === String(item.id));
+          if (!target && (item.title || item.name)) {
+            const cleanName = (item.title || item.name).trim().toLowerCase();
+            target = localProds.find(p => p.name && (p.name.trim().toLowerCase() === cleanName || cleanName.includes(p.name.trim().toLowerCase()) || p.name.trim().toLowerCase().includes(cleanName)));
+          }
+          if (!target && !isNaN(Number(item.id))) {
+            const numIdx = Number(item.id) - 1;
+            if (numIdx >= 0 && numIdx < localProds.length) {
+              target = localProds[numIdx];
+            }
+          }
+
           if (target) {
-            target.stock = Math.max(0, (Number(target.stock) || 0) - orderedQty);
-            if (target.stock <= 0) {
+            const oldStock = Number(target.stock !== undefined ? target.stock : 15);
+            const newStock = Math.max(0, oldStock - orderedQty);
+            target.stock = newStock;
+            if (newStock <= 0) {
+              target.stock = 0;
               target.status = 'out-of-stock';
-            } else if (target.stock <= 5) {
+            } else if (newStock <= 5) {
               target.status = 'low-stock';
+            } else {
+              target.status = 'in-stock';
             }
             target.sales = (Number(target.sales) || 0) + orderedQty;
 
-            // Also update Supabase Cloud in background
+            // Sync directly with Supabase Cloud Database
             if (window.GlamProducts && typeof window.GlamProducts.update === 'function') {
               try {
-                window.GlamProducts.update(target.id, {
+                await window.GlamProducts.update(target.id, {
                   stock: target.stock,
                   status: target.status,
                   sales: target.sales
                 });
-              } catch(err) {}
+                console.log(`✅ Supabase stock synced for ${target.id} (${target.name}): ${target.stock} units (${target.status})`);
+              } catch(err) {
+                console.warn('Supabase cloud inventory update error:', err);
+              }
             }
           }
         }
         localStorage.setItem('nf_products', JSON.stringify(localProds));
+        window.dispatchEvent(new CustomEvent('products_updated', { detail: localProds }));
+        try { window.dispatchEvent(new Event('storage')); } catch(e) {}
       }
     } catch(e) {
       console.warn('Inventory reduction warning:', e);

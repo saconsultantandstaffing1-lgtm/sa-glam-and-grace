@@ -731,6 +731,38 @@ class AdminApp {
     try { this.initMobileSidebar(); } catch (e) { console.warn('Sidebar init:', e); }
     try { if (this.initSupabaseSync) this.initSupabaseSync(); } catch (e) { console.warn('Supabase sync init:', e); }
     try { if (this.initAdminAuth) this.initAdminAuth(); } catch (e) { console.warn('Admin auth init:', e); }
+
+    // Live Cross-Tab & Customer Order Sync
+    window.addEventListener('products_updated', (e) => {
+      if (e && e.detail && Array.isArray(e.detail)) {
+        this.products = e.detail;
+        this.renderProductsTable();
+        this.renderDashboard();
+      }
+    });
+
+    window.addEventListener('storage', (e) => {
+      if (!e.key || e.key === 'nf_products') {
+        try {
+          const prods = JSON.parse(localStorage.getItem('nf_products'));
+          if (Array.isArray(prods)) {
+            this.products = prods;
+            this.renderProductsTable();
+            this.renderDashboard();
+          }
+        } catch(err) {}
+      }
+      if (!e.key || e.key === 'nf_orders') {
+        try {
+          const ords = JSON.parse(localStorage.getItem('nf_orders'));
+          if (Array.isArray(ords)) {
+            this.orders = ords;
+            this.renderOrdersTable();
+            this.renderDashboard();
+          }
+        } catch(err) {}
+      }
+    });
   }
 
   // --- SUPABASE CLOUD SYNC ENGINE ---
@@ -749,14 +781,23 @@ class AdminApp {
             .filter(p => !deletedIds.includes(String(p.id)))
             .map(p => {
               const localExisting = (this.products || []).find(lp => String(lp.id) === String(p.id));
+              const cloudStock = Number(p.stock !== undefined ? p.stock : 15);
+              const isLocallyOutOfStock = localExisting && (Number(localExisting.stock) <= 0 || localExisting.status === 'out-of-stock');
+              const finalStock = isLocallyOutOfStock ? 0 : cloudStock;
+              const finalStatus = (finalStock <= 0) ? 'out-of-stock' : (finalStock <= 5 ? 'low-stock' : (p.status || 'in-stock'));
+
+              if (isLocallyOutOfStock && cloudStock > 0 && window.GlamProducts && typeof window.GlamProducts.update === 'function') {
+                window.GlamProducts.update(p.id, { stock: 0, status: 'out-of-stock' }).catch(() => {});
+              }
+
               return {
                 id: p.id,
                 name: p.name,
                 category: p.category,
                 price: Number(p.price),
                 originalPrice: Number(p.original_price || p.price),
-                stock: Number(p.stock),
-                status: p.status,
+                stock: finalStock,
+                status: finalStatus,
                 image: p.image,
                 images: p.images || (localExisting && localExisting.images) || [p.image],
                 colors: p.colors || (localExisting && localExisting.colors) || null,
