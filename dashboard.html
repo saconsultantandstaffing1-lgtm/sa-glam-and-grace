@@ -1195,6 +1195,7 @@
     }
 
     /* RESPONSIVE */
+    /* RESPONSIVE DESIGN FOR DASHBOARD */
     @media (max-width: 900px) {
       .profile-hero-card {
         grid-template-columns: 1fr;
@@ -1219,6 +1220,158 @@
       }
       .stepper-track-bar {
         display: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-header {
+        padding: 0.65rem 0.85rem;
+      }
+      .brand-titles p {
+        display: none;
+      }
+      .brand-titles h1 {
+        font-size: 0.95rem;
+        letter-spacing: 1px;
+      }
+      .brand-crest {
+        width: 34px;
+        height: 34px;
+        font-size: 1.1rem;
+      }
+      .header-nav .nav-btn {
+        padding: 0.45rem 0.7rem;
+        font-size: 0.78rem;
+      }
+      .header-nav .nav-btn span {
+        display: none;
+      }
+      .header-nav .nav-btn i {
+        margin: 0;
+        font-size: 1.15rem;
+      }
+      .dashboard-main {
+        padding: 1.25rem 0.85rem 3.5rem;
+      }
+      .sync-broadcast-banner {
+        padding: 0.75rem 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .sync-action-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      .profile-hero-card {
+        padding: 1.5rem 1rem;
+        border-radius: 14px;
+      }
+      .profile-info h2 {
+        font-size: 1.6rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .profile-contact-line {
+        flex-direction: column;
+        gap: 0.35rem;
+        font-size: 0.82rem;
+      }
+      .profile-controls {
+        width: 100%;
+      }
+      .account-switcher-select {
+        width: 100%;
+        text-align: center;
+      }
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem;
+        margin-bottom: 1.8rem;
+      }
+      .kpi-card {
+        padding: 1rem 0.85rem;
+        border-radius: 10px;
+      }
+      .kpi-val {
+        font-size: 1.45rem;
+      }
+      .kpi-label {
+        font-size: 0.68rem;
+      }
+      .kpi-icon-wrap {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+      }
+      .section-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.85rem;
+      }
+      .section-title {
+        font-size: 1.5rem;
+      }
+      .filter-tabs {
+        width: 100%;
+        overflow-x: auto;
+        padding: 0.25rem;
+        scrollbar-width: none;
+      }
+      .filter-tabs::-webkit-scrollbar {
+        display: none;
+      }
+      .filter-tab {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.76rem;
+      }
+      .search-filter-row {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .search-box-wrap {
+        width: 100%;
+        min-width: auto;
+      }
+      .order-card-header {
+        padding: 1rem 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+      .order-meta-group {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .order-status-badge {
+        padding: 0.35rem 0.85rem;
+        font-size: 0.76rem;
+      }
+      .order-total-amount {
+        font-size: 1.15rem;
+      }
+      .order-action-btns {
+        width: 100%;
+        flex-direction: column;
+      }
+      .btn-order-action {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .kpi-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.5rem;
+      }
+      .kpi-card {
+        padding: 0.8rem 0.65rem;
+      }
+      .kpi-val {
+        font-size: 1.25rem;
+      }
+      .order-id-badge {
+        font-size: 0.95rem;
       }
     }
   </style>

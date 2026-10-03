@@ -1095,7 +1095,10 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(e) {}
     // Count total items
     const totalCount = state.cart.reduce((sum, item) => sum + item.qty, 0);
-    cartBadge.textContent = totalCount;
+    if (cartBadge) cartBadge.textContent = totalCount;
+    const mobCartBadge = document.getElementById('mobileCartBadge');
+    if (mobCartBadge) mobCartBadge.textContent = totalCount;
+    document.querySelectorAll('.cart-badge-sync').forEach(b => { if (b) b.textContent = totalCount; });
 
     const discountRow = document.getElementById('cartDiscountRow');
     const discountAmountEl = document.getElementById('cartDiscountAmount');
@@ -2943,7 +2946,7 @@ function saveWishlist() {
 
 function updateWishlistBadges() {
   const count = Array.isArray(window.stateWishlist) ? window.stateWishlist.length : 0;
-  const badges = document.querySelectorAll('#wishlistBadge, .wishlist-badge-count, span#wishlistBadge');
+  const badges = document.querySelectorAll('#wishlistBadge, #mobileWishlistBadge, .wishlist-badge-count, span#wishlistBadge');
   badges.forEach(b => {
     if (b) b.textContent = count;
   });
@@ -3217,3 +3220,161 @@ document.addEventListener('DOMContentLoaded', () => {
   // Final announcement promo check on DOM ready
   if (typeof window.syncAnnouncementPromo === 'function') window.syncAnnouncementPromo();
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// LUXURY MOBILE NAVIGATION & TOUCH GESTURES SYSTEM
+// ═══════════════════════════════════════════════════════════════════════════
+window.openMobileNav = function() {
+  const drawer = document.getElementById('mobileNavDrawer');
+  const backdrop = document.getElementById('mobileNavBackdrop');
+  const toggleIcon = document.getElementById('mobileToggleIcon');
+  if (drawer) drawer.classList.add('open');
+  if (backdrop) backdrop.classList.add('active');
+  if (toggleIcon) toggleIcon.className = 'ri-close-line';
+  document.body.style.overflow = 'hidden';
+
+  // Sync user status in drawer
+  try {
+    const savedUser = localStorage.getItem('glam_customer_user');
+    const nameEl = document.getElementById('mobileDrawerUserName');
+    const roleEl = document.getElementById('mobileDrawerUserRole');
+    if (savedUser) {
+      const u = JSON.parse(savedUser);
+      if (nameEl) nameEl.textContent = u.fullName || u.email || 'VIP Member';
+      if (roleEl) roleEl.textContent = 'Active Luxury Member • View Account';
+    } else {
+      if (nameEl) nameEl.textContent = 'Guest Client';
+      if (roleEl) roleEl.textContent = 'Tap to Sign In / VIP Access';
+    }
+  } catch(e) {}
+};
+
+window.closeMobileNav = function() {
+  const drawer = document.getElementById('mobileNavDrawer');
+  const backdrop = document.getElementById('mobileNavBackdrop');
+  const toggleIcon = document.getElementById('mobileToggleIcon');
+  if (drawer) drawer.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('active');
+  if (toggleIcon) toggleIcon.className = 'ri-menu-4-line';
+  document.body.style.overflow = '';
+};
+
+window.toggleMobileNav = function() {
+  const drawer = document.getElementById('mobileNavDrawer');
+  if (drawer && drawer.classList.contains('open')) {
+    window.closeMobileNav();
+  } else {
+    window.openMobileNav();
+  }
+};
+
+window.toggleMobileAccordion = function(itemId) {
+  const target = document.getElementById(itemId);
+  if (!target) return;
+  const isOpen = target.classList.contains('open');
+  document.querySelectorAll('.mobile-accordion-item').forEach(item => {
+    if (item !== target) item.classList.remove('open');
+  });
+  if (isOpen) {
+    target.classList.remove('open');
+  } else {
+    target.classList.add('open');
+  }
+};
+
+window.handleMobileSearch = function(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const input = document.getElementById('mobileDrawerSearchInput');
+  const query = (input ? input.value : '').trim().toLowerCase();
+  if (!query) return;
+
+  window.closeMobileNav();
+  
+  if (query.includes('kurti')) {
+    window.location.href = 'category.html?cat=kurtis';
+  } else if (query.includes('saree')) {
+    window.location.href = 'category.html?cat=saree';
+  } else if (query.includes('anarkali')) {
+    window.location.href = 'category.html?cat=anarkali';
+  } else if (query.includes('chudidar') || query.includes('churidar')) {
+    window.location.href = 'category.html?cat=churidar';
+  } else if (query.includes('lehenga')) {
+    window.location.href = 'category.html?cat=lehenga';
+  } else if (query.includes('jewel') || query.includes('jhumka') || query.includes('necklace')) {
+    window.location.href = 'category.html?cat=jewellery';
+  } else if (query.includes('gown') || query.includes('party') || query.includes('sequin') || query.includes('dress') || query.includes('fancy')) {
+    const fancySec = document.getElementById('fancy-dresses') || document.getElementById('fancyDressesPortal');
+    if (fancySec) {
+      if (typeof window.openFancyPortal === 'function') window.openFancyPortal();
+      fancySec.scrollIntoView({ behavior: 'smooth' });
+    }
+  } else {
+    const productsSec = document.getElementById('new-arrivals');
+    if (productsSec) productsSec.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+// Touch gestures support for Hero Banner slider & mobile bottom active highlights
+document.addEventListener('DOMContentLoaded', () => {
+  const heroSection = document.getElementById('hero');
+  if (heroSection) {
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    heroSection.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    heroSection.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleHeroSwipe();
+    }, { passive: true });
+
+    function handleHeroSwipe() {
+      const diff = touchEndX - touchStartX;
+      if (Math.abs(diff) > 45) {
+        if (diff < 0) {
+          const nextBtn = document.getElementById('heroNextBtn');
+          if (nextBtn) nextBtn.click();
+        } else {
+          const prevBtn = document.getElementById('heroPrevBtn');
+          if (prevBtn) prevBtn.click();
+        }
+      }
+    }
+  }
+
+  // Mobile Bottom Navigation Tab Active Highlight on Scroll
+  const tabHome = document.getElementById('mobileTabHome');
+  const tabShop = document.getElementById('mobileTabShop');
+  const tabCouture = document.getElementById('mobileTabCouture');
+
+  window.addEventListener('scroll', () => {
+    if (window.innerWidth > 768) return;
+    const scrollY = window.scrollY;
+    const fancySec = document.getElementById('fancy-dresses') || document.getElementById('fancyDressesPortal');
+    const catSec = document.getElementById('categories');
+
+    if (fancySec && scrollY >= fancySec.offsetTop - 180 && scrollY < (fancySec.offsetTop + fancySec.offsetHeight)) {
+      if (tabCouture) {
+        document.querySelectorAll('.mobile-tab-item').forEach(t => t.classList.remove('active'));
+        tabCouture.classList.add('active');
+      }
+    } else if (catSec && scrollY >= catSec.offsetTop - 180 && scrollY < (catSec.offsetTop + catSec.offsetHeight + 600)) {
+      if (tabShop) {
+        document.querySelectorAll('.mobile-tab-item').forEach(t => t.classList.remove('active'));
+        tabShop.classList.add('active');
+      }
+    } else if (scrollY < 400) {
+      if (tabHome) {
+        document.querySelectorAll('.mobile-tab-item').forEach(t => t.classList.remove('active'));
+        tabHome.classList.add('active');
+      }
+    }
+  }, { passive: true });
+
+  // Sync initial badge values
+  if (typeof updateCartUI === 'function') updateCartUI();
+  if (typeof updateWishlistUI === 'function') updateWishlistUI();
+});
+

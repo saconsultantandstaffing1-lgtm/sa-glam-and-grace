@@ -340,10 +340,182 @@
           <i class="ri-shopping-bag-line" style="font-size: 1.25rem;"></i>
           <span class="badge-count" id="cartBadge">0</span>
         </button>
+
+        <!-- Mobile Menu Toggle (Hamburger) -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggleBtn" aria-label="Open Navigation Menu" onclick="window.toggleMobileNav && window.toggleMobileNav()">
+          <i class="ri-menu-4-line" id="mobileToggleIcon"></i>
+        </button>
       </div>
 
     </div>
   </header>
+
+  <!-- Mobile Navigation Backdrop Overlay -->
+  <div class="mobile-nav-backdrop" id="mobileNavBackdrop" onclick="window.closeMobileNav && window.closeMobileNav()"></div>
+
+  <!-- Slide-Out Luxury Mobile Navigation Drawer -->
+  <aside class="mobile-nav-drawer" id="mobileNavDrawer" aria-label="Mobile Menu">
+    <!-- Drawer Header -->
+    <div class="mobile-drawer-header">
+      <a href="index.html" class="mobile-drawer-brand">
+        <div class="mobile-drawer-crest">
+          <svg viewBox="0 0 50 50" width="24" height="24">
+            <circle cx="25" cy="25" r="23" fill="none" stroke="#D4AF37" stroke-width="2"/>
+            <text x="25" y="36" font-family="'Playfair Display', serif" font-size="16" font-weight="700" fill="#D4AF37" text-anchor="middle">SA</text>
+          </svg>
+        </div>
+        <div class="mobile-drawer-titles">
+          <h3>SA GLAM &amp; GRACE</h3>
+          <span>Haute Couture &amp; Heritage</span>
+        </div>
+      </a>
+      <button class="mobile-drawer-close" id="mobileDrawerCloseBtn" onclick="window.closeMobileNav && window.closeMobileNav()" aria-label="Close Mobile Menu">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+
+    <!-- Customer VIP Quick Account Card -->
+    <div class="mobile-drawer-user" id="mobileDrawerUserCard">
+      <a href="javascript:void(0)" onclick="window.openCustomerAuth && window.openCustomerAuth(event); window.closeMobileNav();" class="mobile-user-status">
+        <div class="user-avatar-pill">
+          <i class="ri-user-star-line"></i>
+        </div>
+        <div class="user-names">
+          <strong id="mobileDrawerUserName">Guest Client</strong>
+          <span id="mobileDrawerUserRole">Tap to Sign In / VIP Access</span>
+        </div>
+      </a>
+      <a href="dashboard.html" class="mobile-auth-btn-quick" title="My Orders">
+        <i class="ri-truck-line"></i> Orders
+      </a>
+    </div>
+
+    <!-- In-Drawer Quick Search -->
+    <div class="mobile-drawer-search">
+      <form onsubmit="window.handleMobileSearch && window.handleMobileSearch(event)" class="mobile-search-box">
+        <i class="ri-search-line"></i>
+        <input type="text" id="mobileDrawerSearchInput" placeholder="Search kurtis, sarees, lehengas..." />
+      </form>
+    </div>
+
+    <!-- Drawer Navigation Links (With Accordions) -->
+    <div class="mobile-drawer-body">
+      <div class="mobile-nav-group-title">Boutique Collections</div>
+      <ul class="mobile-nav-list">
+        
+        <!-- Accordion 1: Collections -->
+        <li class="mobile-accordion-item" id="mobileAccordionCollections">
+          <a href="javascript:void(0)" class="mobile-nav-link" onclick="window.toggleMobileAccordion('mobileAccordionCollections')">
+            <span class="nav-label-wrap">
+              <i class="ri-t-shirt-line nav-icon"></i> Collections
+            </span>
+            <i class="ri-arrow-down-s-line mobile-accordion-arrow"></i>
+          </a>
+          <div class="mobile-submenu">
+            <a href="category.html?cat=kurtis" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Straight Cut &amp; A-Line Kurtis</a>
+            <a href="category.html?cat=anarkali" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Anarkali Suit Sets</a>
+            <a href="category.html?cat=churidar" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Chudidar Sets</a>
+            <a href="category.html?cat=saree" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Banarasi &amp; Chanderi Sarees</a>
+            <a href="category.html?cat=lehenga" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Bridal Lehengas <span style="font-size:0.68rem; color:#D4AF37; font-weight:700;">(New)</span></a>
+            <a href="category.html?cat=dupatta" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Hand-Embroidered Dupattas</a>
+            <a href="category.html?cat=handbags" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Designer Handbags &amp; Potlis</a>
+            <a href="category.html?cat=footwear" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Royal Footwear &amp; Juttis</a>
+          </div>
+        </li>
+
+        <!-- Direct Link: Fancy Dresses (Couture) -->
+        <li>
+          <a href="#fancy-dresses" class="mobile-nav-link" onclick="window.closeMobileNav()">
+            <span class="nav-label-wrap">
+              <i class="ri-sparkles-fill nav-icon" style="color:#D4AF37;"></i> Fancy Dresses
+            </span>
+            <span style="background:linear-gradient(135deg, #111, #D4AF37); color:#FFF; font-size:0.64rem; padding:2px 7px; border-radius:10px; font-weight:700;">COUTURE</span>
+          </a>
+        </li>
+
+        <!-- Accordion 2: Royal Accessories -->
+        <li class="mobile-accordion-item" id="mobileAccordionAccessories">
+          <a href="javascript:void(0)" class="mobile-nav-link" onclick="window.toggleMobileAccordion('mobileAccordionAccessories')">
+            <span class="nav-label-wrap">
+              <i class="ri-vip-diamond-line nav-icon"></i> Royal Jewelry &amp; Accs
+            </span>
+            <i class="ri-arrow-down-s-line mobile-accordion-arrow"></i>
+          </a>
+          <div class="mobile-submenu">
+            <a href="category.html?cat=jewellery" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Kundan &amp; Polki Jewelry</a>
+            <a href="category.html?cat=jewellery" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Jhumkas &amp; Chandbalis</a>
+            <a href="category.html?cat=jewellery" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Royal Choker Sets</a>
+            <a href="category.html?cat=watches" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Luxury Watches</a>
+          </div>
+        </li>
+
+        <!-- Accordion 3: Occasions -->
+        <li class="mobile-accordion-item" id="mobileAccordionOccasions">
+          <a href="javascript:void(0)" class="mobile-nav-link" onclick="window.toggleMobileAccordion('mobileAccordionOccasions')">
+            <span class="nav-label-wrap">
+              <i class="ri-calendar-event-line nav-icon"></i> Shop by Occasion
+            </span>
+            <i class="ri-arrow-down-s-line mobile-accordion-arrow"></i>
+          </a>
+          <div class="mobile-submenu">
+            <a href="#occasions" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Festive Soirée</a>
+            <a href="#occasions" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Wedding &amp; Sangeet</a>
+            <a href="#occasions" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Royal Office Wear</a>
+            <a href="#occasions" onclick="window.closeMobileNav()"><i class="ri-arrow-right-s-line"></i> Daily Luxury</a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="mobile-nav-group-title" style="margin-top:0.5rem;">Customer Care &amp; Portals</div>
+      <ul class="mobile-nav-list">
+        <li>
+          <a href="dashboard.html" class="mobile-nav-link" onclick="window.closeMobileNav()">
+            <span class="nav-label-wrap">
+              <i class="ri-truck-line nav-icon"></i> Track My Orders &amp; Live Status
+            </span>
+            <i class="ri-arrow-right-s-line" style="color:#aaa;"></i>
+          </a>
+        </li>
+        <li>
+          <a href="#about" class="mobile-nav-link" onclick="window.closeMobileNav()">
+            <span class="nav-label-wrap">
+              <i class="ri-heart-pulse-line nav-icon"></i> Our Story &amp; Heritage
+            </span>
+            <i class="ri-arrow-right-s-line" style="color:#aaa;"></i>
+          </a>
+        </li>
+        <li>
+          <a href="#contact" class="mobile-nav-link" onclick="window.closeMobileNav()">
+            <span class="nav-label-wrap">
+              <i class="ri-customer-service-2-line nav-icon"></i> Contact Concierge
+            </span>
+            <i class="ri-arrow-right-s-line" style="color:#aaa;"></i>
+          </a>
+        </li>
+        <li>
+          <a href="admin.html" class="mobile-nav-link" style="color:var(--primary-pink); font-weight:700;" onclick="window.closeMobileNav()">
+            <span class="nav-label-wrap">
+              <i class="ri-shield-user-line nav-icon" style="color:var(--primary-pink);"></i> Admin Management
+            </span>
+            <span style="font-size:0.65rem; background:#fee2e2; color:#b91c1c; padding:2px 6px; border-radius:4px;">MANAGEMENT</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Drawer Footer with WhatsApp Concierge -->
+    <div class="mobile-drawer-footer">
+      <a href="https://wa.me/919876543210?text=Hi%20SA%20Glam%20%26%20Grace%2C%20I%20would%20like%20assistance%20with%20my%20order" target="_blank" rel="noopener" class="mobile-whatsapp-btn">
+        <i class="ri-whatsapp-line" style="font-size:1.15rem;"></i> WhatsApp VIP Stylist
+      </a>
+      <div class="mobile-drawer-socials">
+        <a href="#" aria-label="Instagram"><i class="ri-instagram-line"></i></a>
+        <a href="#" aria-label="Facebook"><i class="ri-facebook-fill"></i></a>
+        <a href="#" aria-label="Pinterest"><i class="ri-pinterest-line"></i></a>
+        <a href="#" aria-label="YouTube"><i class="ri-youtube-line"></i></a>
+      </div>
+    </div>
+  </aside>
 
   <!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
        SECTION 3 – Hero Banner (Restored Slider)
@@ -1858,6 +2030,42 @@
     <i class="ri-checkbox-circle-fill"></i>
     <span id="toastMessage">Item added to bag!</span>
   </div>
+
+  <!-- Floating Mobile Bottom Navigation Bar (Gold & Rose Luxury Experience) -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
+    <a href="index.html" class="mobile-tab-item active" id="mobileTabHome">
+      <div class="mobile-tab-icon-wrap">
+        <i class="ri-home-4-line"></i>
+      </div>
+      <span class="tab-label">Home</span>
+    </a>
+    <a href="#categories" class="mobile-tab-item" id="mobileTabShop" onclick="window.selectCategory && window.selectCategory('all')">
+      <div class="mobile-tab-icon-wrap">
+        <i class="ri-store-2-line"></i>
+      </div>
+      <span class="tab-label">Shop</span>
+    </a>
+    <a href="#fancy-dresses" class="mobile-tab-item" id="mobileTabCouture">
+      <div class="mobile-tab-icon-wrap">
+        <i class="ri-sparkles-fill" style="color:#D4AF37;"></i>
+      </div>
+      <span class="tab-label">Couture</span>
+    </a>
+    <button type="button" class="mobile-tab-item" id="mobileTabWishlist" onclick="window.openWishlistDrawer && window.openWishlistDrawer(event)">
+      <div class="mobile-tab-icon-wrap">
+        <i class="ri-heart-line"></i>
+        <span class="tab-badge" id="mobileWishlistBadge">0</span>
+      </div>
+      <span class="tab-label">Wishlist</span>
+    </button>
+    <button type="button" class="mobile-tab-item cart-trigger" id="mobileTabCart" onclick="window.openCartDrawer ? window.openCartDrawer() : (window.openCart && window.openCart())">
+      <div class="mobile-tab-icon-wrap">
+        <i class="ri-shopping-bag-line"></i>
+        <span class="tab-badge" id="mobileCartBadge">0</span>
+      </div>
+      <span class="tab-label">Bag</span>
+    </button>
+  </nav>
 
   <!-- Automated Admin Order Email Notification -->
   <script src="./email-notification.js"></script>

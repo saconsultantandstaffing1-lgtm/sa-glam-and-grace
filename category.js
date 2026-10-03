@@ -2368,3 +2368,48 @@ function renderCartDrawer() {
     }).catch(err => console.warn('Supabase category fetch:', err));
   }
 });
+
+// Mobile Navigation Drawer Controllers for Category Page
+window.openMobileNav = function() {
+  const drawer = document.getElementById('mobileNavDrawer');
+  const backdrop = document.getElementById('mobileNavBackdrop');
+  const toggleIcon = document.getElementById('mobileToggleIcon');
+  if (drawer) drawer.classList.add('open');
+  if (backdrop) backdrop.classList.add('active');
+  if (toggleIcon) toggleIcon.className = 'ri-close-line';
+  document.body.style.overflow = 'hidden';
+
+  try {
+    const savedUser = localStorage.getItem('glam_customer_user');
+    const nameEl = document.getElementById('mobileDrawerUserName');
+    const roleEl = document.getElementById('mobileDrawerUserRole');
+    if (savedUser) {
+      const u = JSON.parse(savedUser);
+      if (nameEl) nameEl.textContent = u.fullName || u.email || 'VIP Member';
+      if (roleEl) roleEl.textContent = 'Active Luxury Member • View Account';
+    } else {
+      if (nameEl) nameEl.textContent = 'Guest Client';
+      if (roleEl) roleEl.textContent = 'Tap to Sign In / VIP Access';
+    }
+  } catch(e) {}
+};
+
+window.closeMobileNav = function() {
+  const drawer = document.getElementById('mobileNavDrawer');
+  const backdrop = document.getElementById('mobileNavBackdrop');
+  const toggleIcon = document.getElementById('mobileToggleIcon');
+  if (drawer) drawer.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('active');
+  if (toggleIcon) toggleIcon.className = 'ri-menu-4-line';
+  document.body.style.overflow = '';
+};
+
+window.toggleMobileNav = function() {
+  const drawer = document.getElementById('mobileNavDrawer');
+  if (drawer && drawer.classList.contains('open')) {
+    window.closeMobileNav();
+  } else {
+    window.openMobileNav();
+  }
+};
+

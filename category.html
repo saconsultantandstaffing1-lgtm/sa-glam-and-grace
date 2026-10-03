@@ -364,9 +364,82 @@
           <i class="ri-shopping-bag-line" style="font-size: 1.25rem;"></i>
           <span class="badge-count" id="cartBadge">0</span>
         </button>
+
+        <!-- Mobile Menu Toggle Button -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggleBtn" aria-label="Open Navigation Menu" onclick="window.toggleMobileNav && window.toggleMobileNav()">
+          <i class="ri-menu-4-line" id="mobileToggleIcon"></i>
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- Mobile Navigation Backdrop Overlay -->
+  <div class="mobile-nav-backdrop" id="mobileNavBackdrop" onclick="window.closeMobileNav && window.closeMobileNav()"></div>
+
+  <!-- Slide-Out Luxury Mobile Navigation Drawer -->
+  <aside class="mobile-nav-drawer" id="mobileNavDrawer" aria-label="Mobile Menu">
+    <div class="mobile-drawer-header">
+      <a href="index.html" class="mobile-drawer-brand">
+        <div class="mobile-drawer-crest">
+          <svg viewBox="0 0 50 50" width="24" height="24">
+            <circle cx="25" cy="25" r="23" fill="none" stroke="#D4AF37" stroke-width="2"/>
+            <text x="25" y="36" font-family="'Playfair Display', serif" font-size="16" font-weight="700" fill="#D4AF37" text-anchor="middle">SA</text>
+          </svg>
+        </div>
+        <div class="mobile-drawer-titles">
+          <h3>SA GLAM &amp; GRACE</h3>
+          <span>Haute Couture &amp; Heritage</span>
+        </div>
+      </a>
+      <button class="mobile-drawer-close" id="mobileDrawerCloseBtn" onclick="window.closeMobileNav && window.closeMobileNav()" aria-label="Close Mobile Menu">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+
+    <!-- Customer VIP Quick Account Card -->
+    <div class="mobile-drawer-user">
+      <a href="javascript:void(0)" onclick="window.openCustomerAuth && window.openCustomerAuth(event); window.closeMobileNav();" class="mobile-user-status">
+        <div class="user-avatar-pill">
+          <i class="ri-user-star-line"></i>
+        </div>
+        <div class="user-names">
+          <strong id="mobileDrawerUserName">Guest Client</strong>
+          <span id="mobileDrawerUserRole">Tap to Sign In / VIP Access</span>
+        </div>
+      </a>
+      <a href="dashboard.html" class="mobile-auth-btn-quick" title="My Orders">
+        <i class="ri-truck-line"></i> Orders
+      </a>
+    </div>
+
+    <!-- Drawer Navigation Links -->
+    <div class="mobile-drawer-body">
+      <div class="mobile-nav-group-title">Collections</div>
+      <ul class="mobile-nav-list">
+        <li><a href="index.html" class="mobile-nav-link"><span class="nav-label-wrap"><i class="ri-home-4-line nav-icon"></i> Main Storefront</span></a></li>
+        <li><a href="category.html?cat=kurtis" class="mobile-nav-link" onclick="window.closeMobileNav()"><span class="nav-label-wrap"><i class="ri-t-shirt-line nav-icon"></i> Kurtis &amp; Sets</span></a></li>
+        <li><a href="category.html?cat=anarkali" class="mobile-nav-link" onclick="window.closeMobileNav()"><span class="nav-label-wrap"><i class="ri-t-shirt-2-line nav-icon"></i> Anarkali Suit Sets</span></a></li>
+        <li><a href="category.html?cat=churidar" class="mobile-nav-link" onclick="window.closeMobileNav()"><span class="nav-label-wrap"><i class="ri-t-shirt-line nav-icon"></i> Chudidar Sets</span></a></li>
+        <li><a href="category.html?cat=saree" class="mobile-nav-link" onclick="window.closeMobileNav()"><span class="nav-label-wrap"><i class="ri-hand-heart-line nav-icon"></i> Banarasi Sarees</span></a></li>
+        <li><a href="category.html?cat=lehenga" class="mobile-nav-link" onclick="window.closeMobileNav()"><span class="nav-label-wrap"><i class="ri-sparkles-line nav-icon"></i> Bridal Lehengas</span></a></li>
+        <li><a href="category.html?cat=dupatta" class="mobile-nav-link" onclick="window.closeMobileNav()"><span class="nav-label-wrap"><i class="ri-file-paper-2-line nav-icon"></i> Hand-Embroidered Dupattas</span></a></li>
+        <li><a href="category.html?cat=jewellery" class="mobile-nav-link" onclick="window.closeMobileNav()"><span class="nav-label-wrap"><i class="ri-vip-diamond-line nav-icon"></i> Kundan Jewelry</span></a></li>
+      </ul>
+
+      <div class="mobile-nav-group-title" style="margin-top:0.5rem;">Services &amp; Portals</div>
+      <ul class="mobile-nav-list">
+        <li><a href="dashboard.html" class="mobile-nav-link"><span class="nav-label-wrap"><i class="ri-truck-line nav-icon"></i> My Orders &amp; Live Tracking</span></a></li>
+        <li><a href="admin.html" class="mobile-nav-link" style="color:var(--primary-pink); font-weight:700;"><span class="nav-label-wrap"><i class="ri-shield-user-line nav-icon" style="color:var(--primary-pink);"></i> Admin Management</span></a></li>
+      </ul>
+    </div>
+
+    <!-- Drawer Footer with WhatsApp Concierge -->
+    <div class="mobile-drawer-footer">
+      <a href="https://wa.me/919876543210?text=Hi%20SA%20Glam%20%26%20Grace%2C%20I%20would%20like%20assistance" target="_blank" rel="noopener" class="mobile-whatsapp-btn">
+        <i class="ri-whatsapp-line" style="font-size:1.15rem;"></i> WhatsApp VIP Stylist
+      </a>
+    </div>
+  </aside>
 
   <!-- Category Hero Banner -->
   <section class="cat-hero-wrap">
@@ -814,6 +887,42 @@
 
     </div>
   </div>
+
+  <!-- Floating Mobile Bottom Navigation Bar (Gold & Rose Luxury Experience) -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
+    <a href="index.html" class="mobile-tab-item">
+      <div class="mobile-tab-icon-wrap">
+        <i class="ri-home-4-line"></i>
+      </div>
+      <span class="tab-label">Home</span>
+    </a>
+    <a href="javascript:void(0)" class="mobile-tab-item active">
+      <div class="mobile-tab-icon-wrap">
+        <i class="ri-store-2-line"></i>
+      </div>
+      <span class="tab-label">Category</span>
+    </a>
+    <a href="index.html#fancy-dresses" class="mobile-tab-item">
+      <div class="mobile-tab-icon-wrap">
+        <i class="ri-sparkles-fill" style="color:#D4AF37;"></i>
+      </div>
+      <span class="tab-label">Couture</span>
+    </a>
+    <button type="button" class="mobile-tab-item" onclick="window.openWishlistDrawer && window.openWishlistDrawer(event)">
+      <div class="mobile-tab-icon-wrap">
+        <i class="ri-heart-line"></i>
+        <span class="tab-badge" id="mobileWishlistBadge">0</span>
+      </div>
+      <span class="tab-label">Wishlist</span>
+    </button>
+    <button type="button" class="mobile-tab-item cart-trigger" onclick="window.openCartDrawer ? window.openCartDrawer() : (window.openCart && window.openCart())">
+      <div class="mobile-tab-icon-wrap">
+        <i class="ri-shopping-bag-line"></i>
+        <span class="tab-badge" id="mobileCartBadge">0</span>
+      </div>
+      <span class="tab-label">Bag</span>
+    </button>
+  </nav>
 
   <!-- Automated Admin Order Email Notification -->
   <script src="./email-notification.js"></script>
