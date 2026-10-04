@@ -1258,7 +1258,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <h3 class="product-title">${name}</h3>
             
             <!-- Selectable Sizes (S, M, L, XL, XXL) in Category -->
-            <div class="product-sizes-selector-row">
+            <div class="product-sizes-selector-row" style="min-height:28px; display:flex; align-items:center; flex-wrap:wrap; gap:4px; margin: 4px 0;">
               <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:#78716c; letter-spacing:0.5px; margin-right:3px;">Size:</span>
               ${availSizes.map(s => `
                 <button type="button" class="card-size-btn ${s === activeSize ? 'active' : ''}" onclick="window.selectCategoryCardSize('${id}', '${s}', this, event)">
@@ -1269,7 +1269,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             <!-- Dynamic Available Colors for this dress -->
             ${availColors.length > 0 ? `
-              <div class="product-colors-selector-row" style="margin-top:4px; display:flex; align-items:center; gap:6px;">
+              <div class="product-colors-selector-row" style="min-height:22px; margin-top:4px; display:flex; align-items:center; gap:6px;">
                 <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:#78716c; letter-spacing:0.5px;">Color:</span>
                 <span class="card-color-label" style="font-size:0.75rem; font-weight:600; color:#57534e;">${activeColor ? activeColor.name : ''}</span>
                 <div class="color-swatches" style="display:flex; gap:6px; align-items:center; margin-left:auto;">
@@ -1282,9 +1282,11 @@ document.addEventListener('DOMContentLoaded', () => {
                   `).join('')}
                 </div>
               </div>
-            ` : ''}
+            ` : `
+              <div class="product-colors-selector-row placeholder" style="min-height:22px; margin-top:4px;"></div>
+            `}
 
-            <div class="product-price-row" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+            <div class="product-price-row" style="margin-top:auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px; padding-top:6px; width:100%;">
               <div class="price-box">
                 <span class="current-price">₹${price.toLocaleString('en-IN')}</span>
                 ${origPrice > price ? `<span class="original-price">₹${origPrice.toLocaleString('en-IN')}</span>` : ''}
