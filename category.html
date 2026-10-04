@@ -19,7 +19,7 @@
   <script src="supabase-client.js"></script>
 
   <!-- Main Style -->
-  <link rel="stylesheet" href="style.css?v=222" />
+  <link rel="stylesheet" href="style.css?v=230" />
 
   <style>
     /* Category Page Specific Enhancements */
@@ -155,6 +155,26 @@
       border: 1px dashed #D4AF37;
       grid-column: 1 / -1;
     }
+    .product-img-wrapper {
+      aspect-ratio: 3 / 4 !important;
+      background: #FAF8F5 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      overflow: hidden !important;
+      position: relative !important;
+    }
+    .product-img-wrapper img,
+    .product-img-primary,
+    .product-img-secondary,
+    [id^="cardImg_"] {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain !important;
+      object-position: center center !important;
+      background: #FAF8F5 !important;
+      display: block !important;
+    }
     @media (max-width: 768px) {
       .cat-hero-wrap {
         padding: 2.2rem 0 1.6rem 0 !important;
@@ -167,17 +187,6 @@
       .cat-hero-desc {
         font-size: 0.88rem !important;
         line-height: 1.5 !important;
-      }
-      .product-img-wrapper {
-        aspect-ratio: 3 / 4 !important;
-        background: #FAF8F5 !important;
-      }
-      .product-img-primary,
-      .product-img-secondary {
-        object-fit: contain !important;
-        background: #FAF8F5 !important;
-        width: 100% !important;
-        height: 100% !important;
       }
     }
   </style>
@@ -952,6 +961,6 @@
   <!-- Automated Admin Order Email Notification -->
   <script src="./email-notification.js"></script>
   <!-- Category JavaScript Engine -->
-  <script src="category.js"></script>
+  <script src="category.js?v=230"></script>
 </body>
 </html>
