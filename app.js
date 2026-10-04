@@ -648,7 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             ` : ''}
 
-            <img src="${image}" alt="${name}" class="product-img-primary" id="cardImg_${id}" onerror="this.onerror=null; this.src='./assets/images/hero_1.png';" style="object-fit:cover; width:100%; height:100%; transition: opacity 0.2s ease;">
+            <img src="${image}" alt="${name}" class="product-img-primary" id="cardImg_${id}" onerror="this.onerror=null; this.src='./assets/images/hero_1.png';" style="object-fit:contain; width:100%; height:100%; background:#FAF8F5; transition: opacity 0.2s ease;">
             
             <!-- Prev & Next Carousel Arrows for Sliding One by One -->
             ${imagesList.length > 1 ? `

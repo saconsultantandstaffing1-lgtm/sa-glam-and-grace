@@ -19,7 +19,7 @@
   <script src="supabase-client.js"></script>
 
   <!-- Main Style -->
-  <link rel="stylesheet" href="style.css?v=221" />
+  <link rel="stylesheet" href="style.css?v=222" />
 
   <style>
     /* Category Page Specific Enhancements */
@@ -154,6 +154,31 @@
       border-radius: 18px;
       border: 1px dashed #D4AF37;
       grid-column: 1 / -1;
+    }
+    @media (max-width: 768px) {
+      .cat-hero-wrap {
+        padding: 2.2rem 0 1.6rem 0 !important;
+      }
+      .cat-hero-title {
+        font-size: 2.1rem !important;
+        line-height: 1.2 !important;
+        margin: 0 0 0.4rem 0 !important;
+      }
+      .cat-hero-desc {
+        font-size: 0.88rem !important;
+        line-height: 1.5 !important;
+      }
+      .product-img-wrapper {
+        aspect-ratio: 3 / 4 !important;
+        background: #FAF8F5 !important;
+      }
+      .product-img-primary,
+      .product-img-secondary {
+        object-fit: contain !important;
+        background: #FAF8F5 !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
     }
   </style>
 
@@ -568,7 +593,7 @@
     <button class="modal-close-btn" onclick="window.closeAllDrawers()"><i class="ri-close-line"></i></button>
     <div class="qv-image-box">
       <div class="qv-img-wrapper">
-        <img src="" alt="Quick View Product" id="qvImg" style="width:100%; border-radius:8px; object-fit:cover; max-height:420px; transition:opacity 0.2s ease;">
+        <img src="" alt="Quick View Product" id="qvImg" style="width:100%; border-radius:8px; object-fit:contain; max-height:420px; background:#FAF8F5; transition:opacity 0.2s ease;">
         <button type="button" class="qv-slider-arrow prev" id="qvPrevBtn" onclick="window.slideQvImage(-1, event)" title="Previous image">
           <i class="ri-arrow-left-s-line"></i>
         </button>
