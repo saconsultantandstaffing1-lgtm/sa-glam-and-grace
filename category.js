@@ -1238,20 +1238,6 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             ` : ''}
 
-            <div class="product-hover-actions">
-              ${isOutOfStock ? `
-                <button class="btn-quick-add disabled-stock" disabled title="This item is currently sold out / out of stock">
-                  <i class="ri-close-circle-line"></i> Sold Out
-                </button>
-              ` : `
-                <button class="btn-quick-add" onclick="window.addCategoryCardToCart('${id}', ${safeProdObj})">
-                  Add to Cart
-                </button>
-              `}
-              <button class="btn-quick-view" onclick="window.categoryQuickView(${safeProdObj})" title="Quick View">
-                <i class="ri-eye-line"></i>
-              </button>
-            </div>
           </div>
           <div class="product-info">
             <span class="product-category-label">${category}</span>
@@ -1298,6 +1284,22 @@ document.addEventListener('DOMContentLoaded', () => {
               ` : `
                 <span class="stock-counter-badge in-stock"><i class="ri-checkbox-circle-fill"></i> In Stock (${stockCount})</span>
               `)}
+            </div>
+
+            <!-- Action buttons placed cleanly below all product details without splitting photo -->
+            <div class="card-bottom-actions" style="margin-top:12px; display:flex; gap:8px; width:100%;">
+              ${isOutOfStock ? `
+                <button class="btn-card-action disabled-stock" disabled title="This item is currently sold out / out of stock">
+                  <i class="ri-close-circle-line"></i> Sold Out
+                </button>
+              ` : `
+                <button class="btn-card-action" onclick="window.addCategoryCardToCart('${id}', ${safeProdObj})">
+                  <i class="ri-shopping-bag-3-line"></i> Add to Cart
+                </button>
+              `}
+              <button class="btn-card-quick-view" onclick="window.categoryQuickView(${safeProdObj})" title="Quick View">
+                <i class="ri-eye-line"></i>
+              </button>
             </div>
           </div>
         </div>

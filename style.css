@@ -1233,6 +1233,66 @@ img {
   font-size: 1rem;
 }
 
+/* Card Bottom Action Bar (Placed cleanly below details, never splitting photo) */
+.card-bottom-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.btn-card-action {
+  flex: 1;
+  padding: 0.72rem 1rem;
+  background: var(--text-dark, #181412);
+  color: var(--gold-accent, #D4AF37);
+  border: 1px solid var(--gold-accent, #D4AF37);
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-card-action:hover:not(:disabled) {
+  background: var(--gold-accent, #D4AF37);
+  color: #181412;
+}
+
+.btn-card-action.disabled-stock,
+.btn-card-action:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border: 1px solid #e5e7eb;
+  cursor: not-allowed;
+}
+
+.btn-card-quick-view {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: #FAF8F5;
+  border: 1px solid #d4c5a3;
+  color: #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.btn-card-quick-view:hover {
+  background: #181412;
+  color: #D4AF37;
+  border-color: #181412;
+}
+
 /* Stock & Out-of-Stock Status Styles */
 .product-badge.out-of-stock {
   background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%) !important;
@@ -4172,7 +4232,11 @@ html, body {
     height: 38px;
   }
 
-  /* Mobile action links: Display dashboard bus & sign-in man icons clearly */
+  /* Mobile action links: Hide search icon so man (sign in) & bus (dashboard) have ample room and are clearly visible */
+  .header-actions #searchBtn {
+    display: none !important;
+  }
+
   .header-actions #ordersNavBtn,
   .header-actions #accountBtn {
     display: inline-flex !important;
@@ -4324,8 +4388,13 @@ html, body {
   .header-actions {
     display: flex !important;
     align-items: center !important;
-    gap: 0.25rem !important;
+    gap: 0.35rem !important;
     flex-shrink: 0 !important;
+  }
+
+  /* Hide search button on mobile so man (sign in) and bus (orders) are prominently visible */
+  .header-actions #searchBtn {
+    display: none !important;
   }
 
   .header-actions #ordersNavBtn,
@@ -4338,8 +4407,8 @@ html, body {
   }
 
   .action-btn {
-    width: 33px !important;
-    height: 33px !important;
+    width: 36px !important;
+    height: 36px !important;
     flex-shrink: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -4347,7 +4416,7 @@ html, body {
   }
 
   .action-btn i {
-    font-size: 1.12rem !important;
+    font-size: 1.25rem !important;
   }
 
   .badge-count {
