@@ -635,7 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="product-card ${isOutOfStock ? 'is-out-of-stock' : ''}" data-id="${id}" data-category="${category}"
           onmouseenter="window.startCardAutoSlide('${id}')" 
           onmouseleave="window.stopCardAutoSlide('${id}')">
-          <div class="product-img-wrapper" id="cardImgWrap_${id}">
+          <div class="product-img-wrapper" id="cardImgWrap_${id}" style="aspect-ratio: 3 / 4; width: 100%; height: auto; display: flex; align-items: center; justify-content: center; background: #FAF8F5; overflow: hidden; position: relative;">
             <span class="product-badge ${badgeClass}">${badge}</span>
             <button class="wishlist-btn ${isWishlisted ? 'active' : ''}" onclick="toggleWishlist('${id}', this)">
               <i class="${isWishlisted ? 'ri-heart-fill' : 'ri-heart-line'}"></i>
@@ -648,7 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             ` : ''}
 
-            <img src="${image}" alt="${name}" class="product-img-primary" id="cardImg_${id}" onerror="this.onerror=null; this.src='./assets/images/hero_1.png';" style="object-fit:contain; width:100%; height:100%; background:#FAF8F5; transition: opacity 0.2s ease;">
+            <img src="${image}" alt="${name}" class="product-img-primary" id="cardImg_${id}" onerror="this.onerror=null; this.src='./assets/images/hero_1.png';" style="object-fit:contain; width:100%; height:100%; max-width:100%; max-height:100%; background:#FAF8F5; display:block; margin:auto; transition: opacity 0.2s ease;">
             
             <!-- Prev & Next Carousel Arrows for Sliding One by One -->
             ${imagesList.length > 1 ? `

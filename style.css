@@ -4769,6 +4769,7 @@ html, body {
   .products-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 12px 8px !important;
+    align-items: stretch !important;
   }
 
   .product-card {
@@ -4777,23 +4778,45 @@ html, body {
     background: #FFFFFF;
     border: 1px solid rgba(212, 175, 55, 0.2);
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
   }
 
   .product-img-wrapper {
     border-radius: 8px;
-    aspect-ratio: 3 / 4;
-    overflow: hidden;
-    position: relative;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 3 / 4 !important;
+    overflow: hidden !important;
+    position: relative !important;
     background: #FAF8F5 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
   }
 
   .product-img-primary,
-  .product-img-secondary {
+  .product-img-secondary,
+  .product-img-wrapper img {
     height: 100% !important;
     width: 100% !important;
+    max-height: 100% !important;
+    max-width: 100% !important;
     object-fit: contain !important;
     object-position: center center !important;
     background: #FAF8F5 !important;
+    display: block !important;
+    margin: 0 auto !important;
+  }
+
+  .product-info {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+    justify-content: space-between !important;
   }
 
   /* Slider controls always available and easy to tap on mobile */

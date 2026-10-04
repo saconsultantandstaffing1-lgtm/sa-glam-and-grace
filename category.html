@@ -19,7 +19,7 @@
   <script src="supabase-client.js"></script>
 
   <!-- Main Style -->
-  <link rel="stylesheet" href="style.css?v=230" />
+  <link rel="stylesheet" href="style.css?v=232" />
 
   <style>
     /* Category Page Specific Enhancements */
@@ -155,7 +155,19 @@
       border: 1px dashed #D4AF37;
       grid-column: 1 / -1;
     }
+    .products-grid {
+      display: grid !important;
+      align-items: stretch !important;
+    }
+    .product-card {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+      height: 100% !important;
+    }
     .product-img-wrapper {
+      width: 100% !important;
+      height: auto !important;
       aspect-ratio: 3 / 4 !important;
       background: #FAF8F5 !important;
       display: flex !important;
@@ -163,6 +175,7 @@
       justify-content: center !important;
       overflow: hidden !important;
       position: relative !important;
+      flex-shrink: 0 !important;
     }
     .product-img-wrapper img,
     .product-img-primary,
@@ -170,10 +183,19 @@
     [id^="cardImg_"] {
       width: 100% !important;
       height: 100% !important;
+      max-width: 100% !important;
+      max-height: 100% !important;
       object-fit: contain !important;
       object-position: center center !important;
       background: #FAF8F5 !important;
       display: block !important;
+      margin: 0 auto !important;
+    }
+    .product-info {
+      display: flex !important;
+      flex-direction: column !important;
+      flex-grow: 1 !important;
+      justify-content: space-between !important;
     }
     @media (max-width: 768px) {
       .cat-hero-wrap {
@@ -961,6 +983,6 @@
   <!-- Automated Admin Order Email Notification -->
   <script src="./email-notification.js"></script>
   <!-- Category JavaScript Engine -->
-  <script src="category.js?v=230"></script>
+  <script src="category.js?v=232"></script>
 </body>
 </html>
